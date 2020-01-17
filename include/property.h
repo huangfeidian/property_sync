@@ -709,9 +709,7 @@ namespace spiritsaway::serialize
 		}
 		bool replay_insert(const json& j_data)
 		{
-			
-			json cur_value;
-			return _data.create(cur_value);
+			return _data.create(j_data);
 			
 		}
 		bool replay_clear(const json& j_data)
