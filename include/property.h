@@ -491,7 +491,7 @@ namespace spiritsaway::serialize
 			{
 				return false;
 			}
-			if (!::decode(*iter, _id))
+			if (!spiritsaway::serialize::decode(*iter, _id))
 			{
 				return false;
 			}
@@ -526,11 +526,10 @@ namespace spiritsaway::serialize
 			_data.shrink_to_fit();
 			return *this;
 		}
-		using item_type = Item;
-		using key_type = K;
+
 		json encode() const
 		{
-			return ::encode(_data);
+			return spiritsaway::serialize::encode(_data);
 		}
 		bool decode(const json& in_data)
 		{
@@ -548,7 +547,7 @@ namespace spiritsaway::serialize
 			temp_array = in_data.get<json::array_t>();
 			for (const auto& one_json_item : temp_array)
 			{
-				item_type temp_item(this, _dest_buffer, K());
+				value_type temp_item(this, _dest_buffer, K());
 				if (!temp_item.decode(one_json_item))
 				{
 					_data.clear();
@@ -577,7 +576,7 @@ namespace spiritsaway::serialize
 		bool create(const json& data)
 		{
 			Item temp_item(this, _dest_buffer, K());
-			if (!::decode(data, temp_item))
+			if (!spiritsaway::serialize::decode(data, temp_item))
 			{
 				std::cout<<"property_bag "<<type_name()<<" fail to create item with data {}"<< data.dump()<<std::endl;
 				return false;
