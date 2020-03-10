@@ -127,9 +127,9 @@ public:
 	int a;
 	std::vector<std::string> b;
 	std::unordered_map<int, std::string> c;
-	any_vector d;
-	any_int_map e;
-	any_str_map f;
+	std::vector<int> d;
+	std::unordered_map<int, int> e;
+	std::unordered_map<std::string, int> f;
 	simple_bag g;
 	const std::string& type_name() const
 	{
@@ -347,19 +347,17 @@ void test_property_mutate()
 {
 	std::deque<mutate_msg> msg_cmd_queue;
 	std::vector<std::uint8_t> depth = { 1,2,3 };
-	any_vector temp_any_vec;
+	std::vector<int> temp_any_vec;
 	temp_any_vec.push_back(1);
-	temp_any_vec.push_back("hehe"s);
+	temp_any_vec.push_back(2);
 
-	any_str_map temp_any_str_map;
+	std::unordered_map<std::string, int> temp_any_str_map;
 	temp_any_str_map["hehe"] = 1;
-	temp_any_str_map["haha"] = "what"s;
-	temp_any_str_map["wtf"] = temp_any_vec;
+	temp_any_str_map["haha"] = 2;
 
-	any_int_map temp_any_int_map;
+	std::unordered_map<int, int> temp_any_int_map;
 	temp_any_int_map[1] = 2;
-	temp_any_int_map[3] = "hahhah";
-	temp_any_int_map[5] = temp_any_str_map;
+	temp_any_int_map[3] = 3;
 
 	PropertyMap test_a(nullptr, depth, msg_cmd_queue);
 	PropertyMap test_b(nullptr, depth, msg_cmd_queue);
@@ -403,7 +401,7 @@ void test_property_mutate()
 
 	auto mut_d = test_a.d_mut();
 
-	mut_d.set(any_vector{"hehe"s, "hahah"s});
+	mut_d.set(std::vector<int>{1, 2});
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -460,7 +458,7 @@ void test_property_mutate()
 	}
 
 	// mutate d begin
-	mut_d.push_back(any_encode("ee"));
+	mut_d.push_back(1);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -468,7 +466,7 @@ void test_property_mutate()
 	{
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
-	mut_d.push_back(any_encode(1));
+	mut_d.push_back(2);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -477,7 +475,7 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
-	mut_d.push_back(temp_any_str_map);
+	mut_d.push_back(3);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -508,7 +506,7 @@ void test_property_mutate()
 
 	// mutate e begin
 	auto mut_e = test_a.e_mut();
-	mut_e.insert(1, "eh");
+	mut_e.insert(1, 2);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -517,7 +515,7 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
-	mut_e.insert(1, "ahaha");
+	mut_e.insert(1, 3);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -551,7 +549,7 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 	
-	mut_e.insert(5, temp_any_int_map);
+	mut_e.insert(5, 6);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -562,7 +560,7 @@ void test_property_mutate()
 	// mutate f begin
 
 	auto mut_f = test_a.f_mut();
-	mut_f.insert("1", "eh");
+	mut_f.insert("1", 1);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -571,7 +569,7 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
-	mut_f.insert("1", "ahaha");
+	mut_f.insert("1", 1);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));
@@ -605,7 +603,7 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
-	mut_f.insert("5", temp_any_int_map);
+	mut_f.insert("5", 5);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
 	test_b.replay_mutate_msg(std::get<1>(msg), std::get<2>(msg), std::get<3>(msg));

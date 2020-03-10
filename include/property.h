@@ -627,7 +627,7 @@ namespace spiritsaway::serialize
 		}
 		std::optional<std::reference_wrapper<const Item>> get(const K& key) const
 		{
-			auto cur_iter = _index.find(_key);
+			auto cur_iter = _index.find(key);
 			if (cur_iter == _index.end())
 			{
 				return std::nullopt;
@@ -639,7 +639,7 @@ namespace spiritsaway::serialize
 		}
 		std::optional<std::reference_wrapper<Item>> get_mut(const K& key)
 		{
-			auto cur_iter = _index.find(_key);
+			auto cur_iter = _index.find(key);
 			if (cur_iter == _index.end())
 			{
 				return std::nullopt;
