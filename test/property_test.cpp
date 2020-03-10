@@ -72,6 +72,9 @@ public:
 	}
 };
 
+const var_idx_type simple_item::index_for_item = 0;
+const var_idx_type simple_item::index_for_a = 1;
+
 class simple_bag : public property_bag<int, simple_item>
 {
 public:
@@ -342,7 +345,14 @@ public:
 	std::deque<mutate_msg>& _dest_buffer;
 	msg_queue _cmd_buffer;
 };
-
+const var_idx_type PropertyMap::index_for_item = 0;
+const var_idx_type PropertyMap::index_for_a = 1;
+const var_idx_type PropertyMap::index_for_b = 2;
+const var_idx_type PropertyMap::index_for_c = 3;
+const var_idx_type PropertyMap::index_for_d = 4;
+const var_idx_type PropertyMap::index_for_e = 5;
+const var_idx_type PropertyMap::index_for_f = 6;
+const var_idx_type PropertyMap::index_for_g = 7;
 void test_property_mutate()
 {
 	std::deque<mutate_msg> msg_cmd_queue;
