@@ -11,8 +11,8 @@ public:
 	int a = 0;
 	using base = property_item<int>;
 	using base::base;
-	const static var_idx_type index_for_item = 0;
-	const static var_idx_type index_for_a = 1;
+	static constexpr var_idx_type index_for_item = 0;
+	static constexpr var_idx_type index_for_a = 1;
 	const decltype(a)& a_ref() const
 	{
 		return a;
@@ -72,8 +72,6 @@ public:
 	}
 };
 
-const var_idx_type simple_item::index_for_item = 0;
-const var_idx_type simple_item::index_for_a = 1;
 
 class simple_bag : public property_bag<int, simple_item>
 {
@@ -333,26 +331,19 @@ public:
 private:
 	const PropertyMap* _parent;
 	const var_prefix_idx_type _cur_depth;
-	const static var_idx_type index_for_item = 0;
-	const static var_idx_type index_for_a = 1;
-	const static var_idx_type index_for_b = 2;
-	const static var_idx_type index_for_c = 3;
-	const static var_idx_type index_for_d = 4;
-	const static var_idx_type index_for_e = 5;
-	const static var_idx_type index_for_f = 6;
-	const static var_idx_type index_for_g = 7;
+	static constexpr var_idx_type index_for_item = 0;
+	static constexpr var_idx_type index_for_a = 1;
+	static constexpr var_idx_type index_for_b = 2;
+	static constexpr var_idx_type index_for_c = 3;
+	static constexpr var_idx_type index_for_d = 4;
+	static constexpr var_idx_type index_for_e = 5;
+	static constexpr var_idx_type index_for_f = 6;
+	static constexpr var_idx_type index_for_g = 7;
 public:
 	std::deque<mutate_msg>& _dest_buffer;
 	msg_queue _cmd_buffer;
 };
-const var_idx_type PropertyMap::index_for_item = 0;
-const var_idx_type PropertyMap::index_for_a = 1;
-const var_idx_type PropertyMap::index_for_b = 2;
-const var_idx_type PropertyMap::index_for_c = 3;
-const var_idx_type PropertyMap::index_for_d = 4;
-const var_idx_type PropertyMap::index_for_e = 5;
-const var_idx_type PropertyMap::index_for_f = 6;
-const var_idx_type PropertyMap::index_for_g = 7;
+
 void test_property_mutate()
 {
 	std::deque<mutate_msg> msg_cmd_queue;
