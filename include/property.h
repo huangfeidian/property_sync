@@ -7,6 +7,18 @@ namespace spiritsaway::serialize
 	using var_idx_type = std::uint8_t;
 	using var_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
 	const static std::uint8_t depth_max = 8;
+	class type_hash
+	{
+		static std::size_t last_used_id;
+	public:
+		template <typename T>
+		static std::size_t hash()
+		{
+			static const std::size_t value = last_used_id++;
+			return value;
+		}
+	};
+
 	using var_prefix_idx_type = std::vector<var_idx_type>;
 	static var_prefix_idx_type concat_prefix(const var_prefix_idx_type pre, 
 		var_idx_type offset)
@@ -39,28 +51,34 @@ namespace spiritsaway::serialize
 		all_notify = 2
 	};
 	
-	using mutate_msg = std::tuple<var_prefix_idx_type, var_idx_type, var_mutate_cmd, json>;
+	struct mutate_msg
+	{
+		var_prefix_idx_type prefix;
+		var_idx_type idx;
+		var_mutate_cmd cmd;
+		json data;
+	};
 	class msg_queue_base
 	{
 	public:
-		virtual void add(const var_idx_type& offset, var_mutate_cmd _cmd, const json& _data) = 0;
+		virtual void add(const var_idx_type& offset, var_mutate_cmd _cmd, const json& m_data) = 0;
 	};
 	class msg_queue : public msg_queue_base
 	{
-		std::deque<mutate_msg>& _queue;
-		const var_prefix_idx_type& parent_idxes;
+		std::deque<mutate_msg>& m_queue;
+		const var_prefix_idx_type& m_parentm_idxes;
 	public:
-		msg_queue(std::deque<mutate_msg>& _in_msg_queue,
-			const var_prefix_idx_type& _in_parent_idxes)
-			: _queue(_in_msg_queue)
-			, parent_idxes(_in_parent_idxes)
+		msg_queue(std::deque<mutate_msg>& msg_queue,
+			const var_prefix_idx_type& parentm_idxes)
+			: m_queue(msg_queue)
+			, m_parentm_idxes(parentm_idxes)
 		{
 
 		}
 		msg_queue(const msg_queue& other) = default;
-		void add(const var_idx_type& offset, var_mutate_cmd _cmd, const json& _data)
+		void add(const var_idx_type& offset, var_mutate_cmd cmd, const json& data)
 		{
-			_queue.emplace_back(parent_idxes, offset, _cmd, _data);
+			m_queue.emplace_back(mutate_msg{ m_parentm_idxes, offset, cmd, data });
 			return;
 		}
 
@@ -68,207 +86,250 @@ namespace spiritsaway::serialize
 	template <typename T>
 	class item_msg_queue : public msg_queue_base
 	{
-		std::deque<mutate_msg>& _queue;
-		const var_prefix_idx_type& parent_idxes;
-		const T& _item_key;
+		std::deque<mutate_msg>& m_queue;
+		const var_prefix_idx_type& m_parentm_idxes;
+		const T& m_item_key;
 	public:
-		item_msg_queue(std::deque<mutate_msg>& _in_msg_queue,
-			const var_prefix_idx_type& _in_parent_idxes,
-			const T& _in_key)
-			: _queue(_in_msg_queue)
-			, parent_idxes(_in_parent_idxes)
-			, _item_key(_in_key)
+		item_msg_queue(std::deque<mutate_msg>& msg_queue,
+			const var_prefix_idx_type& parentm_idxes,
+			const T& key)
+			: m_queue(msg_queue)
+			, m_parentm_idxes(parentm_idxes)
+			, m_item_key(key)
 		{
 
 		}
 		item_msg_queue(const item_msg_queue& other) = default;
-		void add(const var_idx_type& offset, var_mutate_cmd _cmd, const json& _data)
+		void add(const var_idx_type& offset, var_mutate_cmd cmd, const json& data)
 		{
-			std::tuple<T, var_idx_type, var_mutate_cmd, json> _new_data;
-			_queue.emplace_back(parent_idxes, 0, _cmd, encode_multi(_item_key, offset, _cmd, _data));
+			m_queue.emplace_back(mutate_msg{ m_parentm_idxes, 0, cmd, encode_multi(m_item_key, offset, cmd, data) });
 			return;
 		}
 	};
     template <typename T, typename B = void>
 	class prop_proxy;
+	template <>
+	class prop_proxy<void*>
+	{
+	protected:
+		void* m_data = nullptr;
+		const std::size_t m_data_type_id;
+		msg_queue_base& m_msg_queue;
+		const var_idx_type& m_offset;
+		const notify_kind m_notify_kind;
+		prop_proxy(void* data, std::size_t data_type_id,
+			msg_queue_base& msg_queue,
+			const var_idx_type& offset,
+			notify_kind in_notify_kind)
+			: m_data(data)
+			, m_data_type_id(data_type_id)
+			, m_msg_queue(msg_queue)
+			, m_notify_kind(in_notify_kind)
+			, m_offset(offset)
+		{
+
+		}
+	public:
+
+		template <typename T>
+		static prop_proxy* construct(T* data, msg_queue_base& msg_queue,
+			const var_idx_type& offset,
+			notify_kind in_notify_kind)
+		{
+			return new prop_proxy(reinterpret_cast<void*>(data), type_hash::hash<T>(), msg_queue, offset, in_notify_kind);
+		}
+		template <typename T>
+		prop_proxy<T>* rebind() const
+		{
+			if (!m_data)
+			{
+				return nullptr;
+			}
+			if (m_data_type_id != type_hash::hash<T>())
+			{
+				return nullptr;
+			}
+			return new prop_proxy<T>(*reinterpret_cast<T*>(m_data), m_msg_queue, m_offset, m_notify_kind);
+		}
+	};
 	template <typename T>
     class prop_proxy<T, std::enable_if_t<
 		std::is_pod_v<T> || std::is_same_v<T, std::string>, void>
 	>
     {
     public:
-        prop_proxy(T& _in_data, 
-			msg_queue_base& _in_msg_queue, 
-			const var_idx_type& in_offset,
-			notify_kind in_notify_kind = notify_kind::self_notify):
-        _data(_in_data),
-		_msg_queue(_in_msg_queue),
-		_notify_kind(in_notify_kind),
-		_offset(in_offset)
+        prop_proxy(T& data, 
+			msg_queue_base& msg_queue, 
+			const var_idx_type& offset,
+			notify_kind in_notify_kind = notify_kind::self_notify)
+			: m_data(data),
+		m_msg_queue(msg_queue),
+		m_notify_kind(in_notify_kind),
+		m_offset(offset)
 
         {
 
         }
 		T& get()
 		{
-			return _data;
+			return m_data;
 		}
 		operator const T&() const
 		{
-			return _data;
+			return m_data;
 		}
-		void set(const T& _in_data)
+		void set(const T& data)
 		{
-			_data = _in_data;
-			if (_notify_kind != notify_kind::no_notify)
+			m_data = data;
+			if (m_notify_kind != notify_kind::no_notify)
 			{
-				_msg_queue.add(_offset,
-					var_mutate_cmd::set, encode(_data));
+				m_msg_queue.add(m_offset,
+					var_mutate_cmd::set, encode(m_data));
 			}
 			
 		}
 		
 		void clear()
 		{
-			_data = {};
-			if (_notify_kind != notify_kind::no_notify)
+			m_data = {};
+			if (m_notify_kind != notify_kind::no_notify)
 			{
-				_msg_queue.add(_offset,
+				m_msg_queue.add(m_offset,
 					var_mutate_cmd::clear, json());
 			}
 		}
 		
-		bool replay(var_mutate_cmd _cmd, const json& j_data)
+		bool replay(var_mutate_cmd cmd, const json& data)
 		{
-			switch (_cmd)
+			switch (cmd)
 			{
 			case var_mutate_cmd::clear:
-				return replay_clear(j_data);
+				return replay_clear(data);
 			case var_mutate_cmd::set:
-				return replay_set(j_data);
+				return replay_set(data);
 			default:
 				return false;
 			}
 		}
 	private:
-		bool replay_set(const json& j_data)
+		bool replay_set(const json& data)
 		{
-			return decode(j_data, _data);
+			return decode(data, m_data);
 		}
-		bool replay_clear(const json& j_data)
+		bool replay_clear(const json& data)
 		{
-			_data = {};
+			m_data = {};
 			return true;
 		}
     private:
-        T& _data;
-		msg_queue_base& _msg_queue;
-		const var_idx_type& _offset;
-		const notify_kind _notify_kind;
+        T& m_data;
+		msg_queue_base& m_msg_queue;
+		const var_idx_type& m_offset;
+		const notify_kind m_notify_kind;
 	};
 
 	template<typename T>
 	class prop_proxy<std::vector<T>>
 	{
 	public:
-		prop_proxy(std::vector<T>& _in_data, 
-			msg_queue_base& _in_msg_queue, 
-			const var_idx_type& _in_offset) :
-			_data(_in_data),
-			_msg_queue(_in_msg_queue),
-			_offset(_in_offset)
+		prop_proxy(std::vector<T>& data, 
+			msg_queue_base& msg_queue, 
+			const var_idx_type& offset) :
+			m_data(data),
+			m_msg_queue(msg_queue),
+			m_offset(offset)
 		{
 
 		}
 		std::vector<T>& get()
 		{
-			return _data;
+			return m_data;
 		}
 		operator const std::vector<T>&() const
 		{
-			return _data;
+			return m_data;
 		}
-		void set(const std::vector<T>& _in_data)
+		void set(const std::vector<T>& data)
 		{
-			_data = _in_data;
-			_msg_queue.add(_offset, var_mutate_cmd::set, encode(_data));
+			m_data = data;
+			m_msg_queue.add(m_offset, var_mutate_cmd::set, encode(m_data));
 		}
 		
 		void clear()
 		{
-			_data.clear();
-			_msg_queue.add(_offset, var_mutate_cmd::clear, json());
+			m_data.clear();
+			m_msg_queue.add(m_offset, var_mutate_cmd::clear, json());
 		}
 		
-		void push_back(const T& _new_data)
+		void push_back(const T& new_data)
 		{
-			_data.push_back(_new_data);
-			_msg_queue.add(_offset, var_mutate_cmd::vector_push_back, encode(_new_data));
+			m_data.push_back(new_data);
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_push_back, encode(new_data));
 		}
 		
 		void pop_back()
 		{
-			if (_data.size())
+			if (m_data.size())
 			{
-				_data.pop_back();
+				m_data.pop_back();
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_pop_back, json());
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_pop_back, json());
 		}
 		
-		void idx_mutate(std::size_t idx, const T& _new_data)
+		void idx_mutate(std::size_t idx, const T& new_data)
 		{
-			if (idx < _data.size())
+			if (idx < m_data.size())
 			{
-				_data[idx] = _new_data;
+				m_data[idx] = new_data;
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_idx_mutate, encode_multi(idx, _new_data));
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, encode_multi(idx, new_data));
 		}
 		
 		void idx_delete(std::size_t idx)
 		{
-			if (idx < _data.size())
+			if (idx < m_data.size())
 			{
-				_data.erase(_data.begin() + idx);
+				m_data.erase(m_data.begin() + idx);
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_idx_mutate, encode(idx));
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, encode(idx));
 		}
 		
-		bool replay(var_mutate_cmd _cmd, const json& j_data)
+		bool replay(var_mutate_cmd cmd, const json& data)
 		{
-			switch (_cmd)
+			switch (cmd)
 			{
 			case var_mutate_cmd::clear:
-				return replay_clear(j_data);
+				return replay_clear(data);
 			case var_mutate_cmd::set:
-				return replay_set(j_data);
+				return replay_set(data);
 			case var_mutate_cmd::vector_push_back:
-				return replay_push_back(j_data);
+				return replay_push_back(data);
 			case var_mutate_cmd::vector_pop_back:
-				return replay_pop_back(j_data);
+				return replay_pop_back(data);
 			case var_mutate_cmd::vector_idx_mutate:
-				return replay_idx_mutate(j_data);
+				return replaym_idx_mutate(data);
 			case var_mutate_cmd::vector_idx_delete:
-				return replay_idx_delete(j_data);
+				return replaym_idx_delete(data);
 			default:
 				return false;
 			}
 		}
 	private:
-		bool replay_set(const json& j_data)
+		bool replay_set(const json& data)
 		{
-			return decode(j_data, _data);
+			return decode(data, m_data);
 		}
-		bool replay_clear(const json& j_data)
+		bool replay_clear(const json& data)
 		{
-			_data.clear();
+			m_data.clear();
 			return true;
 		}
-		bool replay_push_back(const json& j_data)
+		bool replay_push_back(const json& data)
 		{
 			T temp;
-			if (decode(j_data, temp))
+			if (decode(data, temp))
 			{
-				_data.push_back(temp);
+				m_data.push_back(temp);
 				return true;
 			}
 			else
@@ -276,143 +337,143 @@ namespace spiritsaway::serialize
 				return false;
 			}
 		}
-		bool replay_pop_back(const json& j_data)
+		bool replay_pop_back(const json& data)
 		{
-			if (_data.size())
+			if (m_data.size())
 			{
-				_data.pop_back();
+				m_data.pop_back();
 			}
 			return true;
 		}
-		bool replay_idx_mutate(const json& j_data)
+		bool replaym_idx_mutate(const json& data)
 		{
 			std::size_t idx;
 			T temp;
-			if (!decode_multi(j_data, idx, temp))
+			if (!decode_multi(data, idx, temp))
 			{
 				return false;
 			}
-			if (idx < _data.size())
+			if (idx < m_data.size())
 			{
-				_data[idx] = temp;
+				m_data[idx] = temp;
 			}
 			return true;
 		}
-		bool replay_idx_delete(const json& j_data)
+		bool replaym_idx_delete(const json& data)
 		{
 			std::size_t idx;
-			if (!decode(j_data, idx))
+			if (!decode(data, idx))
 			{
 				return false;
 			}
-			if (idx < _data.size())
+			if (idx < m_data.size())
 			{
-				_data.erase(_data.begin() + idx);
+				m_data.erase(m_data.begin() + idx);
 			}
 			return true;
 		}
 	private:
-		std::vector<T>& _data;
-		msg_queue_base& _msg_queue;
-		const var_idx_type _offset;
+		std::vector<T>& m_data;
+		msg_queue_base& m_msg_queue;
+		const var_idx_type m_offset;
 	};
 
 	template <typename T1, typename T2>
 	class prop_proxy<std::unordered_map<T1, T2>>
 	{
 	public:
-		prop_proxy(std::unordered_map<T1, T2>& _in_data,
-			msg_queue_base& _in_msg_queue,
-			const var_idx_type& _in_offset) :
-			_data(_in_data),
-			_msg_queue(_in_msg_queue),
-			_offset(_in_offset)
+		prop_proxy(std::unordered_map<T1, T2>& data,
+			msg_queue_base& msg_queue,
+			const var_idx_type& offset) :
+			m_data(data),
+			m_msg_queue(msg_queue),
+			m_offset(offset)
 		{
 
 		}
 		std::unordered_map<T1, T2>& get()
 		{
-			return _data;
+			return m_data;
 		}
 		operator const std::unordered_map<T1, T2>&() const
 		{
-			return _data;
+			return m_data;
 		}
-		void set(const std::unordered_map<T1, T2>& _in_data)
+		void set(const std::unordered_map<T1, T2>& data)
 		{
-			_data = _in_data;
-			_msg_queue.add(_offset, var_mutate_cmd::set, encode(_data));
+			m_data = data;
+			m_msg_queue.add(m_offset, var_mutate_cmd::set, encode(m_data));
 		}
 
 		void clear()
 		{
-			_data.clear();
-			_msg_queue.add(_offset, var_mutate_cmd::clear, json());
+			m_data.clear();
+			m_msg_queue.add(m_offset, var_mutate_cmd::clear, json());
 		}
 
 		void insert(const T1& key, const T2& value)
 		{
-			_data[key] = value;
-			_msg_queue.add(_offset, var_mutate_cmd::map_insert, encode_multi(key, value));
+			m_data[key] = value;
+			m_msg_queue.add(m_offset, var_mutate_cmd::map_insert, encode_multi(key, value));
 		}
 
 		void erase(const T1& key)
 		{
-			_data.erase(key);
-			_msg_queue.add(_offset, var_mutate_cmd::map_erase, encode(key));
+			m_data.erase(key);
+			m_msg_queue.add(m_offset, var_mutate_cmd::map_erase, encode(key));
 		}
 
-		bool replay(var_mutate_cmd _cmd, const json& j_data)
+		bool replay(var_mutate_cmd cmd, const json& data)
 		{
-			switch (_cmd)
+			switch (cmd)
 			{
 			case var_mutate_cmd::clear:
-				return replay_clear(j_data);
+				return replay_clear(data);
 			case var_mutate_cmd::set:
-				return replay_set(j_data);
+				return replay_set(data);
 			case var_mutate_cmd::map_insert:
-				return replay_insert(j_data);
+				return replay_insert(data);
 			case var_mutate_cmd::map_erase:
-				return replay_erase(j_data);
+				return replay_erase(data);
 			default:
 				return false;
 			}
 		}
 	private:
-		bool replay_set(const json& j_data)
+		bool replay_set(const json& data)
 		{
-			return decode(j_data, _data);
+			return decode(data, m_data);
 		}
-		bool replay_clear(const json& j_data)
+		bool replay_clear(const json& data)
 		{
-			_data.clear();
+			m_data.clear();
 			return true;
 		}
-		bool replay_insert(const json& j_data)
+		bool replay_insert(const json& data)
 		{
 			T1 key;
 			T2 value;
-			if (!decode_multi(j_data, key, value))
+			if (!decode_multi(data, key, value))
 			{
 				return false;
 			}
-			_data[key] = value;
+			m_data[key] = value;
 			return true;
 		}
-		bool replay_erase(const json& j_data)
+		bool replay_erase(const json& data)
 		{
 			T1 key;
-			if (!decode(j_data, key))
+			if (!decode(data, key))
 			{
 				return false;
 			}
-			_data.erase(key);
+			m_data.erase(key);
 			return true;
 		}
 	private:
-		std::unordered_map<T1, T2>& _data;
-		msg_queue_base& _msg_queue;
-		const var_idx_type _offset;
+		std::unordered_map<T1, T2>& m_data;
+		msg_queue_base& m_msg_queue;
+		const var_idx_type m_offset;
 	};
 
 	
@@ -421,10 +482,10 @@ namespace spiritsaway::serialize
 	class property_item_base
 	{
 	private:
-		property_bag_base* _container;
+		property_bag_base* m_container;
 	public:
-		property_item_base(property_bag_base* _in_container)
-			: _container(_in_container)
+		property_item_base(property_bag_base* container)
+			: m_container(container)
 		{
 
 		}
@@ -436,47 +497,49 @@ namespace spiritsaway::serialize
 	class property_bag_base
 	{
 	public:
-		var_prefix_idx_type _depth;
+		var_prefix_idx_type m_depth;
 		virtual json encode() const = 0;
 		virtual bool decode(const json& data) = 0;
 		virtual const std::string& type_name() const = 0;
-		std::deque<mutate_msg>& _dest_buffer;
-		property_bag_base(var_prefix_idx_type _in_depth,
-			std::deque<mutate_msg>& _in_cmd_queue) :
-			_depth(_in_depth),
-			_dest_buffer(_in_cmd_queue)
+		std::deque<mutate_msg>& m_dest_buffer;
+		property_bag_base(var_prefix_idx_type depth,
+			std::deque<mutate_msg>& cmd_queue) :
+			m_depth(depth),
+			m_dest_buffer(cmd_queue)
 		{
 
 		}
 		virtual bool replay_mutate_msg(std::size_t field_index,
 			var_mutate_cmd cmd, const json& data) = 0;
+		virtual prop_proxy<void*>* get(const std::string& member_name) = 0;
 
 	};
 	template <typename T>
 	class property_item : public property_item_base
 	{
 	protected:
-		T _id;
+		T m_id;
+		item_msg_queue<T> m_cmd_buffer;
+
 	public:
 		const T& id() const
 		{
-			return _id;
+			return m_id;
 		}
-		property_item(property_bag_base* _in_container,
+		property_item(property_bag_base* container,
 			std::deque<mutate_msg>& _dest_queue,
-			const T& _in_id):
-			property_item_base(_in_container),
-			_id(_in_id),
-			_cmd_buffer(_dest_queue, _in_container->_depth, _id)
+			const T& id):
+			property_item_base(container),
+			m_id(id),
+			m_cmd_buffer(_dest_queue, container->m_depth, m_id)
 
 		{
 
 		}
-		item_msg_queue<T> _cmd_buffer;
 		json encode() const
 		{
 			json result;
-			result["id"] = _id;
+			result["id"] = m_id;
 			return result;
 		}
 		bool decode(const json& data)
@@ -490,7 +553,7 @@ namespace spiritsaway::serialize
 			{
 				return false;
 			}
-			if (!spiritsaway::serialize::decode(*iter, _id))
+			if (!spiritsaway::serialize::decode(*iter, m_id))
 			{
 				return false;
 			}
@@ -504,66 +567,67 @@ namespace spiritsaway::serialize
 
 		static_assert(std::is_base_of<property_item<K>, Item>::value,
 			"item should be derived from property_item<K>");
-		std::vector<Item> _data;
-		std::unordered_map<K, std::size_t> _index;
+		std::vector<Item> m_data;
+		std::unordered_map<K, std::size_t> m_index;
 	public:
 		using key_type = K;
 		using value_type = Item;
-		property_bag(var_prefix_idx_type _in_depth,
-			std::deque<mutate_msg>& _in_cmd_queue) :
-			property_bag_base(_in_depth, _in_cmd_queue)
+		property_bag(var_prefix_idx_type depth,
+			std::deque<mutate_msg>& cmd_queue) :
+			property_bag_base(depth, cmd_queue)
 		{
 
 		}
 		property_bag& operator=(const property_bag& other)
 		{
-			_data.clear();
-			for (const auto& one_item : other._data)
+			m_data.clear();
+			m_data.shrink_to_fit();
+			m_data.reserve(other.m_data.size());
+			for (const auto& one_item : other.m_data)
 			{
 				insert(one_item.encode());
 			}
-			_data.shrink_to_fit();
 			return *this;
 		}
 
 		json encode() const
 		{
-			return spiritsaway::serialize::encode(_data);
+			return spiritsaway::serialize::encode(m_data);
 		}
-		bool decode(const json& in_data)
+		bool decode(const json& data)
 		{
-			if (_data.size())
+			if (m_data.size())
 			{
-				std::cout << "the bag is not empty while decode data " << in_data.dump() << " to property_bag " << type_name() << std::endl;
+				std::cout << "the bag is not empty while decode data " << data.dump() << " to property_bag " << type_name() << std::endl;
 				return false;
 			}
 			json::array_t temp_array;
-			if (!in_data.is_array())
+			if (!data.is_array())
 			{
 				return false;
 			}
-			_data.reserve(in_data.size());
-			temp_array = in_data.get<json::array_t>();
+			m_data.reserve(data.size());
+			temp_array = data.get<json::array_t>();
 			for (const auto& one_json_item : temp_array)
 			{
-				value_type temp_item(this, _dest_buffer, K());
+				value_type temp_item(this, m_dest_buffer, K());
 				if (!temp_item.decode(one_json_item))
 				{
-					_data.clear();
+					m_data.clear();
 					return false;
 				}
-				_data.push_back(temp_item);
+				m_data.push_back(temp_item);
 			}
-			for (std::size_t i = 0; i < _data.size(); i++)
+			for (std::size_t i = 0; i < m_data.size(); i++)
 			{
-				_index[_data[i].id()] = i;
+				m_index[m_data[i].id()] = i;
 			}
 			return true;
 		}
 		bool has_item(const K& _key) const
 		{
-			auto cur_iter = _index.find(_key);
-			if (cur_iter == _index.end())
+			auto cur_iter = m_index.find(_key);
+			if (cur_iter == m_index.end())
 			{
 				return false;
 			}
@@ -574,80 +638,85 @@ namespace spiritsaway::serialize
 		}
 		bool create(const json& data)
 		{
-			Item temp_item(this, _dest_buffer, K());
+			Item temp_item(this, m_dest_buffer, K());
 			if (!spiritsaway::serialize::decode(data, temp_item))
 			{
 				std::cout<<"property_bag "<<type_name()<<" fail to create item with data {}"<< data.dump()<<std::endl;
 				return false;
 			}
-			_index[temp_item.id()] = _data.size();
-			_data.emplace_back(std::move(temp_item));
+			m_index[temp_item.id()] = m_data.size();
+			m_data.emplace_back(std::move(temp_item));
 			return true;
 		}
 		Item& create(const K& key)
 		{
-			Item temp_item(this, _dest_buffer, key);
-			_index[temp_item.id()] = _data.size();
-			_data.emplace_back(std::move(temp_item));
-			return _data.back();
+			Item temp_item(this, m_dest_buffer, key);
+			m_index[temp_item.id()] = m_data.size();
+			m_data.emplace_back(std::move(temp_item));
+			return m_data.back();
 		}
 		bool operator==(const property_bag& other)
 		{
-			return _data == other._data;
+			return m_data == other.m_data;
 		}
 		void clear()
 		{
-			_index.clear();
-			_data.clear();
+			m_index.clear();
+			m_data.clear();
 		}
 		bool erase(const K& key)
 		{
-			auto cur_iter = _index.find(key);
-			if (cur_iter == _index.end())
+			auto cur_iter = m_index.find(key);
+			if (cur_iter == m_index.end())
 			{
 				return false;
 			}
 			else
 			{
-				if (cur_iter->second == _data.size())
+				if (cur_iter->second == m_data.size())
 				{
-					_index.erase(cur_iter);
-					_data.pop_back();
+					m_index.erase(cur_iter);
+					m_data.pop_back();
 				}
 				else
 				{
 					auto pre_index = cur_iter->second;
-					_index.erase(cur_iter);
-					_index[_data[pre_index].id()] = pre_index;
-					_data[pre_index].swap(_data.back());
-					_data.pop_back();
+					m_index.erase(cur_iter);
+					m_index[m_data[pre_index].id()] = pre_index;
+					m_data[pre_index].swap(m_data.back());
+					m_data.pop_back();
 				}
 				return true;
 			}
 		}
 		std::optional<std::reference_wrapper<const Item>> get(const K& key) const
 		{
-			auto cur_iter = _index.find(key);
-			if (cur_iter == _index.end())
+			auto cur_iter = m_index.find(key);
+			if (cur_iter == m_index.end())
 			{
 				return std::nullopt;
 			}
 			else
 			{
-				return std::cref(_data[cur_iter->second]);
+				return std::cref(m_data[cur_iter->second]);
 			}
 		}
 		std::optional<std::reference_wrapper<Item>> get_mut(const K& key)
 		{
-			auto cur_iter = _index.find(key);
-			if (cur_iter == _index.end())
+			auto cur_iter = m_index.find(key);
+			if (cur_iter == m_index.end())
 			{
 				return std::nullopt;
 			}
 			else
 			{
-				return std::ref(_data[cur_iter->second]);
+				return std::ref(m_data[cur_iter->second]);
 			}
+		}
+
+		prop_proxy<void*>* get(const std::string& member_name) override
+		{
+			return nullptr;
 		}
 	};
 	template <typename T>
@@ -655,33 +724,37 @@ namespace spiritsaway::serialize
 		std::enable_if_t<std::is_base_of_v<property_bag_base, T>, void>>
 	{
 
-		T& _data;
+		T& m_data;
 	public:
 		using key_type = typename T::key_type;
 		using value_type = typename T::value_type;
-		prop_proxy(T& _in_data,
-			msg_queue_base& _in_msg_queue,
-			const var_idx_type& _in_offset)
-			:_data(_in_data)
-			,_msg_queue(_in_msg_queue)
-			,_offset(_in_offset)
+		prop_proxy(T& data,
+			msg_queue_base& msg_queue,
+			const var_idx_type& offset)
+			:m_data(data)
+			,m_msg_queue(msg_queue)
+			,m_offset(offset)
 		{
 
 		}
 		operator const std::vector<value_type>&() const
 		{
-			return _data._data;
+			return m_data.m_data;
+		}
+		prop_proxy<void*>* get(const std::string& member_name)
+		{
+			return m_data.get(member_name);
 		}
 		void clear()
 		{
-			_data.clear();
-			_msg_queue.add(_offset, var_mutate_cmd::clear, json());
+			m_data.clear();
+			m_msg_queue.add(m_offset, var_mutate_cmd::clear, json());
 		}
 		std::vector<key_type> keys() const
 		{
 			std::vector<key_type> result;
-			result.reserve(_data._data.size());
-			for (const auto& one_item : _data._data)
+			result.reserve(m_data.m_data.size());
+			for (const auto& one_item : m_data.m_data)
 			{
 				result.push_back(one_item.first);
 			}
@@ -689,9 +762,9 @@ namespace spiritsaway::serialize
 		}
 		void insert(const json& value)
 		{
-			if (_data.create(value))
+			if (m_data.create(value))
 			{
-				_msg_queue.add(_offset, var_mutate_cmd::map_insert, 
+				m_msg_queue.add(m_offset, var_mutate_cmd::map_insert, 
 					value);
 			}
 			
@@ -699,56 +772,56 @@ namespace spiritsaway::serialize
 
 		void erase(const key_type& key)
 		{
-			if (_data.erase(key))
+			if (m_data.erase(key))
 			{
-				_msg_queue.add(_offset, var_mutate_cmd::map_erase, encode(key));
+				m_msg_queue.add(m_offset, var_mutate_cmd::map_erase, encode(key));
 			}
 			
 		}
-		bool replay_insert(const json& j_data)
+		bool replay_insert(const json& data)
 		{
-			return _data.create(j_data);
+			return m_data.create(data);
 			
 		}
-		bool replay_clear(const json& j_data)
+		bool replay_clear(const json& data)
 		{
-			_data.clear();
+			m_data.clear();
 			return true;
 		}
-		bool replay_erase(const json& j_data)
+		bool replay_erase(const json& data)
 		{
 			key_type cur_k;
-			if (!decode(j_data, cur_k))
+			if (!decode(data, cur_k))
 			{
 				return false;
 			}
-			return _data.erase(cur_k);
+			return m_data.erase(cur_k);
 		}
-		bool replay(var_mutate_cmd _cmd, const json& j_data)
+		bool replay(var_mutate_cmd _cmd, const json& data)
 		{
 			switch (_cmd)
 			{
 			case var_mutate_cmd::clear:
-				return replay_clear(j_data);
+				return replay_clear(data);
 			case var_mutate_cmd::map_insert:
-				return replay_insert(j_data);
+				return replay_insert(data);
 			case var_mutate_cmd::map_erase:
-				return replay_erase(j_data);
+				return replay_erase(data);
 			default:
 				return false;
 			}
 		}
 	private:
-		msg_queue_base& _msg_queue;
-		const var_idx_type _offset;
+		msg_queue_base& m_msg_queue;
+		const var_idx_type m_offset;
 	};
 
 	template <typename T>
-	prop_proxy<T, void> make_proxy(T& _in_data,
-		msg_queue_base& _in_msg_queue,
-		const var_idx_type& _in_offset)
+	prop_proxy<T, void> make_proxy(T& data,
+		msg_queue_base& msg_queue,
+		const var_idx_type& offset)
 	{
-		return prop_proxy<T, void>(_in_data, _in_msg_queue, _in_offset);
+		return prop_proxy<T, void>(data, msg_queue, offset);
 	}
 
 }
