@@ -7,6 +7,7 @@ namespace spiritsaway::serialize
 	protected:
 		std::size_t m_total_chats;
 		std::unordered_map<std::string, std::size_t> m_last_chat_ts;
+		
 #include "chat_prop.generated.h"
 
 	};
