@@ -201,7 +201,7 @@ namespace spiritsaway::serialize
 			}
 			else
 			{
-				return prop_record_proxy<Item>(parent_queue, parent_offset,  m_data[cur_iter->second], cur_iter->second);
+				return std::make_unique<prop_record_proxy<Item>>(parent_queue, parent_offset,  m_data[cur_iter->second], cur_iter->second);
 			}
 		}
 		bool replay_insert(const json& data)
@@ -262,7 +262,7 @@ namespace spiritsaway::serialize
 				return replay_insert(data);
 			case spiritsaway::serialize::var_mutate_cmd::map_erase:
 				return replay_erase(data);
-			case spiritsaway::serialize::var_mutate_cmd::item_update:
+			case spiritsaway::serialize::var_mutate_cmd::mutate_item:
 
 				return replay_item_mutate(data);
 			default:

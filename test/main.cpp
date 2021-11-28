@@ -295,6 +295,22 @@ void test_property_mutate()
 	{
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
+
+	auto g_2_proxy = mut_g.get(2);
+	if (!g_2_proxy)
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+	g_2_proxy->a().set(3);
+	msg = msg_cmd_queue.front();
+	msg_cmd_queue.pop_front();
+	test_b.replay_mutate_msg(msg.offset, msg.cmd, msg.data);
+	if (!(test_a == test_b))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+
 	mut_g.erase(2);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
