@@ -10,12 +10,20 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif(MSVC)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/generated)
+
+FILE(GLOB_RECURSE PROP_SRCS ${CMAKE_SOURCE_DIR}/src/*.cpp)
+FILE(GLOB_RECURSE PROP_GENERATED_SRCS ${CMAKE_SOURCE_DIR}/generated/*.cpp)
+
 find_package(nlohmann_json CONFIG REQUIRED)
 
 
 find_package(any_container CONFIG REQUIRED)
 
 INCLUDE_DIRECTORIES(${any_container_include_dirs})
-message(STATUS "any_container_include_dirs=${any_container_include_dirs}")
-add_executable(property_sync ${CMAKE_SOURCE_DIR}/test/property_test.cpp)
+
+add_library(${CMAKE_PROJECT_NAME} ${PROP_SRCS}  ${PROP_GENERATED_SRCS})
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC any_container)
+
+message(STATUS "any_container_include_dirs=${any_container_include_dirs}")
+add_subdirectory(test)
