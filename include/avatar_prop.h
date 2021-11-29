@@ -8,9 +8,11 @@ namespace spiritsaway::serialize
 	Meta(property) class avatar_prop
 	{
 	protected:
-		Meta(property) char_prop m_chat;
+		Meta(property) chat_prop m_chat;
 		Meta(property) friend_prop m_friend;
-		Meta(property) equip_prop m_equips;
+		Meta(property) equip_prop m_weapons;
+		Meta(property) equip_prop m_armors;
 		#include "avatar_prop.generated.h"
 	};
+#include "avatar_prop.proxy.h"
 }

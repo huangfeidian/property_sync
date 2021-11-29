@@ -248,7 +248,7 @@ namespace spiritsaway::serialize
 			return m_data[mutate_idx].replay_mutate_msg(field_idx, var_mutate_cmd(field_cmd), mutate_content);
 		}
 	public:
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay_mutate_msg(property_offset offset, var_mutate_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -339,20 +339,4 @@ namespace spiritsaway::serialize
 
 	};
 
-	template <typename T>
-	class prop_replay_proxy<property_bag<T>>
-	{
-		property_bag<T>& m_data;
-	public:
-		prop_replay_proxy(property_bag<T>& data)
-			: m_data(data)
-		{
-
-		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
-		{
-			return m_data.replay(offset, cmd, data);
-		}
-
-	};
 }

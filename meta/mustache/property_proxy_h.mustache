@@ -1,0 +1,39 @@
+{{#has_property_base}}
+template <> 
+class prop_record_proxy<{{class_name}}>: public prop_record_proxy<{{base_class_name}}>
+{
+	{{class_name}}& m_{{class_name}}_data;
+public:
+	prop_record_proxy({{class_name}}& data, msg_queue_base& msg_queue,
+		const property_offset& offset)
+		: prop_record_proxy<{{base_class_name}}>(data, msg_queue, offset)
+		, m_{{class_name}}_data(data)
+	{
+
+	}
+{{/has_property_base}}
+{{^has_property_base}}
+template <>
+class prop_record_proxy<{{class_name}}>
+{
+	{{class_name}}& m_{{class_name}}_data;
+	const property_offset m_offset;
+	msg_queue_base& m_queue;
+public:
+	prop_record_proxy({{class_name}}& data, msg_queue_base& msg_queue,
+		const property_offset& offset)
+		: m_data(data)
+		, m_offset(offset)
+		, m_queue(msg_queue)
+	{
+
+	}
+{{/has_property_base}}
+
+	{{#property_fields}}
+	prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})> {{field_name}}()
+	{
+		return prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})>(m_{{class_name}}_data.m_{{field_name}}, m_queue, m_offset.merge({{class_name}}::index_for_{{field_name}}));
+	}
+	{{/property_fields}}
+}

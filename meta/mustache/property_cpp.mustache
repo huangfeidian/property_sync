@@ -1,0 +1,81 @@
+protected:
+
+bool {{class_name}}::replay_mutate_msg(property_offset offset, var_mutate_cmd cmd, const json& data)
+{
+	auto split_result = offset.split();
+	auto field_index = split_result.second;
+	auto remain_offset = split_result.first;
+	switch(field_index)
+	{
+{{#property_fields}}		
+		case index_for_{{field_name}}:
+		{
+			auto temp_proxy = make_replay_proxy(m_{{field_name}});
+			return temp_proxy.replay(remain_offset, cmd, data);
+		}
+{{/property_fields}}
+		default:
+		{{#has_base_replay}}
+			return {{base_class}}::replay_mutate_msg(offset, cmd, data);
+		{{/has_base_replay}}
+		{{^has_base_replay}}
+			return false;
+		{{/has_base_replay}}
+	}
+}
+
+bool {{class_name}}::operator==(const {{class_name}}& other)
+{
+	{{#has_base_class}}
+	if(!{{base_class}}::operator==(other))
+	{
+		return false;
+	}
+	{{/has_base_class}}
+	{{#property_fields}}	
+	if(m_{{field_name}} != other.m_{{field_name}})
+	{
+		return false;
+	}
+	{{/property_fields}}
+	return true;
+}
+
+json {{class_name}}::encode() const
+{
+	{{#has_base_class}}
+	json result = {{base_class}}::encode();
+	{{/has_base_class}}
+	{{^has_base_class}}
+	json result;
+	{{/has_base_class}}
+	{{#property_fields}}
+	result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
+	{{/property_fields}}
+	return result;
+}
+
+bool {{class_name}}::decode(const json& data)
+{
+	{{#has_base_class}}
+	if(!{{base_class}}::decode(data))
+	{
+		return false;
+	}
+	{{/has_base_class}}
+	decltype(data.end()) iter;
+	{{#property_fields}}
+	iter = data.find("{{field_name}}");
+	if(iter == data.end())
+	{
+		return false;
+	}
+	if(!spiritsaway::serialize::decode(*iter, m_{{field_name}}))
+	{
+		return false;
+	}
+	{{/property_fields}}
+	return true;
+}
+
+

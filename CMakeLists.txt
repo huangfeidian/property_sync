@@ -27,3 +27,4 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC any_container)
 
 message(STATUS "any_container_include_dirs=${any_container_include_dirs}")
 add_subdirectory(test)
+add_subdirectory(meta)

@@ -73,22 +73,6 @@ public:
 	}
 #include "simple_item.generated.h"
 };
-template <>
-class prop_replay_proxy<simple_item>
-{
-protected:
-	simple_item& m_data;
-public:
-	prop_replay_proxy(simple_item& data)
-		: m_data(data)
-	{
-
-	}
-	bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
-	{
-		return m_data.replay_mutate_msg(offset, cmd, data);
-	}
-};
 
 template <>
 class prop_record_proxy<simple_item>

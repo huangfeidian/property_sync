@@ -255,19 +255,5 @@ namespace spiritsaway::serialize
 			return prop_record_proxy<decltype(m_data.m_g)>(m_data.m_g, m_queue, m_offset.merge(PropertyMap::index_for_g));
 		}
 	};
-	template <>
-	class prop_replay_proxy<PropertyMap>
-	{
-		PropertyMap& m_data;
-	public:
-		prop_replay_proxy(PropertyMap& data)
-			: m_data(data)
-		{
 
-		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
-		{
-			return m_data.replay_mutate_msg(offset, cmd, data);
-		}
-	};
 }

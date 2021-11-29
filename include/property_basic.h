@@ -104,6 +104,20 @@ namespace spiritsaway::serialize
 	class prop_record_proxy;
 
 	template<typename T, typename B = void>
-	class prop_replay_proxy;
+	class prop_replay_proxy
+	{
+		T& m_data;
+	public:
+		prop_replay_proxy(T& data)
+			: m_data(data)
+		{
+
+		}
+		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		{
+			return m_data.replay_mutate_msg(offset, cmd, data);
+		}
+	};
+
 
 }
