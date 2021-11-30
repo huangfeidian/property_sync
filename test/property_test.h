@@ -1,7 +1,7 @@
 #pragma once
 #include "simple_item.h"
 
-namespace spiritsaway::serialize
+namespace spiritsaway::test
 {
 	class PropertyMap
 	{
@@ -209,14 +209,19 @@ namespace spiritsaway::serialize
 		static constexpr var_idx_type index_for_f = 6;
 		static constexpr var_idx_type index_for_g = 7;
 	};
+	
+
+}
+namespace spiritsaway::property
+{
 	template <>
-	class prop_record_proxy<PropertyMap>
+	class prop_record_proxy<test::PropertyMap>
 	{
-		PropertyMap& m_data;
+		test::PropertyMap& m_data;
 		const property_offset m_offset;
 		msg_queue_base& m_queue;
 	public:
-		prop_record_proxy(PropertyMap& data, msg_queue_base& msg_queue,
+		prop_record_proxy(test::PropertyMap& data, msg_queue_base& msg_queue,
 			const property_offset& offset)
 			: m_data(data)
 			, m_offset(offset)
@@ -226,34 +231,33 @@ namespace spiritsaway::serialize
 		}
 		prop_record_proxy<decltype(m_data.m_a)> a()
 		{
-			return prop_record_proxy<decltype(m_data.m_a)>(m_data.m_a, m_queue, m_offset.merge(PropertyMap::index_for_a));
+			return prop_record_proxy<decltype(m_data.m_a)>(m_data.m_a, m_queue, m_offset.merge(test::PropertyMap::index_for_a));
 		}
 
 		prop_record_proxy<decltype(m_data.m_b)> b()
 		{
-			return prop_record_proxy<decltype(m_data.m_b)>(m_data.m_b, m_queue, m_offset.merge(PropertyMap::index_for_b));
+			return prop_record_proxy<decltype(m_data.m_b)>(m_data.m_b, m_queue, m_offset.merge(test::PropertyMap::index_for_b));
 		}
 		prop_record_proxy<decltype(m_data.m_c)> c()
 		{
-			return prop_record_proxy<decltype(m_data.m_c)>(m_data.m_c, m_queue, m_offset.merge(PropertyMap::index_for_c));
+			return prop_record_proxy<decltype(m_data.m_c)>(m_data.m_c, m_queue, m_offset.merge(test::PropertyMap::index_for_c));
 		}
 		prop_record_proxy<decltype(m_data.m_d)> d()
 		{
-			return prop_record_proxy<decltype(m_data.m_d)>(m_data.m_d, m_queue, m_offset.merge(PropertyMap::index_for_d));
+			return prop_record_proxy<decltype(m_data.m_d)>(m_data.m_d, m_queue, m_offset.merge(test::PropertyMap::index_for_d));
 		}
 		prop_record_proxy<decltype(m_data.m_e)> e()
 		{
-			return prop_record_proxy<decltype(m_data.m_e)>(m_data.m_e, m_queue, m_offset.merge(PropertyMap::index_for_e));
+			return prop_record_proxy<decltype(m_data.m_e)>(m_data.m_e, m_queue, m_offset.merge(test::PropertyMap::index_for_e));
 		}
 		prop_record_proxy<decltype(m_data.m_f)> f()
 		{
-			return prop_record_proxy<decltype(m_data.m_f)>(m_data.m_f, m_queue, m_offset.merge(PropertyMap::index_for_f));
+			return prop_record_proxy<decltype(m_data.m_f)>(m_data.m_f, m_queue, m_offset.merge(test::PropertyMap::index_for_f));
 		}
 
 		prop_record_proxy<decltype(m_data.m_g)> g()
 		{
-			return prop_record_proxy<decltype(m_data.m_g)>(m_data.m_g, m_queue, m_offset.merge(PropertyMap::index_for_g));
+			return prop_record_proxy<decltype(m_data.m_g)>(m_data.m_g, m_queue, m_offset.merge(test::PropertyMap::index_for_g));
 		}
 	};
-
 }

@@ -2,7 +2,7 @@
 
 #include "property_basic.h"
 
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
 
 	template <typename T>
@@ -256,13 +256,13 @@ namespace spiritsaway::serialize
 			}
 			switch (cmd)
 			{
-			case spiritsaway::serialize::var_mutate_cmd::clear:
+			case var_mutate_cmd::clear:
 				return replay_clear(data);
-			case spiritsaway::serialize::var_mutate_cmd::map_insert:
+			case var_mutate_cmd::map_insert:
 				return replay_insert(data);
-			case spiritsaway::serialize::var_mutate_cmd::map_erase:
+			case var_mutate_cmd::map_erase:
 				return replay_erase(data);
-			case spiritsaway::serialize::var_mutate_cmd::mutate_item:
+			case var_mutate_cmd::mutate_item:
 
 				return replay_item_mutate(data);
 			default:

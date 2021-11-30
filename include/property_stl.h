@@ -1,7 +1,7 @@
 #pragma once
 #include "property_basic.h"
 
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
 
 	template <typename T>
@@ -93,7 +93,7 @@ namespace spiritsaway::serialize
 	private:
 		bool replay_set(const json& data)
 		{
-			return decode(data, m_data);
+			return serialize::decode(data, m_data);
 		}
 		bool replay_clear(const json& data)
 		{
@@ -215,7 +215,7 @@ namespace spiritsaway::serialize
 	private:
 		bool replay_set(const json& data)
 		{
-			return decode(data, m_data);
+			return serialize::decode(data, m_data);
 		}
 		bool replay_clear(const json& data)
 		{
@@ -225,7 +225,7 @@ namespace spiritsaway::serialize
 		bool replay_push_back(const json& data)
 		{
 			T temp;
-			if (decode(data, temp))
+			if (serialize::decode(data, temp))
 			{
 				m_data.push_back(temp);
 				return true;
@@ -247,7 +247,7 @@ namespace spiritsaway::serialize
 		{
 			std::size_t idx;
 			T temp;
-			if (!decode_multi(data, idx, temp))
+			if (!serialize::decode_multi(data, idx, temp))
 			{
 				return false;
 			}
@@ -260,7 +260,7 @@ namespace spiritsaway::serialize
 		bool replaym_idx_delete(const json& data)
 		{
 			std::size_t idx;
-			if (!decode(data, idx))
+			if (!serialize::decode(data, idx))
 			{
 				return false;
 			}
@@ -357,7 +357,7 @@ namespace spiritsaway::serialize
 	private:
 		bool replay_set(const json& data)
 		{
-			return decode(data, m_data);
+			return serialize::decode(data, m_data);
 		}
 		bool replay_clear(const json& data)
 		{
@@ -368,7 +368,7 @@ namespace spiritsaway::serialize
 		{
 			T1 key;
 			T2 value;
-			if (!decode_multi(data, key, value))
+			if (!serialize::decode_multi(data, key, value))
 			{
 				return false;
 			}
@@ -378,7 +378,7 @@ namespace spiritsaway::serialize
 		bool replay_erase(const json& data)
 		{
 			T1 key;
-			if (!decode(data, key))
+			if (!serialize::decode(data, key))
 			{
 				return false;
 			}

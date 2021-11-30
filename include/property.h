@@ -4,7 +4,7 @@
 #include "property_stl.h"
 #include "property_bag.h"
 
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
 
 	

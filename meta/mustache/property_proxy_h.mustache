@@ -30,10 +30,10 @@ public:
 	}
 {{/has_property_base}}
 
-	{{#property_fields}}
+{{#property_fields}}
 	prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})> {{field_name}}()
 	{
 		return prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})>(m_{{class_name}}_data.m_{{field_name}}, m_queue, m_offset.merge({{class_name}}::index_for_{{field_name}}));
 	}
-	{{/property_fields}}
+{{/property_fields}}
 }

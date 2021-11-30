@@ -1,7 +1,7 @@
 #pragma once
 #include <any_container/decode.h>
 #include "property_basic.h"
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
 	
 	class child_msg_queue : public msg_queue_base
@@ -84,7 +84,7 @@ namespace spiritsaway::serialize
 		item_msg_queue(const item_msg_queue& other) = default;
 		void add(const property_offset& offset, var_mutate_cmd cmd, const json& data) override
 		{
-			m_parent_queue.add(m_parent_offset, var_mutate_cmd::mutate_item, encode_multi(m_item_idx, offset, cmd, data));
+			m_parent_queue.add(m_parent_offset, var_mutate_cmd::mutate_item, serialize::encode_multi(m_item_idx, offset, cmd, data));
 			return;
 		}
 		void add(const std::uint8_t& offset, var_mutate_cmd cmd, const json& data) override

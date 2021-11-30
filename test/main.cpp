@@ -5,6 +5,8 @@
 
 using namespace std;
 using namespace spiritsaway::serialize;
+using namespace spiritsaway::property;
+using namespace spiritsaway::test;
 
 
 
