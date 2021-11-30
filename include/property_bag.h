@@ -89,7 +89,7 @@ namespace spiritsaway::property
 		{
 			if (m_data.size())
 			{
-				std::cout << "the bag is not empty while decode data " << data.dump() << " to property_bag " << std::endl;
+				// std::cout << "the bag is not empty while decode data " << data.dump() << " to property_bag " << std::endl;
 				return false;
 			}
 			json::array_t temp_array;
@@ -209,7 +209,7 @@ namespace spiritsaway::property
 			Item temp_item{ key_type() };
 			if (!spiritsaway::serialize::decode(data, temp_item))
 			{
-				std::cout <<" fail to create item with data {}" << data.dump() << std::endl;
+				// std::cout <<" fail to create item with data {}" << data.dump() << std::endl;
 				return false;
 			}
 			m_index[temp_item.id()] = m_data.size();
@@ -225,7 +225,7 @@ namespace spiritsaway::property
 		bool replay_erase(const json& data)
 		{
 			key_type cur_k;
-			if (!::decode(data, cur_k))
+			if (!serialize::decode(data, cur_k))
 			{
 				return false;
 			}
@@ -237,7 +237,7 @@ namespace spiritsaway::property
 			std::size_t field_idx;
 			std::uint8_t field_cmd;
 			json mutate_content;
-			if (!::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
+			if (!serialize::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
 			{
 				return false;
 			}
@@ -324,7 +324,7 @@ namespace spiritsaway::property
 		{
 			if (m_data.erase(key))
 			{
-				m_queue.add(m_offset, var_mutate_cmd::map_erase, encode(key));
+				m_queue.add(m_offset, var_mutate_cmd::map_erase, serialize::encode(key));
 			}
 
 		}

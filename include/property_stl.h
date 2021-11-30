@@ -36,7 +36,7 @@ namespace spiritsaway::property
 			if (m_notify_kind != notify_kind::no_notify)
 			{
 				m_msg_queue.add(m_offset,
-					var_mutate_cmd::set, encode(m_data));
+					var_mutate_cmd::set, serialize::encode(m_data));
 			}
 
 		}
@@ -127,7 +127,7 @@ namespace spiritsaway::property
 		void set(const std::vector<T>& data)
 		{
 			m_data = data;
-			m_msg_queue.add(m_offset, var_mutate_cmd::set, encode(m_data));
+			m_msg_queue.add(m_offset, var_mutate_cmd::set, serialize::encode(m_data));
 		}
 
 		void clear()
@@ -139,7 +139,7 @@ namespace spiritsaway::property
 		void push_back(const T& new_data)
 		{
 			m_data.push_back(new_data);
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_push_back, encode(new_data));
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_push_back, serialize::encode(new_data));
 		}
 
 		void pop_back()
@@ -157,7 +157,7 @@ namespace spiritsaway::property
 			{
 				m_data[idx] = new_data;
 			}
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, encode_multi(idx, new_data));
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, serialize::encode_multi(idx, new_data));
 		}
 
 		void idx_delete(std::size_t idx)
@@ -166,7 +166,7 @@ namespace spiritsaway::property
 			{
 				m_data.erase(m_data.begin() + idx);
 			}
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, encode(idx));
+			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, serialize::encode(idx));
 		}
 
 		
@@ -296,7 +296,7 @@ namespace spiritsaway::property
 		void set(const std::unordered_map<T1, T2>& data)
 		{
 			m_data = data;
-			m_msg_queue.add(m_offset, var_mutate_cmd::set, encode(m_data));
+			m_msg_queue.add(m_offset, var_mutate_cmd::set, serialize::encode(m_data));
 		}
 
 		void clear()
@@ -308,13 +308,13 @@ namespace spiritsaway::property
 		void insert(const T1& key, const T2& value)
 		{
 			m_data[key] = value;
-			m_msg_queue.add(m_offset, var_mutate_cmd::map_insert, encode_multi(key, value));
+			m_msg_queue.add(m_offset, var_mutate_cmd::map_insert, serialize::encode_multi(key, value));
 		}
 
 		void erase(const T1& key)
 		{
 			m_data.erase(key);
-			m_msg_queue.add(m_offset, var_mutate_cmd::map_erase, encode(key));
+			m_msg_queue.add(m_offset, var_mutate_cmd::map_erase, serialize::encode(key));
 		}
 
 
