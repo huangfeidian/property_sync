@@ -47,7 +47,7 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_offset offse
 	}
 }
 
-bool PropertyMap::operator==(const PropertyMap& other)
+bool PropertyMap::operator==(const PropertyMap& other) const
 {
 	
 	if(m_a != other.m_a)
@@ -80,6 +80,11 @@ bool PropertyMap::operator==(const PropertyMap& other)
 	}
 	return true;
 }
+bool PropertyMap::operator!=(const PropertyMap& other) const
+{
+	return !(operator==(other));
+}
+
 
 json PropertyMap::encode() const
 {

@@ -23,7 +23,7 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset 
 	}
 }
 
-bool {{{class_name}}}::operator==(const {{{class_name}}}& other)
+bool {{{class_name}}}::operator==(const {{{class_name}}}& other) const
 {
 	{{#has_base_class}}
 	if(!{{{base_class_name}}}::operator==(other))
@@ -39,6 +39,11 @@ bool {{{class_name}}}::operator==(const {{{class_name}}}& other)
 	{{/property_fields}}
 	return true;
 }
+bool {{{class_name}}}::operator!=(const {{{class_name}}}& other) const
+{
+	return !(operator==(other));
+}
+
 
 json {{{class_name}}}::encode() const
 {

@@ -17,7 +17,7 @@ bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offse
 	}
 }
 
-bool simple_item::operator==(const simple_item& other)
+bool simple_item::operator==(const simple_item& other) const
 {
 	if(!spiritsaway::property::property_item<int>::operator==(other))
 	{
@@ -29,6 +29,11 @@ bool simple_item::operator==(const simple_item& other)
 	}
 	return true;
 }
+bool simple_item::operator!=(const simple_item& other) const
+{
+	return !(operator==(other));
+}
+
 
 json simple_item::encode() const
 {

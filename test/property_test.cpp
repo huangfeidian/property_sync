@@ -2,5 +2,5 @@
 
 namespace spiritsaway::test
 {
-	#include <PropertyMap.generated.cpp>
+	#include <PropertyMap.generated.incpp>
 }

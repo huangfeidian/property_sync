@@ -17,6 +17,10 @@ namespace spiritsaway::property
 		{
 			return m_id;
 		}
+		property_item()
+		{
+
+		}
 		property_item(
 			const T& id) :
 			m_id(id)
@@ -45,6 +49,18 @@ namespace spiritsaway::property
 				return false;
 			}
 			return true;
+		}
+		bool operator==(const property_item& other) const
+		{
+			return m_id == other.m_id;
+		}
+		bool operator!=(const property_item& other) const
+		{
+			return m_id != other.m_id;
+		}
+		friend void swap(property_item& a, property_item& b)
+		{
+			std::swap(a.m_id, b.m_id);
 		}
 	};
 
@@ -123,7 +139,7 @@ namespace spiritsaway::property
 		}
 		bool insert(const json& one_item)
 		{
-			value_type temp_item{ key_type() };
+			value_type temp_item;
 			if (!temp_item.decode(one_item))
 			{
 				return false;
@@ -140,9 +156,18 @@ namespace spiritsaway::property
 			}
 			return true;
 		}
-		bool operator==(const property_bag& other)
+		bool operator==(const property_bag& other) const
 		{
 			return m_data == other.m_data;
+		}
+		bool operator!=(const property_bag& other) const
+		{
+			return m_data != other.m_data;
+		}
+		friend void swap(property_bag& a, property_bag& b)
+		{
+			std::swap(a.m_index, b.m_index);
+			std::swap(a.m_data, b.m_data);
 		}
 		void clear()
 		{
@@ -168,7 +193,7 @@ namespace spiritsaway::property
 					auto pre_index = cur_iter->second;
 					m_index.erase(cur_iter);
 					m_index[m_data[pre_index].id()] = pre_index;
-					m_data[pre_index].swap(m_data.back());
+					std::swap(m_data[pre_index], m_data.back());
 					m_data.pop_back();
 				}
 				return true;
@@ -206,7 +231,7 @@ namespace spiritsaway::property
 		}
 		bool replay_insert(const json& data)
 		{
-			Item temp_item{ key_type() };
+			Item temp_item;
 			if (!spiritsaway::serialize::decode(data, temp_item))
 			{
 				// std::cout <<" fail to create item with data {}" << data.dump() << std::endl;

@@ -34,13 +34,25 @@ const decltype(m_g)& g() const
 }
 
 
-protected:
+public:
 
 bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data);
 
+bool operator==(const PropertyMap& other) const;
+bool operator!=(const PropertyMap& other) const;
 
-bool operator==(const PropertyMap& other)
+friend void swap(PropertyMap& a, PropertyMap& b)
+{
 
+
+	std::swap(a.m_a, b.m_a);
+	std::swap(a.m_b, b.m_b);
+	std::swap(a.m_c, b.m_c);
+	std::swap(a.m_d, b.m_d);
+	std::swap(a.m_e, b.m_e);
+	std::swap(a.m_f, b.m_f);
+	std::swap(a.m_g, b.m_g);
+}
 
 json encode() const;
 

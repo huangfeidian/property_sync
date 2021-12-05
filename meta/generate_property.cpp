@@ -92,6 +92,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		auto cur_base = basees_without_class[0]->qualified_name();
 		if (cur_base.rfind("spiritsaway::property::property_item", 0) == 0)
 		{
+			render_args.set("is_property_item_direct_subclass", true);
 			render_args.set("has_base_class", true);
 			render_args.set("base_class_name", cur_base);
 			render_args.set("base_propery_idx_max", "0");
@@ -151,9 +152,9 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 	for (auto one_class : all_property_classes)
 	{
 
-		auto generated_h_file_name = one_class->unqualified_name() + ".generated.h";
-		auto generated_proxy_file_name = one_class->unqualified_name() + ".proxy.h";
-		auto generated_cpp_file_name = one_class->unqualified_name() + ".generated.cpp";
+		auto generated_h_file_name = one_class->unqualified_name() + ".generated.inch";
+		auto generated_proxy_file_name = one_class->unqualified_name() + ".proxy.inch";
+		auto generated_cpp_file_name = one_class->unqualified_name() + ".generated.incpp";
 		auto new_h_file_path = generated_folder_path / generated_h_file_name;
 		auto new_proxy_file_path = generated_folder_path / generated_proxy_file_name;
 		auto new_cpp_file_path = generated_folder_path / generated_cpp_file_name;

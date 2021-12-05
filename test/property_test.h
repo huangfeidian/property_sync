@@ -13,12 +13,12 @@ namespace spiritsaway::test
 		Meta(property) std::unordered_map<int, int> m_e;
 		Meta(property) std::unordered_map<std::string, int> m_f;
 		Meta(property) simple_bag m_g;
-#include <PropertyMap.generated.h>		
+#include <PropertyMap.generated.inch>		
 	};
 	
 
 }
 namespace spiritsaway::property
 {
-	#include <PropertyMap.proxy.h>
+	#include <PropertyMap.proxy.inch>
 }
