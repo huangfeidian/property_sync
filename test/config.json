@@ -1,0 +1,21 @@
+{
+	"include_dirs": [
+		"../include",
+		"/usr/include",
+		"/usr/local/include",
+		"D:/usr/include",
+		"./generated"
+	],
+	"src_file": "./generate_entry.cpp",
+	"definitions": [
+		"-x",
+		"c++",
+		"-std=c++17",
+		"-fparse-all-comments"
+	],
+	"mustache_folder": "../meta/mustache",
+	"generated_folder": "./generated",
+	"namespace": "spiritsaway::test"
+
+
+}

@@ -201,7 +201,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				return std::make_unique<prop_record_proxy<Item>>(parent_queue, parent_offset,  m_data[cur_iter->second], cur_iter->second);
+				return std::make_unique<prop_record_proxy<Item>>(m_data[cur_iter->second], parent_queue, parent_offset , cur_iter->second);
 			}
 		}
 		bool replay_insert(const json& data)

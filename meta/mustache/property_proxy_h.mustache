@@ -1,26 +1,40 @@
-{{#has_property_base}}
+
+#ifndef __meta_parse__
+
+{{#has_base_class}}
 template <> 
-class prop_record_proxy<{{class_name}}>: public prop_record_proxy<{{base_class_name}}>
+class prop_record_proxy<{{{class_name}}}>: public prop_record_proxy<{{{base_class_name}}}>
 {
-	{{class_name}}& m_{{class_name}}_data;
+	{{{class_name}}}& m_{{{class_name}}}_data;
 public:
-	prop_record_proxy({{class_name}}& data, msg_queue_base& msg_queue,
-		const property_offset& offset)
-		: prop_record_proxy<{{base_class_name}}>(data, msg_queue, offset)
-		, m_{{class_name}}_data(data)
+    {{#is_property_item}}
+	prop_record_proxy({{{class_name}}}& data, msg_queue_base& msg_queue,
+		const property_offset& offset, std::uint32_t data_idx)
+		: prop_record_proxy<{{{base_class_name}}}>(data, msg_queue, offset, data_idx)
+		, m_{{{class_name}}}_data(data)
 	{
 
 	}
-{{/has_property_base}}
-{{^has_property_base}}
+	{{/is_property_item}}
+	{{^is_property_item}}
+	prop_record_proxy({{{class_name}}}& data, msg_queue_base& msg_queue,
+		const property_offset& offset)
+		: prop_record_proxy<{{{base_class_name}}}>(data, msg_queue, offset)
+		, m_{{{class_name}}}_data(data)
+	{
+
+	}
+	{{/is_property_item}}
+{{/has_base_class}}
+{{^has_base_class}}
 template <>
-class prop_record_proxy<{{class_name}}>
+class prop_record_proxy<{{{class_name}}}>
 {
-	{{class_name}}& m_{{class_name}}_data;
+	{{{class_name}}}& m_{{{class_name}}}_data;
 	const property_offset m_offset;
 	msg_queue_base& m_queue;
 public:
-	prop_record_proxy({{class_name}}& data, msg_queue_base& msg_queue,
+	prop_record_proxy({{{class_name}}}& data, msg_queue_base& msg_queue,
 		const property_offset& offset)
 		: m_data(data)
 		, m_offset(offset)
@@ -28,12 +42,13 @@ public:
 	{
 
 	}
-{{/has_property_base}}
+{{/has_base_class}}
 
 {{#property_fields}}
-	prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})> {{field_name}}()
+	prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})> {{field_name}}()
 	{
-		return prop_record_proxy<decltype(m_{{class_name}}_data.m_{{field_name}})>(m_{{class_name}}_data.m_{{field_name}}, m_queue, m_offset.merge({{class_name}}::index_for_{{field_name}}));
+		return prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})>(m_{{{class_name}}}_data.m_{{field_name}}, m_queue, m_offset.merge({{{class_name}}}::index_for_{{field_name}}));
 	}
 {{/property_fields}}
 }
+#endif

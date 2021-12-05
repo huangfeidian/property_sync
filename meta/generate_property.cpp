@@ -34,6 +34,27 @@ json load_json_file(const std::string& filename)
 	}
 	return json::parse(cur_file_content);
 }
+bool is_subclass_of_property_item(const class_node* one_class)
+{
+	const std::string property_item_full_name = "spiritsaway::property::property_item";
+	auto base_classes = one_class->base_classes();
+	auto basees_without_class = one_class->bases();
+	for (const auto one_sub_class : base_classes)
+	{
+		if (is_subclass_of_property_item(one_sub_class))
+		{
+			return true;
+		}
+	}
+	for (const auto one_sub_class : basees_without_class)
+	{
+		if (one_sub_class->qualified_name().rfind(property_item_full_name, 0) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 mustache::data generate_property_info_for_class(const class_node* one_class)
 {
 	// 生成一个类的所有property信息
@@ -53,6 +74,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	std::ostringstream cpp_stream;
 	std::string cur_class_name = one_class->qualified_name();
 	auto base_classes = one_class->base_classes();
+	auto basees_without_class = one_class->bases();
 	if (base_classes.size() > 1)
 	{
 		the_logger.error("cant generate property for class {} with {} base classes", cur_class_name, base_classes.size());
@@ -65,14 +87,29 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		render_args.set("base_class_name", base_classes[0]->unqualified_name());
 		render_args.set("base_propery_idx_max", std::to_string(field_begin_index));
 	}
+	else if (basees_without_class.size() == 1)
+	{
+		auto cur_base = basees_without_class[0]->qualified_name();
+		if (cur_base.rfind("spiritsaway::property::property_item", 0) == 0)
+		{
+			render_args.set("has_base_class", true);
+			render_args.set("base_class_name", cur_base);
+			render_args.set("base_propery_idx_max", "0");
+		}
+
+	}
+	if (is_subclass_of_property_item(one_class))
+	{
+		render_args.set("is_property_item", true);
+	}
 	mustache::data field_list{ mustache::data::type::list };
 	for (auto one_field : property_fields)
 	{
 		mustache::data cur_field_render_arg;
-		auto cur_field_name = one_field->unqualified_name();
+		auto cur_field_name = one_field->unqualified_name().substr(2);// remove m_ prefix
 		auto cur_field_type_name = one_field->decl_type()->name();
 		cur_field_render_arg.set("field_name", cur_field_name);
-		cur_field_render_arg.set("field_idx", std::to_string(field_begin_index));
+		cur_field_render_arg.set("field_index", std::to_string(field_begin_index));
 		field_list << cur_field_render_arg;
 		field_begin_index++;
 	}
@@ -123,9 +160,9 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 
 		auto render_args = generate_property_info_for_class(one_class);
 
-		generator::append_output_to_stream(result, new_h_file_path.string(), property_proxy_mustache_tempalte.render(render_args));
+		generator::append_output_to_stream(result, new_proxy_file_path.string(), property_proxy_mustache_tempalte.render(render_args));
 		generator::append_output_to_stream(result, new_h_file_path.string(), property_h_mustache_tempalte.render(render_args));
-		generator::append_output_to_stream(result, new_h_file_path.string(), property_cpp_mustache_tempalte.render(render_args));
+		generator::append_output_to_stream(result, new_cpp_file_path.string(), property_cpp_mustache_tempalte.render(render_args));
 	}
 	return result;
 }
@@ -137,7 +174,7 @@ int main(int argc, const char** argv)
 	//	return 1;
 	//}
 	//std::string json_file_path = argv[1];
-	std::string json_file_path = "../../meta/config.json";
+	std::string json_file_path = "../../test/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;
@@ -256,12 +293,22 @@ int main(int argc, const char** argv)
 	cur_type_db.create_from_translate_unit(cursor);
 	//recursive_print_decl_under_namespace("A");
 	cur_type_db.build_class_under_namespace("std");
+	cur_type_db.build_class_under_namespace("spiritsaway::property");
 	cur_type_db.build_class_under_namespace(property_namespace);
 	//recursive_print_func_under_namespace("A");
 	//recursive_print_class_under_namespace("A");
-	// json result = language::type_db::instance().to_json();
-	// ofstream json_out("type_info.json");
-	// json_out << setw(4) << result << endl;
+	auto cur_namespace_classes = language::type_db::instance().get_class_with_pred([property_namespace](const language::class_node& temp_class)
+		{
+
+			return temp_class.qualified_name().rfind(property_namespace, 0) == 0;
+		});
+	json result;
+	for (const auto& one_class : cur_namespace_classes)
+	{
+		result.push_back(json(*one_class));
+	}
+	 ofstream json_out("type_info.json");
+	 json_out << setw(4) << result << endl;
 	std::unordered_map<std::string, std::string> file_content;
 	//utils::merge_file_content(file_content, generate_encode_decode());
 	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder));

@@ -1,6 +1,5 @@
-protected:
 
-bool {{class_name}}::replay_mutate_msg(property_offset offset, var_mutate_cmd cmd, const json& data)
+bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
@@ -16,7 +15,7 @@ bool {{class_name}}::replay_mutate_msg(property_offset offset, var_mutate_cmd cm
 {{/property_fields}}
 		default:
 		{{#has_base_replay}}
-			return {{base_class}}::replay_mutate_msg(offset, cmd, data);
+			return {{{base_class_name}}}::replay_mutate_msg(offset, cmd, data);
 		{{/has_base_replay}}
 		{{^has_base_replay}}
 			return false;
@@ -24,10 +23,10 @@ bool {{class_name}}::replay_mutate_msg(property_offset offset, var_mutate_cmd cm
 	}
 }
 
-bool {{class_name}}::operator==(const {{class_name}}& other)
+bool {{{class_name}}}::operator==(const {{{class_name}}}& other)
 {
 	{{#has_base_class}}
-	if(!{{base_class}}::operator==(other))
+	if(!{{{base_class_name}}}::operator==(other))
 	{
 		return false;
 	}
@@ -41,10 +40,10 @@ bool {{class_name}}::operator==(const {{class_name}}& other)
 	return true;
 }
 
-json {{class_name}}::encode() const
+json {{{class_name}}}::encode() const
 {
 	{{#has_base_class}}
-	json result = {{base_class}}::encode();
+	json result = {{{base_class_name}}}::encode();
 	{{/has_base_class}}
 	{{^has_base_class}}
 	json result;
@@ -55,10 +54,10 @@ json {{class_name}}::encode() const
 	return result;
 }
 
-bool {{class_name}}::decode(const json& data)
+bool {{{class_name}}}::decode(const json& data)
 {
 	{{#has_base_class}}
-	if(!{{base_class}}::decode(data))
+	if(!{{{base_class_name}}}::decode(data))
 	{
 		return false;
 	}

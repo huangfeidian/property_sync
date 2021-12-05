@@ -1,22 +1,26 @@
+
+#ifndef __meta_parse__
 public:
-friend class prop_record_proxy<{{class_name}}>;
-friend class prop_replay_proxy<{{class_name}}>;
-{{class_name}}() = default;
+friend class spiritsaway::property::prop_record_proxy<{{{class_name}}}>;
+friend class spiritsaway::property::prop_replay_proxy<{{{class_name}}}>;
+{{{class_name}}}() = default;
 {{#property_fields}}
 const decltype(m_{{field_name}})& {{field_name}}() const
 {
-    return {{field_name}};
+    return m_{{field_name}};
 }
 {{/property_fields}}
+
+
 protected:
 
-bool replay_mutate_msg(property_offset offset, var_mutate_cmd cmd, const json& data);
+bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data);
 
 
-bool operator==(const {{class_name}}& other)
+bool operator==(const {{{class_name}}}& other)
 
 
-json {{class_name}}::encode() const;
+json encode() const;
 
 bool decode(const json& data);
 
@@ -25,5 +29,7 @@ protected:
 const static std::uint8_t index_for_{{field_name}} = {{field_index}};
 {{/property_fields}}
 private:
+
+#endif
 
 
