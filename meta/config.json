@@ -3,7 +3,8 @@
 		"../include",
 		"/usr/include",
 		"/usr/local/include",
-		"D:/usr/include"
+		"D:/usr/include",
+		"../generated"
 	],
 	"src_file": "./property_meta.cpp",
 	"definitions": [
@@ -11,5 +12,10 @@
 		"c++",
 		"-std=c++17",
 		"-fparse-all-comments"
-	]
+	],
+	"mustache_folder": "./mustache",
+	"generated_folder": "./generated",
+	"namespace": "spiritsaway::property"
+
+
 }

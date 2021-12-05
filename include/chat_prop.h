@@ -2,9 +2,9 @@
 #include "property.h"
 #include "chat_record.h"
 
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
-	Meta(property) class chat_prop
+	class Meta(property) chat_prop
 	{
 	protected:
 		Meta(property) std::size_t m_total_chats;

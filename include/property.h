@@ -1,4 +1,5 @@
-﻿#include <any_container/decode.h>
+﻿#pragma once
+#include <any_container/decode.h>
 #include "macro.h"
 #include "property_queue.h"
 #include "property_stl.h"

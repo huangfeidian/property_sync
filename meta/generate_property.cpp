@@ -94,6 +94,10 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 		{
 			return language::filter_with_annotation<language::class_node>("property", _cur_node);
 		});
+	for(const auto& one_class: all_property_classes)
+	{
+		the_logger.info("class {} has annotation property with info {}", one_class->name(), json(one_class->annotations()).dump(4));
+	}
 	std::unordered_map<std::string, std::string> result;
 	auto property_proxy_mustache_file = std::ifstream(mustache_folder + "property_proxy.mustache");
 	std::string property_proxy_template_str = std::string(std::istreambuf_iterator<char>(property_proxy_mustache_file), std::istreambuf_iterator<char>());
@@ -147,11 +151,7 @@ int main(int argc, const char** argv)
 	}
 	std::string file_folder = json_file_path.substr(0, folder_iter + 1);
 	auto cur_json_content = load_json_file(json_file_path);
-	if (!cur_json_content)
-	{
-		std::cout << "empty content for json file " << json_file_path << std::endl;
-		return 1;
-	}
+
 	std::vector<std::string> include_dirs;
 	std::vector<std::string> compile_definitions;
 	std::string src_file;
@@ -161,11 +161,17 @@ int main(int argc, const char** argv)
 	try
 	{
 		cur_json_content.at("include_dirs").get_to(include_dirs);
+
 		cur_json_content.at("definitions").get_to(compile_definitions);
+
 		cur_json_content.at("src_file").get_to(src_file);
+
 		cur_json_content.at("namespace").get_to(property_namespace);
-		cur_json_content.at("mustache_foler").get_to(mustache_folder);
+
+		cur_json_content.at("mustache_folder").get_to(mustache_folder);
+
 		cur_json_content.at("generated_folder").get_to(generated_folder);
+
 	}
 	catch (std::exception& e)
 	{
@@ -252,9 +258,9 @@ int main(int argc, const char** argv)
 	cur_type_db.build_class_under_namespace(property_namespace);
 	//recursive_print_func_under_namespace("A");
 	//recursive_print_class_under_namespace("A");
-	json result = language::type_db::instance().to_json();
-	ofstream json_out("type_info.json");
-	json_out << setw(4) << result << endl;
+	// json result = language::type_db::instance().to_json();
+	// ofstream json_out("type_info.json");
+	// json_out << setw(4) << result << endl;
 	std::unordered_map<std::string, std::string> file_content;
 	//utils::merge_file_content(file_content, generate_encode_decode());
 	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder));

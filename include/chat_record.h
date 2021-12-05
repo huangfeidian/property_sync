@@ -1,6 +1,6 @@
 #pragma onece
 #include "property.h"
-namespace spiritsaway::serialize
+namespace spiritsaway::property
 {
 	Meta(property) class chat_record: public property_item<std::string>
 	{
