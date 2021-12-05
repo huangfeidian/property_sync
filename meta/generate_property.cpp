@@ -41,11 +41,11 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	std::unordered_map<std::string, std::string> property_annotate_value;
 	auto property_fields = one_class->query_fields_with_pred([&property_annotate_value](const variable_node& _cur_node)
 		{
-			return _cur_node.unqualified_name().rfind("m_", 0) != 0 && filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
+			return _cur_node.unqualified_name().rfind("m_", 0) == 0 && filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
 		});
 	auto property_fields_with_base = one_class->query_fields_with_pred_recursive([&property_annotate_value](const variable_node& _cur_node)
 		{
-			return _cur_node.unqualified_name().rfind("m_", 0) != 0 &&  filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
+			return _cur_node.unqualified_name().rfind("m_", 0) == 0 &&  filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
 		});
 	std::sort(property_fields.begin(), property_fields.end(), sort_by_unqualified_name<language::variable_node>);
 	std::size_t field_begin_index = property_fields_with_base.size() - property_fields.size();
@@ -99,15 +99,15 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 		the_logger.info("class {} has annotation property with info {}", one_class->name(), json(one_class->annotations()).dump(4));
 	}
 	std::unordered_map<std::string, std::string> result;
-	auto property_proxy_mustache_file = std::ifstream(mustache_folder + "property_proxy.mustache");
+	auto property_proxy_mustache_file = std::ifstream(mustache_folder + "/property_proxy_h.mustache");
 	std::string property_proxy_template_str = std::string(std::istreambuf_iterator<char>(property_proxy_mustache_file), std::istreambuf_iterator<char>());
 	mustache::mustache property_proxy_mustache_tempalte(property_proxy_template_str);
 
-	auto property_h_mustache_file = std::ifstream("mustache_folder + property_h.mustache");
+	auto property_h_mustache_file = std::ifstream(mustache_folder + "/property_h.mustache");
 	std::string property_h_template_str = std::string(std::istreambuf_iterator<char>(property_h_mustache_file), std::istreambuf_iterator<char>());
 	mustache::mustache property_h_mustache_tempalte(property_h_template_str);
 
-	auto property_cpp_mustache_file = std::ifstream("mustache_folder + property_cpp.mustache");
+	auto property_cpp_mustache_file = std::ifstream(mustache_folder + "/property_cpp.mustache");
 	std::string property_cpp_template_str = std::string(std::istreambuf_iterator<char>(property_cpp_mustache_file), std::istreambuf_iterator<char>());
 	mustache::mustache property_cpp_mustache_tempalte(property_cpp_template_str);
 	auto generated_folder_path = std::filesystem::path(generated_folder);
@@ -131,12 +131,13 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 }
 int main(int argc, const char** argv)
 {
-	if (argc != 2)
-	{
-		std::cout << "please specify the json file path" << std::endl;
-		return 1;
-	}
-	std::string json_file_path = argv[1];
+	//if (argc != 2)
+	//{
+	//	std::cout << "please specify the json file path" << std::endl;
+	//	return 1;
+	//}
+	//std::string json_file_path = argv[1];
+	std::string json_file_path = "../../meta/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;
