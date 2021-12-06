@@ -1,6 +1,7 @@
 #pragma once
 
 #include "property.h"
+#include "macro.h"
 
 using namespace spiritsaway::serialize;
 using namespace spiritsaway::property;

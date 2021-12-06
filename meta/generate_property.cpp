@@ -169,13 +169,13 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 }
 int main(int argc, const char** argv)
 {
-	//if (argc != 2)
-	//{
-	//	std::cout << "please specify the json file path" << std::endl;
-	//	return 1;
-	//}
-	//std::string json_file_path = argv[1];
-	std::string json_file_path = "../../test/config.json";
+	if (argc != 2)
+	{
+		std::cout << "please specify the json file path" << std::endl;
+		return 1;
+	}
+	std::string json_file_path = argv[1];
+	// std::string json_file_path = "../../test/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;
