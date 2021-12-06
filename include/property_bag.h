@@ -183,7 +183,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				if (cur_iter->second == m_data.size())
+				if (cur_iter->second == m_data.size() - 1)
 				{
 					m_index.erase(cur_iter);
 					m_data.pop_back();

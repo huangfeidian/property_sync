@@ -322,6 +322,15 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
+	mut_g.insert(test_data);
+	msg = msg_cmd_queue.front();
+	msg_cmd_queue.pop_front();
+	test_b.replay_mutate_msg(msg.offset, msg.cmd, msg.data);
+	if (!(test_a == test_b))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
 	std::cout << "test a is " << test_a.encode() << std::endl;
 	std::cout << "test b is " << test_b.encode() << std::endl;
 
