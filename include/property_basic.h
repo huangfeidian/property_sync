@@ -7,7 +7,27 @@ namespace spiritsaway::property
 	// 0号变量保留不使用 以后可以扩充为std::uint16_t 或者与var_mutate_cmd合并为一个std::uint16_t 
 	using var_idx_type = std::uint8_t;
 	using var_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
-	const static std::uint8_t depth_max = 8;
+	constexpr std::uint8_t depth_max = 8;
+	enum class property_flags: std::uint8_t
+	{
+		on_client = 0,
+		on_server,
+		save_db,
+		sync_client,
+		sync_ghost,
+		sync_other,
+		save_db,
+	};
+	constexpr std::uint64_t property_flag_client_only = 1 << std::uint8_t(property_flags::on_client);
+	constexpr std::uint64_t property_flag_server_only = 1 << std::uint8_t(property_flags::on_server);
+	constexpr std::uint64_t property_flag_client_server = property_flag_client_only | property_flag_server_only;
+
+	constexpr std::uint64_t property_flag_save_db = 1 << std::uint8_t(property_flags::save_db);
+
+	constexpr std::uint64_t property_flag_sync_self = 1 << std::uint8_t(property_flags::sync_client);
+	constexpr std::uint64_t property_flag_sync_ghost = 1 << std::uint8_t(property_flags::sync_ghost);
+	constexpr std::uint64_t property_flag_sync_other = 1 << std::uint8_t(property_flags::sync_other);
+
 	class property_offset
 	{
 		std::uint64_t m_value;
