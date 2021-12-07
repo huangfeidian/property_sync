@@ -10,7 +10,7 @@ namespace spiritsaway::test
 
 	class Meta(property) simple_item : public property_item<int>
 	{
-		Meta(property) int m_a = 0;
+		Meta(property(save_db, sync_clients)) int m_a = 0;
 
 #include "simple_item.generated.inch"
 	};

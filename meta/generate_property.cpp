@@ -62,11 +62,11 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	std::unordered_map<std::string, std::string> property_annotate_value;
 	auto property_fields = one_class->query_fields_with_pred([&property_annotate_value](const variable_node& _cur_node)
 		{
-			return _cur_node.unqualified_name().rfind("m_", 0) == 0 && filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
+			return _cur_node.unqualified_name().rfind("m_", 0) == 0 && filter_with_annotation<variable_node>("property",  _cur_node);
 		});
 	auto property_fields_with_base = one_class->query_fields_with_pred_recursive([&property_annotate_value](const variable_node& _cur_node)
 		{
-			return _cur_node.unqualified_name().rfind("m_", 0) == 0 &&  filter_with_annotation_value<variable_node>("property", property_annotate_value, _cur_node);
+			return _cur_node.unqualified_name().rfind("m_", 0) == 0 && filter_with_annotation<variable_node>("property", _cur_node);
 		});
 	std::sort(property_fields.begin(), property_fields.end(), sort_by_unqualified_name<language::variable_node>);
 	std::size_t field_begin_index = property_fields_with_base.size() - property_fields.size();
@@ -104,13 +104,47 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		render_args.set("is_property_item", true);
 	}
 	mustache::data field_list{ mustache::data::type::list };
+	std::vector<std::string> property_flags = {
+		"save_db",
+		"sync_self",
+		"sync_other",
+		"sync_ghost",
+		"sync_clients",
+		"sync_all"
+
+	};
+	bool first_field = true;
 	for (auto one_field : property_fields)
 	{
 		mustache::data cur_field_render_arg;
 		auto cur_field_name = one_field->unqualified_name().substr(2);// remove m_ prefix
 		auto cur_field_type_name = one_field->decl_type()->name();
 		cur_field_render_arg.set("field_name", cur_field_name);
+		cur_field_render_arg.set("first_field", first_field);
+		first_field = false;
 		cur_field_render_arg.set("field_index", std::to_string(field_begin_index));
+		std::string cur_property_flag;
+		auto cur_prop_annotation = one_field->annotations().find("property")->second;
+		for (const auto& one_flag : property_flags)
+		{
+			if (cur_prop_annotation.find(one_flag) == cur_prop_annotation.end())
+			{
+				continue;
+			}
+			if (cur_property_flag.empty())
+			{
+				cur_property_flag = "spiritsaway::property::property_flags::" + one_flag;
+			}
+			else
+			{
+				cur_property_flag += "|spiritsaway::property::property_flags::" + one_flag;
+			}
+		}
+		if (cur_property_flag.empty())
+		{
+			cur_property_flag = "0";
+		}
+		cur_field_render_arg.set("field_flags", cur_property_flag);
 		field_list << cur_field_render_arg;
 		field_begin_index++;
 	}
@@ -169,13 +203,13 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 }
 int main(int argc, const char** argv)
 {
-	if (argc != 2)
-	{
-		std::cout << "please specify the json file path" << std::endl;
-		return 1;
-	}
-	std::string json_file_path = argv[1];
-	// std::string json_file_path = "../../test/config.json";
+	//if (argc != 2)
+	//{
+	//	std::cout << "please specify the json file path" << std::endl;
+	//	return 1;
+	//}
+	//std::string json_file_path = argv[1];
+	std::string json_file_path = "../../test/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;

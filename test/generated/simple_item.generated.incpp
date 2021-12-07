@@ -1,4 +1,11 @@
 
+simple_item::simple_item()
+	: spiritsaway::property::property_item<int>()
+	, m_a{}
+{
+
+}
+
 bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
@@ -39,10 +46,26 @@ json simple_item::encode() const
 {
 	json result = spiritsaway::property::property_item<int>::encode();
 	
-	result["a"] = spiritsaway::serialize::encode(m_a);
+	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+	{
+		result["a"] = spiritsaway::serialize::encode(m_a);
+	}
 	return result;
 }
 
+json simple_item::encode_with_flag(const spiritsaway::property::property_flags flag) const
+{
+	json result = spiritsaway::property::property_item<int>::encode_with_flag(flag);
+	
+	if((flag_for_a & flag.value) == flag.value)
+	{
+		if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+		{
+			result["a"] = spiritsaway::serialize::encode(m_a);
+		}
+	}
+	return result;
+}
 bool simple_item::decode(const json& data)
 {
 	if(!spiritsaway::property::property_item<int>::decode(data))
@@ -51,11 +74,24 @@ bool simple_item::decode(const json& data)
 	}
 	decltype(data.end()) iter;
 	iter = data.find("a");
-	if(iter == data.end())
+	if(iter != data.end())
+	{
+		if(!spiritsaway::serialize::decode(*iter, m_a))
+		{
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+bool simple_item::has_default_value() const
+{
+	if(!spiritsaway::property::property_item<int>::has_default_value())
 	{
 		return false;
 	}
-	if(!spiritsaway::serialize::decode(*iter, m_a))
+	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		return false;
 	}

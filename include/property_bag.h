@@ -33,6 +33,12 @@ namespace spiritsaway::property
 			result["id"] = m_id;
 			return result;
 		}
+		json encode_with_flag(const property_flags flag) const
+		{
+			json result;
+			result["id"] = m_id;
+			return result;
+		}
 		bool decode(const json& data)
 		{
 			if (!data.is_object())
@@ -61,6 +67,10 @@ namespace spiritsaway::property
 		friend void swap(property_item& a, property_item& b)
 		{
 			std::swap(a.m_id, b.m_id);
+		}
+		bool has_default_value() const
+		{
+			return false;
 		}
 	};
 
@@ -100,6 +110,16 @@ namespace spiritsaway::property
 		json encode() const
 		{
 			return spiritsaway::serialize::encode(m_data);
+		}
+		json encode_with_flag(const property_flags flag) const
+		{
+			json::array_t json_data;
+			json_data.resize(m_data.size());
+			for (std::uint32_t i = 0; i < m_data.size(); i++)
+			{
+				json_data[i] = m_data[i].encode_with_flag(flag);
+			}
+			return json_data;
 		}
 		bool decode(const json& data)
 		{
@@ -210,6 +230,11 @@ namespace spiritsaway::property
 			{
 				return &m_data[cur_iter->second];
 			}
+		}
+
+		bool has_default_value() const
+		{
+			return m_data.empty();
 		}
 		
 

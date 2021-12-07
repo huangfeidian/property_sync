@@ -9,10 +9,10 @@ namespace spiritsaway::test
 		Meta(property) int m_a;
 		Meta(property) std::vector<std::string> m_b;
 		Meta(property) std::unordered_map<int, std::string> m_c;
-		Meta(property) std::vector<int> m_d;
-		Meta(property) std::unordered_map<int, int> m_e;
+		Meta(property(save_db)) std::vector<int> m_d;
+		Meta(property(sync_clients)) std::unordered_map<int, int> m_e;
 		Meta(property) std::unordered_map<std::string, int> m_f;
-		Meta(property) simple_bag m_g;
+		Meta(property(save_db, sync_clients)) simple_bag m_g;
 #include <PropertyMap.generated.inch>		
 	};
 	

@@ -3,7 +3,6 @@
 
 namespace spiritsaway::property
 {
-
 	template <typename T>
 	class prop_record_proxy<T, std::enable_if_t<
 		std::is_arithmetic_v<T> || std::is_same_v<T, std::string>, void>

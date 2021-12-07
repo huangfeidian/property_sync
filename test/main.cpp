@@ -43,6 +43,15 @@ void test_property_mutate()
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
+	test_a_record_proxy.a().clear();
+	msg = msg_cmd_queue.front();
+	msg_cmd_queue.pop_front();
+	test_b.replay_mutate_msg(msg.offset, msg.cmd, msg.data);
+	if (!(test_a == test_b))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
 	auto mut_b = test_a_record_proxy.b();
 	mut_b.set(std::vector<std::string>{"hehe", "hahah"});
 	msg = msg_cmd_queue.front();
@@ -321,7 +330,8 @@ void test_property_mutate()
 	{
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
-
+	std::cout << "test a is " << test_a.encode() << std::endl;
+	std::cout << "test b is " << test_b.encode() << std::endl;
 	mut_g.insert(test_data);
 	msg = msg_cmd_queue.front();
 	msg_cmd_queue.pop_front();
@@ -334,6 +344,10 @@ void test_property_mutate()
 	std::cout << "test a is " << test_a.encode() << std::endl;
 	std::cout << "test b is " << test_b.encode() << std::endl;
 
+	std::cout << "test a save db is " << test_a.encode_with_flag(property_flags{ property_flags::save_db }) << std::endl;
+
+	std::cout << "test a sync_clients is " << test_a.encode_with_flag(property_flags{ property_flags::sync_clients }) << std::endl;
+	std::cout << "test a sync_clients  and save db is " << test_a.encode_with_flag(property_flags{ property_flags::sync_clients|property_flags::save_db }) << std::endl;
 }
 
 int main()

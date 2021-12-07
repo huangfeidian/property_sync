@@ -1,4 +1,14 @@
 
+{{{class_name}}}::{{{class_name}}}()
+{{#has_base_class}}	: {{{base_class_name}}}()
+{{#property_fields}}
+	, m_{{field_name}}{}{{/property_fields}}{{/has_base_class}}{{^has_base_class}}{{#property_fields}}{{#first_field}}	: m_{{field_name}}{}{{/first_field}}
+{{^first_field}}
+	, m_{{field_name}}{}{{/first_field}}{{/property_fields}}{{/has_base_class}}
+{
+
+}
+
 bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
@@ -54,11 +64,33 @@ json {{{class_name}}}::encode() const
 	json result;
 	{{/has_base_class}}
 	{{#property_fields}}
-	result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
+	if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
+	{
+		result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
+	}
 	{{/property_fields}}
 	return result;
 }
 
+json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_flags flag) const
+{
+	{{#has_base_class}}
+	json result = {{{base_class_name}}}::encode_with_flag(flag);
+	{{/has_base_class}}
+	{{^has_base_class}}
+	json result;
+	{{/has_base_class}}
+	{{#property_fields}}
+	if((flag_for_{{field_name}} & flag.value) == flag.value)
+	{
+		if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
+		{
+			result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
+		}
+	}
+	{{/property_fields}}
+	return result;
+}
 bool {{{class_name}}}::decode(const json& data)
 {
 	{{#has_base_class}}
@@ -70,11 +102,28 @@ bool {{{class_name}}}::decode(const json& data)
 	decltype(data.end()) iter;
 	{{#property_fields}}
 	iter = data.find("{{field_name}}");
-	if(iter == data.end())
+	if(iter != data.end())
+	{
+		if(!spiritsaway::serialize::decode(*iter, m_{{field_name}}))
+		{
+			return false;
+		}
+	}
+	
+	{{/property_fields}}
+	return true;
+}
+
+bool {{{class_name}}}::has_default_value() const
+{
+	{{#has_base_class}}
+	if(!{{{base_class_name}}}::has_default_value())
 	{
 		return false;
 	}
-	if(!spiritsaway::serialize::decode(*iter, m_{{field_name}}))
+	{{/has_base_class}}
+	{{#property_fields}}
+	if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
 	{
 		return false;
 	}

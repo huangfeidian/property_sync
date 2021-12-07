@@ -8,25 +8,24 @@ namespace spiritsaway::property
 	using var_idx_type = std::uint8_t;
 	using var_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
 	constexpr std::uint8_t depth_max = 8;
-	enum class property_flags: std::uint8_t
+	enum class property_flags_enum: std::uint8_t
 	{
-		on_client = 0,
-		on_server,
-		save_db,
-		sync_client,
+		save_db = 0,
+		sync_self,
 		sync_ghost,
 		sync_other,
-		save_db,
 	};
-	constexpr std::uint64_t property_flag_client_only = 1 << std::uint8_t(property_flags::on_client);
-	constexpr std::uint64_t property_flag_server_only = 1 << std::uint8_t(property_flags::on_server);
-	constexpr std::uint64_t property_flag_client_server = property_flag_client_only | property_flag_server_only;
-
-	constexpr std::uint64_t property_flag_save_db = 1 << std::uint8_t(property_flags::save_db);
-
-	constexpr std::uint64_t property_flag_sync_self = 1 << std::uint8_t(property_flags::sync_client);
-	constexpr std::uint64_t property_flag_sync_ghost = 1 << std::uint8_t(property_flags::sync_ghost);
-	constexpr std::uint64_t property_flag_sync_other = 1 << std::uint8_t(property_flags::sync_other);
+	struct property_flags
+	{
+		std::uint64_t value;
+		const static std::uint64_t save_db = 1 << std::uint8_t(property_flags_enum::save_db);
+		const static std::uint64_t sync_self = 1 << std::uint8_t(property_flags_enum::sync_self);
+		const static std::uint64_t sync_ghost = 1 << std::uint8_t(property_flags_enum::sync_ghost);
+		const static std::uint64_t sync_other = 1 << std::uint8_t(property_flags_enum::sync_other);
+		const static std::uint64_t sync_clients = sync_self | sync_other;
+		const static std::uint64_t sync_all = sync_clients | sync_ghost;
+	};
+	
 
 	class property_offset
 	{
@@ -139,5 +138,32 @@ namespace spiritsaway::property
 		}
 	};
 
+	template <typename T, typename B = void>
+	struct has_default_value
+	{
+		bool operator()(const T& data) const
+		{
+			return data.empty();
+
+		}
+	};
+	template <typename T>
+	struct has_default_value< T, std::enable_if_t <
+		std::is_arithmetic_v<T>, void>>
+	{
+		bool operator()(const T& data) const
+		{
+			return data == 0;
+		}
+	};
+	template <typename T>
+	struct has_default_value< T, std::enable_if_t <
+		std::is_same_v<decltype(std::declval<T>().has_default_value()), bool>, void>>
+	{
+		bool operator()(const T& data) const
+		{
+			return data.has_default_value();
+		}
+	};
 
 }

@@ -3,7 +3,7 @@
 public:
 friend class spiritsaway::property::prop_record_proxy<PropertyMap>;
 friend class spiritsaway::property::prop_replay_proxy<PropertyMap>;
-PropertyMap() = default;
+PropertyMap();
 const decltype(m_a)& a() const
 {
     return m_a;
@@ -41,6 +41,8 @@ bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsawa
 bool operator==(const PropertyMap& other) const;
 bool operator!=(const PropertyMap& other) const;
 
+json encode_with_flag(const spiritsaway::property::property_flags flag) const;
+
 friend void swap(PropertyMap& a, PropertyMap& b)
 {
 
@@ -58,14 +60,30 @@ json encode() const;
 
 bool decode(const json& data);
 
+bool has_default_value() const;
+
 protected:
 const static std::uint8_t index_for_a = 0;
+const static std::uint64_t flag_for_a = 0;
+
 const static std::uint8_t index_for_b = 1;
+const static std::uint64_t flag_for_b = 0;
+
 const static std::uint8_t index_for_c = 2;
+const static std::uint64_t flag_for_c = 0;
+
 const static std::uint8_t index_for_d = 3;
+const static std::uint64_t flag_for_d = spiritsaway::property::property_flags::save_db;
+
 const static std::uint8_t index_for_e = 4;
+const static std::uint64_t flag_for_e = spiritsaway::property::property_flags::sync_clients;
+
 const static std::uint8_t index_for_f = 5;
+const static std::uint64_t flag_for_f = 0;
+
 const static std::uint8_t index_for_g = 6;
+const static std::uint64_t flag_for_g = spiritsaway::property::property_flags::save_db|spiritsaway::property::property_flags::sync_clients;
+
 private:
 
 #endif
