@@ -97,13 +97,9 @@ namespace spiritsaway::property
 		}
 		property_bag& operator=(const property_bag& other)
 		{
-			m_data.clear();
-			m_data.shrink_to_fit();
-			m_data.reserve(other.m_data.size());
-			for (const auto& one_item : other.m_data)
-			{
-				insert(one_item.encode());
-			}
+
+			m_data = other.m_data;
+			m_index = other.m_index;
 			return *this;
 		}
 
@@ -137,10 +133,13 @@ namespace spiritsaway::property
 			temp_array = data.get<json::array_t>();
 			for (const auto& one_json_item : temp_array)
 			{
-				if (!insert(one_json_item))
+				value_type temp_item;
+				if (!temp_item.decode(one_json_item))
 				{
 					return false;
 				}
+				insert(temp_item);
+				
 			}
 			
 			return true;
@@ -157,25 +156,22 @@ namespace spiritsaway::property
 				return true;
 			}
 		}
-		bool insert(const json& one_item)
+		bool insert(const value_type& temp_item)
 		{
-			value_type temp_item;
-			if (!temp_item.decode(one_item))
-			{
-				return false;
-			}
 			auto cur_iter = m_index.find(temp_item.id());
 			if (cur_iter == m_index.end())
 			{
 				m_index[temp_item.id()] = m_data.size();
 				m_data.push_back(temp_item);
+				return true;
 			}
 			else
 			{
 				m_data[cur_iter->second] = temp_item;
+				return false;
 			}
-			return true;
 		}
+
 		bool operator==(const property_bag& other) const
 		{
 			return m_data == other.m_data;
@@ -256,16 +252,13 @@ namespace spiritsaway::property
 		}
 		bool replay_insert(const json& data)
 		{
-			Item temp_item;
-			if (!spiritsaway::serialize::decode(data, temp_item))
+			value_type temp_item;
+			if (!temp_item.decode(data))
 			{
-				// std::cout <<" fail to create item with data {}" << data.dump() << std::endl;
 				return false;
 			}
-			m_index[temp_item.id()] = m_data.size();
-			m_data.emplace_back(std::move(temp_item));
+			insert(temp_item);
 			return true;
-
 		}
 		bool replay_clear(const json& data)
 		{
@@ -360,15 +353,24 @@ namespace spiritsaway::property
 			}
 			return result;
 		}
+		void insert(const value_type& value)
+		{
+			m_data.insert(value);
+			m_queue.add(m_offset, var_mutate_cmd::map_insert,
+				value.encode());
+		}
+
 		void insert(const json& value)
 		{
-			if (m_data.insert(value))
+			value_type one_item;
+			if (!one_item.decode(value))
 			{
-				m_queue.add(m_offset, var_mutate_cmd::map_insert,
-					value);
+				return;
 			}
-
+			insert(one_item);
 		}
+		
+
 
 		void erase(const key_type& key)
 		{
