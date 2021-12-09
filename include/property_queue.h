@@ -11,9 +11,10 @@ namespace spiritsaway::property
 		const property_flags m_parent_flag;
 	public:
 		struct_msg_queue(msg_queue_base& parent_queue,
-			const property_offset& parent_offset)
+			const property_offset& parent_offset, const property_flags& parent_flag)
 			: m_parent_queue(parent_queue)
 			, m_parent_offset(parent_offset)
+			, m_parent_flag(parent_flag)
 		{
 
 		}

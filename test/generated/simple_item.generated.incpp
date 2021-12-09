@@ -46,6 +46,7 @@ json simple_item::encode() const
 {
 	json result = spiritsaway::property::property_item<int>::encode();
 	
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		result["a"] = spiritsaway::serialize::encode(m_a);
@@ -59,6 +60,7 @@ json simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	
 	if((flag_for_a & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 		{
 			result["a"] = spiritsaway::serialize::encode(m_a);
@@ -91,6 +93,7 @@ bool simple_item::has_default_value() const
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		return false;

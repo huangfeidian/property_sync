@@ -64,10 +64,18 @@ json {{{class_name}}}::encode() const
 	json result;
 	{{/has_base_class}}
 	{{#property_fields}}
+	{{#has_property_interface}}
+	if(m_{{field_name}}.has_default_value())
+	{
+		result["{{field_name}}"] = m_{{field_name}}.encode();
+	}
+	{{/has_property_interface}}
+	{{^has_property_interface}}
 	if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
 	{
 		result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
 	}
+	{{/has_property_interface}}
 	{{/property_fields}}
 	return result;
 }
@@ -83,10 +91,18 @@ json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_fl
 	{{#property_fields}}
 	if((flag_for_{{field_name}} & flag.value) == flag.value)
 	{
+		{{#has_property_interface}}
+		if(m_{{field_name}}.has_default_value())
+		{
+			result["{{field_name}}"] = m_{{field_name}}.encode_with_flag(flag);
+		}
+		{{/has_property_interface}}
+		{{^has_property_interface}}
 		if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
 		{
 			result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
 		}
+		{{/has_property_interface}}
 	}
 	{{/property_fields}}
 	return result;
@@ -123,10 +139,18 @@ bool {{{class_name}}}::has_default_value() const
 	}
 	{{/has_base_class}}
 	{{#property_fields}}
+	{{#has_property_interface}}
+	if(!m_{{field_name}}.has_default_value())
+	{
+		return false;
+	}
+	{{/has_property_interface}}
+	{{^has_property_interface}}
 	if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
 	{
 		return false;
 	}
+	{{/has_property_interface}}
 	{{/property_fields}}
 	return true;
 }

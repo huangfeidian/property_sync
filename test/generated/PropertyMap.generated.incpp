@@ -102,34 +102,41 @@ json PropertyMap::encode() const
 {
 	
 	json result;
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		result["a"] = spiritsaway::serialize::encode(m_a);
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 	{
 		result["b"] = spiritsaway::serialize::encode(m_b);
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_c)>()(m_c))
 	{
 		result["c"] = spiritsaway::serialize::encode(m_c);
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_d)>()(m_d))
 	{
 		result["d"] = spiritsaway::serialize::encode(m_d);
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_e)>()(m_e))
 	{
 		result["e"] = spiritsaway::serialize::encode(m_e);
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_f)>()(m_f))
 	{
 		result["f"] = spiritsaway::serialize::encode(m_f);
 	}
-	if(!spiritsaway::property::has_default_value<decltype(m_g)>()(m_g))
+	if(m_g.has_default_value())
 	{
-		result["g"] = spiritsaway::serialize::encode(m_g);
+		result["g"] = m_g.encode();
 	}
+	
 	return result;
 }
 
@@ -139,6 +146,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	json result;
 	if((flag_for_a & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 		{
 			result["a"] = spiritsaway::serialize::encode(m_a);
@@ -146,6 +154,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_b & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 		{
 			result["b"] = spiritsaway::serialize::encode(m_b);
@@ -153,6 +162,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_c & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_c)>()(m_c))
 		{
 			result["c"] = spiritsaway::serialize::encode(m_c);
@@ -160,6 +170,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_d & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_d)>()(m_d))
 		{
 			result["d"] = spiritsaway::serialize::encode(m_d);
@@ -167,6 +178,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_e & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_e)>()(m_e))
 		{
 			result["e"] = spiritsaway::serialize::encode(m_e);
@@ -174,6 +186,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_f & flag.value) == flag.value)
 	{
+		
 		if(!spiritsaway::property::has_default_value<decltype(m_f)>()(m_f))
 		{
 			result["f"] = spiritsaway::serialize::encode(m_f);
@@ -181,10 +194,11 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_g & flag.value) == flag.value)
 	{
-		if(!spiritsaway::property::has_default_value<decltype(m_g)>()(m_g))
+		if(m_g.has_default_value())
 		{
-			result["g"] = spiritsaway::serialize::encode(m_g);
+			result["g"] = m_g.encode_with_flag(flag);
 		}
+		
 	}
 	return result;
 }
@@ -261,34 +275,41 @@ bool PropertyMap::decode(const json& data)
 bool PropertyMap::has_default_value() const
 {
 	
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_c)>()(m_c))
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_d)>()(m_d))
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_e)>()(m_e))
 	{
 		return false;
 	}
+	
 	if(!spiritsaway::property::has_default_value<decltype(m_f)>()(m_f))
 	{
 		return false;
 	}
-	if(!spiritsaway::property::has_default_value<decltype(m_g)>()(m_g))
+	if(!m_g.has_default_value())
 	{
 		return false;
 	}
+	
 	return true;
 }
 

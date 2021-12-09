@@ -68,6 +68,10 @@ public:
 	{
 
 	}
+	const {{{class_full_name}}}&  get_{{{class_name}}}() const
+	{
+		return m_{{{class_name}}}_data;
+	}
 {{/has_base_class}}
 
 {{#is_property_item}}

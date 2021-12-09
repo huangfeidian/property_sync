@@ -118,11 +118,26 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	{
 		mustache::data cur_field_render_arg;
 		auto cur_field_name = one_field->unqualified_name().substr(2);// remove m_ prefix
-		auto cur_field_type_name = one_field->decl_type()->name();
+		bool has_property_interface = false;
+		auto cur_field_class_type = one_field->decl_type()->related_class();
+		auto cur_field_full_name = one_field->decl_type()->qualified_name();
+		if (cur_field_full_name.rfind("spiritsaway::property::property_bag", 0) == 0)
+		{
+			has_property_interface = true;
+		}
+		if (cur_field_class_type)
+		{
+			const auto& cur_filed_class_annotation = cur_field_class_type->annotations();
+			if (cur_filed_class_annotation.find("property") != cur_filed_class_annotation.end())
+			{
+				has_property_interface = true;
+			}
+		}
 		cur_field_render_arg.set("field_name", cur_field_name);
 		cur_field_render_arg.set("first_field", first_field);
 		first_field = false;
 		cur_field_render_arg.set("field_index", std::to_string(field_begin_index));
+		cur_field_render_arg.set("has_property_interface", has_property_interface);
 		std::string cur_property_flag;
 		auto cur_prop_annotation = one_field->annotations().find("property")->second;
 		for (const auto& one_flag : property_flags)
