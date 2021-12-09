@@ -24,6 +24,11 @@ namespace spiritsaway::property
 		const static std::uint64_t sync_other = 1 << std::uint8_t(property_flags_enum::sync_other);
 		const static std::uint64_t sync_clients = sync_self | sync_other;
 		const static std::uint64_t sync_all = sync_clients | sync_ghost;
+		const static std::uint64_t mask_all = std::numeric_limits<std::uint64_t>::max();
+		constexpr property_flags merge(property_flags other) const
+		{
+			return property_flags{ value & other.value };
+		}
 	};
 	
 
@@ -46,10 +51,11 @@ namespace spiritsaway::property
 		{
 			return m_value;
 		}
-		property_offset merge(std::uint8_t child_var) const
+		property_offset merge(property_offset child_var) const
 		{
 			assert(m_value < (std::uint64_t(1) << 56));
-			auto new_value = (m_value << 8) | child_var;
+			assert(child_var.m_value < (std::uint64_t(1) << 8));
+			auto new_value = (m_value << 8) | (child_var.m_value & 0xff);
 			return property_offset(new_value);
 		}
 		std::pair<property_offset, std::uint8_t> split() const
@@ -111,13 +117,13 @@ namespace spiritsaway::property
 	{
 		property_offset offset;
 		var_mutate_cmd cmd;
+		property_flags flag;
 		json data;
 	};
 	class msg_queue_base
 	{
 	public:
-		virtual void add(const std::uint8_t& offset, var_mutate_cmd cmd, const json& data) = 0;
-		virtual void add(const property_offset& offset, var_mutate_cmd cmd, const json& data) = 0;
+		virtual void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) = 0;
 	};
 	template <typename T, typename B = void>
 	class prop_record_proxy;

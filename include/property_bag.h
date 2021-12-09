@@ -237,7 +237,7 @@ namespace spiritsaway::property
 
 	protected:
 		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
-			property_offset parent_offset, const key_type& key)
+			property_offset parent_offset, property_flags parent_flag, const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
 
@@ -247,7 +247,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				return std::make_unique<prop_record_proxy<Item>>(m_data[cur_iter->second], parent_queue, parent_offset , cur_iter->second);
+				return std::make_unique<prop_record_proxy<Item>>(m_data[cur_iter->second], parent_queue, parent_offset , parent_flag, cur_iter->second);
 			}
 		}
 		bool replay_insert(const json& data)
@@ -321,15 +321,18 @@ namespace spiritsaway::property
 		property_bag<T>& m_data;
 		msg_queue_base& m_queue;
 		const property_offset m_offset;
+		const property_flags m_flag;
 	public:
 		using key_type = typename T::key_type;
 		using value_type = T;
 		prop_record_proxy(property_bag<T>& data,
 			msg_queue_base& msg_queue,
-			const property_offset offset)
+			const property_offset& offset,
+			const property_flags& flag)
 			:m_data(data)
 			, m_queue(msg_queue)
 			, m_offset(offset)
+			, m_flag(flag)
 		{
 
 		}
@@ -356,7 +359,7 @@ namespace spiritsaway::property
 		void insert(const value_type& value)
 		{
 			m_data.insert(value);
-			m_queue.add(m_offset, var_mutate_cmd::map_insert,
+			m_queue.add(m_offset, var_mutate_cmd::map_insert, m_flag, 
 				value.encode());
 		}
 
@@ -376,13 +379,13 @@ namespace spiritsaway::property
 		{
 			if (m_data.erase(key))
 			{
-				m_queue.add(m_offset, var_mutate_cmd::map_erase, serialize::encode(key));
+				m_queue.add(m_offset, var_mutate_cmd::map_erase, m_flag, serialize::encode(key));
 			}
 
 		}
 		std::unique_ptr<prop_record_proxy<value_type>> get(const key_type& key)
 		{
-			return m_data.get(m_queue, m_offset, key);
+			return m_data.get(m_queue, m_offset, m_flag, key);
 		}
 		bool replay(var_mutate_cmd cmd, const json& data)
 		{

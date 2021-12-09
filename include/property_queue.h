@@ -4,27 +4,24 @@
 namespace spiritsaway::property
 {
 	
-	class child_msg_queue : public msg_queue_base
+	class struct_msg_queue : public msg_queue_base
 	{
 		msg_queue_base& m_parent_queue;
 		const property_offset m_parent_offset;
+		const property_flags m_parent_flag;
 	public:
-		child_msg_queue(msg_queue_base& parent_queue,
+		struct_msg_queue(msg_queue_base& parent_queue,
 			const property_offset& parent_offset)
 			: m_parent_queue(parent_queue)
 			, m_parent_offset(parent_offset)
 		{
 
 		}
-		child_msg_queue(const child_msg_queue& other) = default;
-		void add(const std::uint8_t& offset, var_mutate_cmd cmd, const json& data) override
+		struct_msg_queue(const struct_msg_queue& other) = default;
+		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data)
 		{
-			m_parent_queue.add(m_parent_offset.merge(offset), cmd, data );
+			m_parent_queue.add(m_parent_offset.merge(offset), cmd, m_parent_flag.merge(flag), data );
 			return;
-		}
-		void add(const property_offset& offset, var_mutate_cmd cmd, const json& data) override
-		{
-			assert(false);
 		}
 
 	};
@@ -38,13 +35,10 @@ namespace spiritsaway::property
 
 		}
 		top_msg_queue(const top_msg_queue& other) = default;
-		void add(const std::uint8_t& offset, var_mutate_cmd cmd, const json& data) override
+
+		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) override
 		{
-			assert(false);
-		}
-		void add(const property_offset& offset, var_mutate_cmd cmd, const json& data) override
-		{
-			m_queue.push_back(mutate_msg{ offset, cmd, data });
+			m_queue.push_back(mutate_msg{ offset, cmd, flag, data });
 		}
 		std::vector<mutate_msg> dump()
 		{
@@ -69,28 +63,26 @@ namespace spiritsaway::property
 		msg_queue_base& m_parent_queue;
 		const std::uint32_t m_item_idx;
 		const property_offset m_parent_offset;
-
+		const property_flags m_parent_flag;
 
 	public:
 		item_msg_queue(msg_queue_base& parent_queue,
 			property_offset parent_offset,
+			property_flags parent_flag,
 			const std::uint32_t& item_idx)
 			: m_parent_queue(parent_queue)
 			, m_item_idx(item_idx)
 			, m_parent_offset(parent_offset)
+			, m_parent_flag(parent_flag)
 		{
 
 		}
 		item_msg_queue(const item_msg_queue& other) = default;
-		void add(const property_offset& offset, var_mutate_cmd cmd, const json& data) override
+		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) override
 		{
-			m_parent_queue.add(m_parent_offset, var_mutate_cmd::mutate_item, serialize::encode_multi(m_item_idx, offset, cmd, data));
+			m_parent_queue.add(m_parent_offset, var_mutate_cmd::mutate_item, m_parent_flag.merge(flag), serialize::encode_multi(m_item_idx, offset, cmd, data));
 			return;
 		}
-		void add(const std::uint8_t& offset, var_mutate_cmd cmd, const json& data) override
-		{
-			assert(false);
-			return;
-		}
+		
 	};
 }

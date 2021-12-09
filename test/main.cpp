@@ -31,7 +31,7 @@ void test_property_mutate()
 
 	PropertyMap test_a;
 	PropertyMap test_b;
-	prop_record_proxy<PropertyMap> test_a_record_proxy(test_a, cur_top_queue, property_offset());
+	prop_record_proxy<PropertyMap> test_a_record_proxy(test_a, cur_top_queue, property_offset(), property_flags{ property_flags::mask_all });
 
 	mutate_msg msg;
 	test_a_record_proxy.a().set(1);
