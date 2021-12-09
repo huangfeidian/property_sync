@@ -34,7 +34,7 @@ bool has_default_value() const;
 
 protected:
 const static std::uint8_t index_for_a = 0;
-const static std::uint64_t flag_for_a = spiritsaway::property::property_flags::save_db|spiritsaway::property::property_flags::sync_clients;
+const static std::uint64_t flag_for_a = spiritsaway::property::property_flags::sync_clients;
 
 private:
 

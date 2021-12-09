@@ -132,7 +132,7 @@ json PropertyMap::encode() const
 	{
 		result["f"] = spiritsaway::serialize::encode(m_f);
 	}
-	if(m_g.has_default_value())
+	if(!m_g.has_default_value())
 	{
 		result["g"] = m_g.encode();
 	}
@@ -194,7 +194,7 @@ json PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	if((flag_for_g & flag.value) == flag.value)
 	{
-		if(m_g.has_default_value())
+		if(!m_g.has_default_value())
 		{
 			result["g"] = m_g.encode_with_flag(flag);
 		}

@@ -65,7 +65,7 @@ json {{{class_name}}}::encode() const
 	{{/has_base_class}}
 	{{#property_fields}}
 	{{#has_property_interface}}
-	if(m_{{field_name}}.has_default_value())
+	if(!m_{{field_name}}.has_default_value())
 	{
 		result["{{field_name}}"] = m_{{field_name}}.encode();
 	}
@@ -92,7 +92,7 @@ json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_fl
 	if((flag_for_{{field_name}} & flag.value) == flag.value)
 	{
 		{{#has_property_interface}}
-		if(m_{{field_name}}.has_default_value())
+		if(!m_{{field_name}}.has_default_value())
 		{
 			result["{{field_name}}"] = m_{{field_name}}.encode_with_flag(flag);
 		}
