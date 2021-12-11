@@ -11,7 +11,7 @@ PropertyMap::PropertyMap()
 
 }
 
-bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
+bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
@@ -52,6 +52,116 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_offset offse
 		{
 			auto temp_proxy = make_replay_proxy(m_g);
 			return temp_proxy.replay(remain_offset, cmd, data);
+		}
+		default:
+		
+			return false;
+	}
+}
+
+bool PropertyMap::filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const
+{
+	auto split_result = offset.split();
+	auto field_index = split_result.second;
+	auto remain_offset = split_result.first;
+	switch(field_index)
+	{
+		case index_for_a:
+		{
+			if((flag_for_a & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_b:
+		{
+			if((flag_for_b & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_c:
+		{
+			if((flag_for_c & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_d:
+		{
+			if((flag_for_d & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_e:
+		{
+			if((flag_for_e & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_f:
+		{
+			if((flag_for_f & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_g:
+		{
+			if((flag_for_g & flag.value) == flag.value)
+			{
+				return m_g.filter_with_flag(flag, remain_offset, cmd, data, result_data);
+				
+			}
+			else
+			{
+				return false;
+			}
+			
 		}
 		default:
 		

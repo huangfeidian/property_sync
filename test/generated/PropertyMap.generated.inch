@@ -36,12 +36,13 @@ const decltype(m_g)& g() const
 
 public:
 
-bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data);
+bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
 
 bool operator==(const PropertyMap& other) const;
 bool operator!=(const PropertyMap& other) const;
 
 json encode_with_flag(const spiritsaway::property::property_flags flag) const;
+bool filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const;
 
 friend void swap(PropertyMap& a, PropertyMap& b)
 {

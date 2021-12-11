@@ -19,7 +19,7 @@ namespace spiritsaway::property
 
 		}
 		struct_msg_queue(const struct_msg_queue& other) = default;
-		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data)
+		void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data)
 		{
 			m_parent_queue.add(m_parent_offset.merge(offset), cmd, m_parent_flag.merge(flag), data );
 			return;
@@ -37,7 +37,7 @@ namespace spiritsaway::property
 		}
 		top_msg_queue(const top_msg_queue& other) = default;
 
-		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) override
+		void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
 		{
 			m_queue.push_back(mutate_msg{ offset, cmd, flag, data });
 		}
@@ -55,6 +55,19 @@ namespace spiritsaway::property
 		std::deque<mutate_msg>& queue()
 		{
 			return m_queue;
+		}
+		bool empty() const
+		{
+			return m_queue.empty();
+		}
+
+		mutate_msg& front()
+		{
+			return m_queue.front();
+		}
+		void pop_front()
+		{
+			m_queue.pop_front();
 		}
 
 	};
@@ -79,9 +92,9 @@ namespace spiritsaway::property
 
 		}
 		item_msg_queue(const item_msg_queue& other) = default;
-		void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) override
+		void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
 		{
-			m_parent_queue.add(m_parent_offset, var_mutate_cmd::mutate_item, m_parent_flag.merge(flag), serialize::encode_multi(m_item_idx, offset, cmd, data));
+			m_parent_queue.add(m_parent_offset, property_cmd::item_change, m_parent_flag.merge(flag), serialize::encode_multi(m_item_idx, offset, cmd, data));
 			return;
 		}
 		

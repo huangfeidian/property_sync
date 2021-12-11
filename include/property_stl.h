@@ -30,7 +30,7 @@ namespace spiritsaway::property
 		{
 			m_data = data;
 			m_msg_queue.add(m_offset,
-				var_mutate_cmd::set, m_flag, serialize::encode(m_data));
+				property_cmd::set, m_flag, serialize::encode(m_data));
 
 		}
 
@@ -38,7 +38,7 @@ namespace spiritsaway::property
 		{
 			m_data = {};
 			m_msg_queue.add(m_offset,
-				var_mutate_cmd::clear, m_flag, json());
+				property_cmd::clear, m_flag, json());
 			
 		}
 
@@ -65,7 +65,7 @@ namespace spiritsaway::property
 			: m_data(data)
 		{
 		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay(property_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -73,9 +73,9 @@ namespace spiritsaway::property
 			}
 			switch (cmd)
 			{
-			case var_mutate_cmd::clear:
+			case property_cmd::clear:
 				return replay_clear(data);
-			case var_mutate_cmd::set:
+			case property_cmd::set:
 				return replay_set(data);
 			default:
 				return false;
@@ -118,19 +118,19 @@ namespace spiritsaway::property
 		void set(const std::vector<T>& data)
 		{
 			m_data = data;
-			m_msg_queue.add(m_offset, var_mutate_cmd::set, m_flag, serialize::encode(m_data));
+			m_msg_queue.add(m_offset, property_cmd::set, m_flag, serialize::encode(m_data));
 		}
 
 		void clear()
 		{
 			m_data.clear();
-			m_msg_queue.add(m_offset, var_mutate_cmd::clear, m_flag, json());
+			m_msg_queue.add(m_offset, property_cmd::clear, m_flag, json());
 		}
 
 		void push_back(const T& new_data)
 		{
 			m_data.push_back(new_data);
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_push_back, m_flag, serialize::encode(new_data));
+			m_msg_queue.add(m_offset, property_cmd::vector_push_back, m_flag, serialize::encode(new_data));
 		}
 
 		void pop_back()
@@ -139,7 +139,7 @@ namespace spiritsaway::property
 			{
 				m_data.pop_back();
 			}
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_pop_back, m_flag, json());
+			m_msg_queue.add(m_offset, property_cmd::vector_pop_back, m_flag, json());
 		}
 
 		void idx_mutate(std::size_t idx, const T& new_data)
@@ -148,7 +148,7 @@ namespace spiritsaway::property
 			{
 				m_data[idx] = new_data;
 			}
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, m_flag, serialize::encode_multi(idx, new_data));
+			m_msg_queue.add(m_offset, property_cmd::vector_idx_mutate, m_flag, serialize::encode_multi(idx, new_data));
 		}
 
 		void idx_delete(std::size_t idx)
@@ -157,7 +157,7 @@ namespace spiritsaway::property
 			{
 				m_data.erase(m_data.begin() + idx);
 			}
-			m_msg_queue.add(m_offset, var_mutate_cmd::vector_idx_mutate, m_flag, serialize::encode(idx));
+			m_msg_queue.add(m_offset, property_cmd::vector_idx_mutate, m_flag, serialize::encode(idx));
 		}
 
 		
@@ -180,7 +180,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay(property_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -188,17 +188,17 @@ namespace spiritsaway::property
 			}
 			switch (cmd)
 			{
-			case var_mutate_cmd::clear:
+			case property_cmd::clear:
 				return replay_clear(data);
-			case var_mutate_cmd::set:
+			case property_cmd::set:
 				return replay_set(data);
-			case var_mutate_cmd::vector_push_back:
+			case property_cmd::vector_push_back:
 				return replay_push_back(data);
-			case var_mutate_cmd::vector_pop_back:
+			case property_cmd::vector_pop_back:
 				return replay_pop_back(data);
-			case var_mutate_cmd::vector_idx_mutate:
+			case property_cmd::vector_idx_mutate:
 				return replaym_idx_mutate(data);
-			case var_mutate_cmd::vector_idx_delete:
+			case property_cmd::vector_idx_delete:
 				return replaym_idx_delete(data);
 			default:
 				return false;
@@ -287,25 +287,25 @@ namespace spiritsaway::property
 		void set(const std::unordered_map<T1, T2>& data)
 		{
 			m_data = data;
-			m_msg_queue.add(m_offset, var_mutate_cmd::set, m_flag, serialize::encode(m_data));
+			m_msg_queue.add(m_offset, property_cmd::set, m_flag, serialize::encode(m_data));
 		}
 
 		void clear()
 		{
 			m_data.clear();
-			m_msg_queue.add(m_offset, var_mutate_cmd::clear, m_flag, json());
+			m_msg_queue.add(m_offset, property_cmd::clear, m_flag, json());
 		}
 
 		void insert(const T1& key, const T2& value)
 		{
 			m_data[key] = value;
-			m_msg_queue.add(m_offset, var_mutate_cmd::map_insert, m_flag, serialize::encode_multi(key, value));
+			m_msg_queue.add(m_offset, property_cmd::map_insert, m_flag, serialize::encode_multi(key, value));
 		}
 
 		void erase(const T1& key)
 		{
 			m_data.erase(key);
-			m_msg_queue.add(m_offset, var_mutate_cmd::map_erase, m_flag, serialize::encode(key));
+			m_msg_queue.add(m_offset, property_cmd::map_erase, m_flag, serialize::encode(key));
 		}
 
 
@@ -326,7 +326,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay(property_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -334,13 +334,13 @@ namespace spiritsaway::property
 			}
 			switch (cmd)
 			{
-			case var_mutate_cmd::clear:
+			case property_cmd::clear:
 				return replay_clear(data);
-			case var_mutate_cmd::set:
+			case property_cmd::set:
 				return replay_set(data);
-			case var_mutate_cmd::map_insert:
+			case property_cmd::map_insert:
 				return replay_insert(data);
-			case var_mutate_cmd::map_erase:
+			case property_cmd::map_erase:
 				return replay_erase(data);
 			default:
 				return false;

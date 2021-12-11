@@ -2,11 +2,12 @@
 simple_item::simple_item()
 	: spiritsaway::property::property_item<int>()
 	, m_a{}
+	, m_b{}
 {
 
 }
 
-bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
+bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
@@ -18,9 +19,55 @@ bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offse
 			auto temp_proxy = make_replay_proxy(m_a);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
+		case index_for_b:
+		{
+			auto temp_proxy = make_replay_proxy(m_b);
+			return temp_proxy.replay(remain_offset, cmd, data);
+		}
 		default:
+			return spiritsaway::property::property_item<int>::replay_mutate_msg(offset, cmd, data);
 		
-			return false;
+	}
+}
+
+bool simple_item::filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const
+{
+	auto split_result = offset.split();
+	auto field_index = split_result.second;
+	auto remain_offset = split_result.first;
+	switch(field_index)
+	{
+		case index_for_a:
+		{
+			if((flag_for_a & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		case index_for_b:
+		{
+			if((flag_for_b & flag.value) == flag.value)
+			{
+				
+				result_data = data;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		default:
+			return spiritsaway::property::property_item<int>::filter_with_flag(flag, remain_offset, cmd, data, result_data);
+		
 	}
 }
 
@@ -31,6 +78,10 @@ bool simple_item::operator==(const simple_item& other) const
 		return false;
 	}
 	if(m_a != other.m_a)
+	{
+		return false;
+	}
+	if(m_b != other.m_b)
 	{
 		return false;
 	}
@@ -51,6 +102,11 @@ json simple_item::encode() const
 	{
 		result["a"] = spiritsaway::serialize::encode(m_a);
 	}
+	
+	if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+	{
+		result["b"] = spiritsaway::serialize::encode(m_b);
+	}
 	return result;
 }
 
@@ -64,6 +120,14 @@ json simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 		if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 		{
 			result["a"] = spiritsaway::serialize::encode(m_a);
+		}
+	}
+	if((flag_for_b & flag.value) == flag.value)
+	{
+		
+		if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+		{
+			result["b"] = spiritsaway::serialize::encode(m_b);
 		}
 	}
 	return result;
@@ -84,6 +148,15 @@ bool simple_item::decode(const json& data)
 		}
 	}
 	
+	iter = data.find("b");
+	if(iter != data.end())
+	{
+		if(!spiritsaway::serialize::decode(*iter, m_b))
+		{
+			return false;
+		}
+	}
+	
 	return true;
 }
 
@@ -95,6 +168,11 @@ bool simple_item::has_default_value() const
 	}
 	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+	{
+		return false;
+	}
+	
+	if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 	{
 		return false;
 	}

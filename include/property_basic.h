@@ -4,9 +4,9 @@
 namespace spiritsaway::property
 {
 	// 每个变量在当前定义内只能是uint8的整数索引 所以一个类里面只能定义255个变量 
-	// 0号变量保留不使用 以后可以扩充为std::uint16_t 或者与var_mutate_cmd合并为一个std::uint16_t 
-	using var_idx_type = std::uint8_t;
-	using var_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
+	// 0号变量保留不使用 以后可以扩充为std::uint16_t 或者与property_cmd合并为一个std::uint16_t 
+	using property_idx_type = std::uint8_t;
+	using property_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
 	constexpr std::uint8_t depth_max = 8;
 	enum class property_flags_enum: std::uint8_t
 	{
@@ -89,11 +89,10 @@ namespace spiritsaway::property
 
 	};
 
-	enum class var_mutate_cmd : var_cmd_type
+	enum class property_cmd : property_cmd_type
 	{
 		clear = 0,
 		set = 1,
-		mutate_item = 2,
 		vector_push_back = 10,
 		vector_idx_mutate = 11,
 		vector_idx_delete = 12,
@@ -103,7 +102,9 @@ namespace spiritsaway::property
 		map_erase = 21,
 		set_add = 30,
 		set_erase = 31,
-		item_update = 41,
+		bag_insert = 41,
+		bag_erase = 42,
+		item_change = 43,
 
 	};
 	enum class notify_kind
@@ -116,14 +117,14 @@ namespace spiritsaway::property
 	struct mutate_msg
 	{
 		property_offset offset;
-		var_mutate_cmd cmd;
+		property_cmd cmd;
 		property_flags flag;
 		json data;
 	};
 	class msg_queue_base
 	{
 	public:
-		virtual void add(const property_offset& offset, var_mutate_cmd cmd, property_flags flag, const json& data) = 0;
+		virtual void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
 	};
 	template <typename T, typename B = void>
 	class prop_record_proxy;
@@ -138,10 +139,15 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay(property_offset offset, property_cmd cmd, const json& data)
 		{
 			return m_data.replay_mutate_msg(offset, cmd, data);
 		}
+		const T& data() const
+		{
+			return m_data;
+		}
+
 	};
 
 	template <typename T, typename B = void>

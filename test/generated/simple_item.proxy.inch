@@ -30,6 +30,11 @@ public:
 		property_offset empty_offset;
 		return prop_record_proxy<decltype(m_simple_item_data.m_a)>(m_simple_item_data.m_a, m_queue, empty_offset.merge(spiritsaway::test::simple_item::index_for_a), m_flag.merge(property_flags{ spiritsaway::test::simple_item::flag_for_a}));
 	}
+	prop_record_proxy<decltype(m_simple_item_data.m_b)> b()
+	{
+		property_offset empty_offset;
+		return prop_record_proxy<decltype(m_simple_item_data.m_b)>(m_simple_item_data.m_b, m_queue, empty_offset.merge(spiritsaway::test::simple_item::index_for_b), m_flag.merge(property_flags{ spiritsaway::test::simple_item::flag_for_b}));
+	}
 
 
 };

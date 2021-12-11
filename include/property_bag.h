@@ -39,6 +39,10 @@ namespace spiritsaway::property
 			result["id"] = m_id;
 			return result;
 		}
+		bool filter_with_flag(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
+		{
+			return false;
+		}
 		bool decode(const json& data)
 		{
 			if (!data.is_object())
@@ -72,6 +76,10 @@ namespace spiritsaway::property
 		{
 			return false;
 		}
+		bool replay_mutate_msg(property_offset offset, property_cmd cmd, const json& data)
+		{
+			return false;
+		}
 	};
 
 
@@ -84,10 +92,10 @@ namespace spiritsaway::property
 			"item should be derived from property_item<K>");
 		using key_type = typename Item::key_type;
 		using value_type = Item;
-		const static var_idx_type index_for_item = 0;
+		const static std::uint8_t index_for_item = 0;
 	protected:
 		std::vector<Item> m_data;
-		std::unordered_map<key_type, std::size_t> m_index;
+		std::unordered_map<key_type, std::uint64_t> m_index;
 		
 	public:
 
@@ -233,8 +241,63 @@ namespace spiritsaway::property
 			return m_data.empty();
 		}
 		
-
-
+		bool filter_insert_with_flags(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
+		{
+			if (!data.is_object())
+			{
+				assert(false);
+				return false;
+			}
+			auto json_iter = data.find("id");
+			if (json_iter == data.end())
+			{
+				assert(false);
+				return false;
+			}
+			key_type key;
+			if (!spiritsaway::serialize::decode(*json_iter, key))
+			{
+				assert(false);
+				return false;
+			}
+			auto cur_iter = m_index.find(key);
+			if (cur_iter == m_index.end())
+			{
+				assert(false);
+				return false;
+			}
+			result_data = m_data[cur_iter->second].encode_with_flag(flag);
+			return true;
+			
+		}
+		bool filter_change_with_flags(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
+		{
+			std::uint64_t mutate_idx = 0;
+			std::uint64_t field_idx;
+			std::uint8_t field_cmd;
+			json mutate_content;
+			if (!serialize::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
+			{
+				assert(false);
+				return false;
+			}
+			if (mutate_idx >= m_data.size())
+			{
+				assert(false);
+				return false;
+			}
+			json temp_result;
+			if (m_data[mutate_idx].filter_with_flag(flag, field_idx, property_cmd(field_cmd), mutate_content, temp_result))
+			{
+				result_data = spiritsaway::serialize::encode_multi(mutate_idx, field_idx, field_cmd, temp_result);
+				
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	protected:
 		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
 			property_offset parent_offset, property_flags parent_flag, const key_type& key)
@@ -276,8 +339,8 @@ namespace spiritsaway::property
 		}
 		bool replay_item_mutate(const json& data)
 		{
-			std::size_t mutate_idx = 0;
-			std::size_t field_idx;
+			std::uint64_t mutate_idx = 0;
+			std::uint64_t field_idx;
 			std::uint8_t field_cmd;
 			json mutate_content;
 			if (!serialize::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
@@ -288,10 +351,10 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			return m_data[mutate_idx].replay_mutate_msg(field_idx, var_mutate_cmd(field_cmd), mutate_content);
+			return m_data[mutate_idx].replay_mutate_msg(field_idx, property_cmd(field_cmd), mutate_content);
 		}
 	public:
-		bool replay_mutate_msg(property_offset offset, var_mutate_cmd cmd, const json& data)
+		bool replay_mutate_msg(property_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -299,17 +362,34 @@ namespace spiritsaway::property
 			}
 			switch (cmd)
 			{
-			case var_mutate_cmd::clear:
+			case property_cmd::clear:
 				return replay_clear(data);
-			case var_mutate_cmd::map_insert:
+			case property_cmd::bag_insert:
 				return replay_insert(data);
-			case var_mutate_cmd::map_erase:
+			case property_cmd::bag_erase:
 				return replay_erase(data);
-			case var_mutate_cmd::mutate_item:
+			case property_cmd::item_change:
 
 				return replay_item_mutate(data);
 			default:
 				return false;
+			}
+		}
+		bool filter_with_flag(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case spiritsaway::property::property_cmd::bag_insert:
+				return filter_insert_with_flags(flag, offset, cmd, data, result_data);
+			case spiritsaway::property::property_cmd::item_change:
+				return filter_change_with_flags(flag, offset, cmd, data, result_data);
+			default:
+				result_data = data;
+				return true;
 			}
 		}
 		friend class prop_record_proxy<property_bag<Item>>;
@@ -344,7 +424,7 @@ namespace spiritsaway::property
 		void clear()
 		{
 			m_data.clear();
-			m_queue.add(m_offset, var_mutate_cmd::clear, json());
+			m_queue.add(m_offset, property_cmd::clear, json());
 		}
 		std::vector<key_type> keys() const
 		{
@@ -359,7 +439,7 @@ namespace spiritsaway::property
 		void insert(const value_type& value)
 		{
 			m_data.insert(value);
-			m_queue.add(m_offset, var_mutate_cmd::map_insert, m_flag, 
+			m_queue.add(m_offset, property_cmd::bag_insert, m_flag,
 				value.encode());
 		}
 
@@ -379,17 +459,13 @@ namespace spiritsaway::property
 		{
 			if (m_data.erase(key))
 			{
-				m_queue.add(m_offset, var_mutate_cmd::map_erase, m_flag, serialize::encode(key));
+				m_queue.add(m_offset, property_cmd::bag_erase, m_flag, serialize::encode(key));
 			}
 
 		}
 		std::unique_ptr<prop_record_proxy<value_type>> get(const key_type& key)
 		{
 			return m_data.get(m_queue, m_offset, m_flag, key);
-		}
-		bool replay(var_mutate_cmd cmd, const json& data)
-		{
-			return m_data.replay_mutate_msg(cmd, data);
 		}
 
 	};

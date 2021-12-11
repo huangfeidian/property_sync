@@ -9,7 +9,7 @@
 
 }
 
-bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::var_mutate_cmd cmd, const json& data)
+bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
@@ -24,12 +24,49 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset 
 		}
 {{/property_fields}}
 		default:
-		{{#has_base_replay}}
+		{{#has_base_class}}
 			return {{{base_class_name}}}::replay_mutate_msg(offset, cmd, data);
-		{{/has_base_replay}}
-		{{^has_base_replay}}
+		{{/has_base_class}}
+		{{^has_base_class}}
 			return false;
-		{{/has_base_replay}}
+		{{/has_base_class}}
+	}
+}
+
+bool {{{class_name}}}::filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const
+{
+	auto split_result = offset.split();
+	auto field_index = split_result.second;
+	auto remain_offset = split_result.first;
+	switch(field_index)
+	{
+{{#property_fields}}		
+		case index_for_{{field_name}}:
+		{
+			if((flag_for_{{field_name}} & flag.value) == flag.value)
+			{
+				{{#has_property_interface}}
+				return m_{{field_name}}.filter_with_flag(flag, remain_offset, cmd, data, result_data);
+				{{/has_property_interface}}
+				{{^has_property_interface}}
+				result_data = data;
+				return true;
+				{{/has_property_interface}}
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+{{/property_fields}}
+		default:
+		{{#has_base_class}}
+			return {{{base_class_name}}}::filter_with_flag(flag, remain_offset, cmd, data, result_data);
+		{{/has_base_class}}
+		{{^has_base_class}}
+			return false;
+		{{/has_base_class}}
 	}
 }
 
