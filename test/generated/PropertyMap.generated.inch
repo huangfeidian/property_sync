@@ -62,7 +62,7 @@ json encode() const;
 
 bool decode(const json& data);
 bool decode(const json::object_t& data);
-bool decode(const std::vector<std::pair<std::uint8_t, json>>& data);
+bool decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx);
 
 bool has_default_value() const;
 

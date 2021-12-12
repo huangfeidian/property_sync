@@ -70,8 +70,12 @@ namespace spiritsaway::property
 			}
 			return true;
 		}
-		bool decode(const std::vector<std::pair<std::uint8_t, json>>& data)
+		bool decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 		{
+			if (next_idx != 0)
+			{
+				return false;
+			}
 			if (data.size() == 0)
 			{
 				return false;
@@ -80,6 +84,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
+			next_idx = 1;
 			return spiritsaway::serialize::decode(data[0].second, m_id);
 		}
 		bool decode(const json& data)

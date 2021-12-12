@@ -129,21 +129,22 @@ json simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 }
 
-bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data)
+bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 {
-	if(!spiritsaway::property::property_item<int>::decode(data))
+	if(!spiritsaway::property::property_item<int>::decode(data, next_idx))
 	{
 		return false;
 	}
-	for(const auto& one_item: data)
+	while(next_idx < data.size())
 	{
+		const auto& one_item = data[next_idx];
 		if(one_item.first >= index_end_for_simple_item)
 		{
-			continue;
+			return true;
 		}
 		if(one_item.first < index_begin_for_simple_item)
 		{
-			continue;
+			return false;
 		}
 		switch(one_item.first)
 		{
@@ -166,6 +167,7 @@ bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data)
 			default:
 				return false;
 		}
+		next_idx++;
 	}
 	return true;
 }
@@ -212,7 +214,16 @@ bool simple_item::decode(const json& data)
 		{
 			return false;
 		}
-		return decode(array_data);
+		std::uint32_t next_idx = 0;
+		if(!decode(array_data, next_idx))
+		{
+			return false;
+		}
+		if(next_idx != array_data.size())
+		{
+			return false;
+		}
+		return true;
 	}
 	return false;
 	
