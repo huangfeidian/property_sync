@@ -33,43 +33,6 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_offset 
 	}
 }
 
-bool {{{class_name}}}::filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const
-{
-	auto split_result = offset.split();
-	auto field_index = split_result.second;
-	auto remain_offset = split_result.first;
-	switch(field_index)
-	{
-{{#property_fields}}		
-		case index_for_{{field_name}}:
-		{
-			if((flag_for_{{field_name}} & flag.value) == flag.value)
-			{
-				{{#has_property_interface}}
-				return m_{{field_name}}.filter_with_flag(flag, remain_offset, cmd, data, result_data);
-				{{/has_property_interface}}
-				{{^has_property_interface}}
-				result_data = data;
-				return true;
-				{{/has_property_interface}}
-			}
-			else
-			{
-				return false;
-			}
-			
-		}
-{{/property_fields}}
-		default:
-		{{#has_base_class}}
-			return {{{base_class_name}}}::filter_with_flag(flag, remain_offset, cmd, data, result_data);
-		{{/has_base_class}}
-		{{^has_base_class}}
-			return false;
-		{{/has_base_class}}
-	}
-}
-
 bool {{{class_name}}}::operator==(const {{{class_name}}}& other) const
 {
 	{{#has_base_class}}
@@ -116,35 +79,111 @@ json {{{class_name}}}::encode() const
 	{{/property_fields}}
 	return result;
 }
-
-json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_flags flag) const
+void {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const
 {
 	{{#has_base_class}}
-	json result = {{{base_class_name}}}::encode_with_flag(flag);
+	{{{base_class_name}}}::encode_with_flag(flag, ignore_default, result);
 	{{/has_base_class}}
-	{{^has_base_class}}
-	json result;
-	{{/has_base_class}}
+
 	{{#property_fields}}
 	if((flag_for_{{field_name}} & flag.value) == flag.value)
 	{
 		{{#has_property_interface}}
-		if(!m_{{field_name}}.has_default_value())
+		if(!ignore_default || !m_{{field_name}}.has_default_value())
 		{
-			result["{{field_name}}"] = m_{{field_name}}.encode_with_flag(flag);
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(index_for_{{field_name}}, m_{{field_name}}.encode_with_flag(flag, ignore_default, true))));
 		}
 		{{/has_property_interface}}
 		{{^has_property_interface}}
-		if(!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
+		{
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(index_for_{{field_name}}, m_{{field_name}})));
+		}
+		{{/has_property_interface}}
+	}
+	{{/property_fields}}
+	return;
+}
+
+void {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const
+{
+	{{#has_base_class}}
+	{{{base_class_name}}}::encode_with_flag(flag, ignore_default, result);
+	{{/has_base_class}}
+
+	{{#property_fields}}
+	if((flag_for_{{field_name}} & flag.value) == flag.value)
+	{
+		{{#has_property_interface}}
+		if(!ignore_default || !m_{{field_name}}.has_default_value())
+		{
+			result["{{field_name}}"] = m_{{field_name}}.encode_with_flag(flag, ignore_default, false);
+		}
+		{{/has_property_interface}}
+		{{^has_property_interface}}
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
 		{
 			result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
 		}
 		{{/has_property_interface}}
 	}
 	{{/property_fields}}
-	return result;
+	return;
 }
-bool {{{class_name}}}::decode(const json& data)
+json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const
+{
+	if (replace_key_by_index)
+	{
+		json::array_t result;
+		encode_with_flag(flag, ignore_default, result);
+		return result;
+	}
+	else
+	{
+		json::object_t result;
+		encode_with_flag(flag, ignore_default, result);
+		return result;
+	}
+}
+
+bool {{{class_name}}}::decode(const std::vector<std::pair<std::uint8_t, json>>& data)
+{
+	{{#has_base_class}}
+	if(!{{{base_class_name}}}::decode(data))
+	{
+		return false;
+	}
+	{{/has_base_class}}
+	for(const auto& one_item: data)
+	{
+		if(one_item.first >= index_end_for_{{{class_name}}})
+		{
+			continue;
+		}
+		if(one_item.first < index_begin_for_{{{class_name}}})
+		{
+			continue;
+		}
+		switch(one_item.first)
+		{
+			{{#property_fields}}
+			case index_for_{{field_name}}:
+			{
+				if(!spiritsaway::serialize::decode(one_item.second, m_{{field_name}}))
+				{
+					return false;
+				}
+				break;
+			}
+			{{/property_fields}}
+			default:
+				return false;
+		}
+	}
+	return true;
+}
+
+bool {{{class_name}}}::decode(const json::object_t& data)
 {
 	{{#has_base_class}}
 	if(!{{{base_class_name}}}::decode(data))
@@ -157,7 +196,7 @@ bool {{{class_name}}}::decode(const json& data)
 	iter = data.find("{{field_name}}");
 	if(iter != data.end())
 	{
-		if(!spiritsaway::serialize::decode(*iter, m_{{field_name}}))
+		if(!spiritsaway::serialize::decode(iter->second, m_{{field_name}}))
 		{
 			return false;
 		}
@@ -165,6 +204,26 @@ bool {{{class_name}}}::decode(const json& data)
 	
 	{{/property_fields}}
 	return true;
+}
+
+bool {{{class_name}}}::decode(const json& data)
+{
+	if(data.is_object())
+	{
+		json::object_t obj_data = data.get<json::object_t>();
+		return decode(obj_data);
+	}
+	else if(data.is_array())
+	{
+		std::vector<std::pair<std::uint8_t, json>> array_data;
+		if(!spiritsaway::serialize::decode(data, array_data))
+		{
+			return false;
+		}
+		return decode(array_data);
+	}
+	return false;
+	
 }
 
 bool {{{class_name}}}::has_default_value() const

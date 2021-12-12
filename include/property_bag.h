@@ -33,32 +33,76 @@ namespace spiritsaway::property
 			result["id"] = m_id;
 			return result;
 		}
-		json encode_with_flag(const property_flags flag) const
+		void encode_with_flag(const property_flags flag, bool ignore_default, json::object_t& result) const
 		{
-			json result;
 			result["id"] = m_id;
-			return result;
 		}
-		bool filter_with_flag(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
+
+		void encode_with_flag(const property_flags flag, bool ignore_default, json::array_t& result) const
 		{
-			return false;
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(0, m_id)));
 		}
-		bool decode(const json& data)
+		json encode_with_flag(const property_flags flag, bool ignore_default, bool replace_key_by_index) const
 		{
-			if (!data.is_object())
+			if (replace_key_by_index)
 			{
-				return false;
+				json::array_t result;
+				encode_with_flag(flag, ignore_default, result);
+				return result;
 			}
+			else
+			{
+				json::object_t result;
+				encode_with_flag(flag, ignore_default, result);
+				return result;
+			}
+		}
+		bool decode(const json::object_t& data)
+		{
 			auto iter = data.find("id");
 			if (iter == data.end())
 			{
 				return false;
 			}
-			if (!spiritsaway::serialize::decode(*iter, m_id))
+			if (!spiritsaway::serialize::decode(iter->second, m_id))
 			{
 				return false;
 			}
 			return true;
+		}
+		bool decode(const std::vector<std::pair<std::uint8_t, json>>& data)
+		{
+			if (data.size() == 0)
+			{
+				return false;
+			}
+			if (data[0].first != 0)
+			{
+				return false;
+			}
+			return spiritsaway::serialize::decode(data[0].second, m_id);
+		}
+		bool decode(const json& data)
+		{
+			if (data.is_object())
+			{
+				return decode(data.get<json::object_t>());
+			}
+			else if (data.is_array())
+			{
+				std::vector<std::pair<std::uint8_t, json>> array_data;
+				if (!spiritsaway::serialize::decode(data, array_data))
+				{
+					return false;
+				}
+				return decode(array_data);
+			}
+			else
+			{
+				return false;
+			}
+
+			
 		}
 		bool operator==(const property_item& other) const
 		{
@@ -115,13 +159,13 @@ namespace spiritsaway::property
 		{
 			return spiritsaway::serialize::encode(m_data);
 		}
-		json encode_with_flag(const property_flags flag) const
+		json encode_with_flag(const property_flags flag, bool ignore_default, bool replace_key_by_index) const
 		{
 			json::array_t json_data;
 			json_data.resize(m_data.size());
 			for (std::uint32_t i = 0; i < m_data.size(); i++)
 			{
-				json_data[i] = m_data[i].encode_with_flag(flag);
+				json_data[i] = m_data[i].encode_with_flag(flag, ignore_default, replace_key_by_index);
 			}
 			return json_data;
 		}
@@ -241,63 +285,7 @@ namespace spiritsaway::property
 			return m_data.empty();
 		}
 		
-		bool filter_insert_with_flags(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
-		{
-			if (!data.is_object())
-			{
-				assert(false);
-				return false;
-			}
-			auto json_iter = data.find("id");
-			if (json_iter == data.end())
-			{
-				assert(false);
-				return false;
-			}
-			key_type key;
-			if (!spiritsaway::serialize::decode(*json_iter, key))
-			{
-				assert(false);
-				return false;
-			}
-			auto cur_iter = m_index.find(key);
-			if (cur_iter == m_index.end())
-			{
-				assert(false);
-				return false;
-			}
-			result_data = m_data[cur_iter->second].encode_with_flag(flag);
-			return true;
-			
-		}
-		bool filter_change_with_flags(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
-		{
-			std::uint64_t mutate_idx = 0;
-			std::uint64_t field_idx;
-			std::uint8_t field_cmd;
-			json mutate_content;
-			if (!serialize::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
-			{
-				assert(false);
-				return false;
-			}
-			if (mutate_idx >= m_data.size())
-			{
-				assert(false);
-				return false;
-			}
-			json temp_result;
-			if (m_data[mutate_idx].filter_with_flag(flag, field_idx, property_cmd(field_cmd), mutate_content, temp_result))
-			{
-				result_data = spiritsaway::serialize::encode_multi(mutate_idx, field_idx, field_cmd, temp_result);
-				
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+		
 	protected:
 		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
 			property_offset parent_offset, property_flags parent_flag, const key_type& key)
@@ -353,6 +341,17 @@ namespace spiritsaway::property
 			}
 			return m_data[mutate_idx].replay_mutate_msg(field_idx, property_cmd(field_cmd), mutate_content);
 		}
+		bool replay_set(const json& data)
+		{
+			property_bag temp;
+			if (!temp.decode(data))
+			{
+				return false;
+			}
+			*this = temp;
+			return true;
+			
+		}
 	public:
 		bool replay_mutate_msg(property_offset offset, property_cmd cmd, const json& data)
 		{
@@ -368,28 +367,12 @@ namespace spiritsaway::property
 				return replay_insert(data);
 			case property_cmd::bag_erase:
 				return replay_erase(data);
+			case property_cmd::bag_set:
+				return replay_set(data);
 			case property_cmd::item_change:
-
 				return replay_item_mutate(data);
 			default:
 				return false;
-			}
-		}
-		bool filter_with_flag(property_flags flag, property_offset offset, property_cmd cmd, const json& data, json& result_data) const
-		{
-			if (offset.value() != 0)
-			{
-				return false;
-			}
-			switch (cmd)
-			{
-			case spiritsaway::property::property_cmd::bag_insert:
-				return filter_insert_with_flags(flag, offset, cmd, data, result_data);
-			case spiritsaway::property::property_cmd::item_change:
-				return filter_change_with_flags(flag, offset, cmd, data, result_data);
-			default:
-				result_data = data;
-				return true;
 			}
 		}
 		friend class prop_record_proxy<property_bag<Item>>;
@@ -446,15 +429,26 @@ namespace spiritsaway::property
 			{
 				if (one_need_flag.include_by(m_flag))
 				{
-					auto one_encode_result = value.encode_with_flag(one_need_flag);
-					if (one_encode_result.empty())
-					{
-						continue;
-					}
+					auto one_encode_result = value.encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+
 					m_queue.add(m_offset, property_cmd::bag_insert, one_need_flag, one_encode_result);
 				}
 			}
 			
+		}
+
+		void set(const property_bag<T>& other)
+		{
+			m_data = other;
+			for (auto one_need_flag : m_queue.m_need_flags)
+			{
+				if (one_need_flag.include_by(m_flag))
+				{
+					auto one_encode_result = other.encode_with_flag(one_need_flag);
+
+					m_queue.add(m_offset, property_cmd::bag_set, one_need_flag, one_encode_result);
+				}
+			}
 		}
 
 		void insert(const json& value)

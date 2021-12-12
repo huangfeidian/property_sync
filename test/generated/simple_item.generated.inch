@@ -21,8 +21,9 @@ bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsawa
 bool operator==(const simple_item& other) const;
 bool operator!=(const simple_item& other) const;
 
-json encode_with_flag(const spiritsaway::property::property_flags flag) const;
-bool filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const;
+json encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const;
+void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const;
+void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const;
 
 friend void swap(simple_item& a, simple_item& b)
 {
@@ -35,16 +36,21 @@ friend void swap(simple_item& a, simple_item& b)
 json encode() const;
 
 bool decode(const json& data);
+bool decode(const json::object_t& data);
+bool decode(const std::vector<std::pair<std::uint8_t, json>>& data);
 
 bool has_default_value() const;
 
 protected:
-const static std::uint8_t index_for_a = 0;
+const static std::uint8_t index_for_a = 1;
 const static std::uint64_t flag_for_a = spiritsaway::property::property_flags::sync_clients;
 
-const static std::uint8_t index_for_b = 1;
+const static std::uint8_t index_for_b = 2;
 const static std::uint64_t flag_for_b = spiritsaway::property::property_flags::save_db;
 
+
+const static std::uint8_t index_begin_for_simple_item = 1;
+const static std::uint8_t index_end_for_simple_item = 3;
 private:
 
 #endif

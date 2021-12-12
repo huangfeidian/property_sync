@@ -30,47 +30,6 @@ bool simple_item::replay_mutate_msg(spiritsaway::property::property_offset offse
 	}
 }
 
-bool simple_item::filter_with_flag(spiritsaway::property::property_flags flag, spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data, json& result_data) const
-{
-	auto split_result = offset.split();
-	auto field_index = split_result.second;
-	auto remain_offset = split_result.first;
-	switch(field_index)
-	{
-		case index_for_a:
-		{
-			if((flag_for_a & flag.value) == flag.value)
-			{
-				
-				result_data = data;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-			
-		}
-		case index_for_b:
-		{
-			if((flag_for_b & flag.value) == flag.value)
-			{
-				
-				result_data = data;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-			
-		}
-		default:
-			return spiritsaway::property::property_item<int>::filter_with_flag(flag, remain_offset, cmd, data, result_data);
-		
-	}
-}
-
 bool simple_item::operator==(const simple_item& other) const
 {
 	if(!spiritsaway::property::property_item<int>::operator==(other))
@@ -109,15 +68,37 @@ json simple_item::encode() const
 	}
 	return result;
 }
-
-json simple_item::encode_with_flag(const spiritsaway::property::property_flags flag) const
+void simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const
 {
-	json result = spiritsaway::property::property_item<int>::encode_with_flag(flag);
-	
+	spiritsaway::property::property_item<int>::encode_with_flag(flag, ignore_default, result);
+
 	if((flag_for_a & flag.value) == flag.value)
 	{
 		
-		if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+		{
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(index_for_a, m_a)));
+		}
+	}
+	if((flag_for_b & flag.value) == flag.value)
+	{
+		
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+		{
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(index_for_b, m_b)));
+		}
+	}
+	return;
+}
+
+void simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const
+{
+	spiritsaway::property::property_item<int>::encode_with_flag(flag, ignore_default, result);
+
+	if((flag_for_a & flag.value) == flag.value)
+	{
+		
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 		{
 			result["a"] = spiritsaway::serialize::encode(m_a);
 		}
@@ -125,14 +106,71 @@ json simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	if((flag_for_b & flag.value) == flag.value)
 	{
 		
-		if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+		if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 		{
 			result["b"] = spiritsaway::serialize::encode(m_b);
 		}
 	}
-	return result;
+	return;
 }
-bool simple_item::decode(const json& data)
+json simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const
+{
+	if (replace_key_by_index)
+	{
+		json::array_t result;
+		encode_with_flag(flag, ignore_default, result);
+		return result;
+	}
+	else
+	{
+		json::object_t result;
+		encode_with_flag(flag, ignore_default, result);
+		return result;
+	}
+}
+
+bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data)
+{
+	if(!spiritsaway::property::property_item<int>::decode(data))
+	{
+		return false;
+	}
+	for(const auto& one_item: data)
+	{
+		if(one_item.first >= index_end_for_simple_item)
+		{
+			continue;
+		}
+		if(one_item.first < index_begin_for_simple_item)
+		{
+			continue;
+		}
+		switch(one_item.first)
+		{
+			case index_for_a:
+			{
+				if(!spiritsaway::serialize::decode(one_item.second, m_a))
+				{
+					return false;
+				}
+				break;
+			}
+			case index_for_b:
+			{
+				if(!spiritsaway::serialize::decode(one_item.second, m_b))
+				{
+					return false;
+				}
+				break;
+			}
+			default:
+				return false;
+		}
+	}
+	return true;
+}
+
+bool simple_item::decode(const json::object_t& data)
 {
 	if(!spiritsaway::property::property_item<int>::decode(data))
 	{
@@ -142,7 +180,7 @@ bool simple_item::decode(const json& data)
 	iter = data.find("a");
 	if(iter != data.end())
 	{
-		if(!spiritsaway::serialize::decode(*iter, m_a))
+		if(!spiritsaway::serialize::decode(iter->second, m_a))
 		{
 			return false;
 		}
@@ -151,13 +189,33 @@ bool simple_item::decode(const json& data)
 	iter = data.find("b");
 	if(iter != data.end())
 	{
-		if(!spiritsaway::serialize::decode(*iter, m_b))
+		if(!spiritsaway::serialize::decode(iter->second, m_b))
 		{
 			return false;
 		}
 	}
 	
 	return true;
+}
+
+bool simple_item::decode(const json& data)
+{
+	if(data.is_object())
+	{
+		json::object_t obj_data = data.get<json::object_t>();
+		return decode(obj_data);
+	}
+	else if(data.is_array())
+	{
+		std::vector<std::pair<std::uint8_t, json>> array_data;
+		if(!spiritsaway::serialize::decode(data, array_data))
+		{
+			return false;
+		}
+		return decode(array_data);
+	}
+	return false;
+	
 }
 
 bool simple_item::has_default_value() const

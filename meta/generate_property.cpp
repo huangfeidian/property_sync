@@ -70,6 +70,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		});
 	std::sort(property_fields.begin(), property_fields.end(), sort_by_unqualified_name<language::variable_node>);
 	std::size_t field_begin_index = property_fields_with_base.size() - property_fields.size();
+	std::size_t field_end_index = property_fields_with_base.size();
 	std::ostringstream h_stream;
 	std::ostringstream cpp_stream;
 	std::string cur_class_name = one_class->qualified_name();
@@ -81,11 +82,19 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		return "";
 	}
 	mustache::data render_args;
+	if (is_subclass_of_property_item(one_class))
+	{
+		render_args.set("is_property_item", true);
+		field_begin_index++;
+		field_end_index++;
+	}
+	render_args.set("property_idx_begin", std::to_string(field_begin_index));
+	render_args.set("property_idx_max", std::to_string(field_end_index));
 	if (base_classes.size() == 1)
 	{
 		render_args.set("has_base_class", true);
 		render_args.set("base_class_name", base_classes[0]->unqualified_name());
-		render_args.set("base_propery_idx_max", std::to_string(field_begin_index));
+
 	}
 	else if (basees_without_class.size() == 1)
 	{
@@ -95,14 +104,16 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 			render_args.set("is_property_item_direct_subclass", true);
 			render_args.set("has_base_class", true);
 			render_args.set("base_class_name", cur_base);
-			render_args.set("base_propery_idx_max", "0");
+
+			field_begin_index = 1;
 		}
 
 	}
-	if (is_subclass_of_property_item(one_class))
+	else
 	{
-		render_args.set("is_property_item", true);
+
 	}
+	
 	mustache::data field_list{ mustache::data::type::list };
 	std::vector<std::string> property_flags = {
 		"save_db",

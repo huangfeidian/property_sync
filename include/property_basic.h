@@ -109,7 +109,8 @@ namespace spiritsaway::property
 		set_erase = 31,
 		bag_insert = 41,
 		bag_erase = 42,
-		item_change = 43,
+		bag_set = 43,
+		item_change = 44,
 
 	};
 	enum class notify_kind
@@ -130,8 +131,12 @@ namespace spiritsaway::property
 	{
 	public:
 		const std::vector<property_flags>& m_need_flags;
-		msg_queue_base(const std::vector<property_flags>& need_flags)
+		const bool m_encode_ignore_default;
+		const bool m_encode_with_array;
+		msg_queue_base(const std::vector<property_flags>& need_flags, bool encode_ignore_default, bool encode_with_array)
 			: m_need_flags(need_flags)
+			, m_encode_ignore_default(encode_ignore_default)
+			, m_encode_with_array(encode_with_array)
 		{
 
 		}

@@ -11,7 +11,7 @@ namespace spiritsaway::property
 	public:
 		aggregation_msg_queue(msg_queue_base& parent_queue,
 			const property_offset& parent_offset, const property_flags& current_flag)
-			: msg_queue_base(parent_queue.m_need_flags)
+			: msg_queue_base(parent_queue.m_need_flags, parent_queue.m_encode_ignore_default, parent_queue.m_encode_with_array)
 			, m_parent_queue(parent_queue)
 			, m_parent_offset(parent_offset)
 		{
@@ -31,8 +31,8 @@ namespace spiritsaway::property
 	{
 		std::deque<mutate_msg> m_queue;
 	public:
-		top_msg_queue(const std::vector<property_flags>& need_flags)
-			: msg_queue_base(need_flags)
+		top_msg_queue(const std::vector<property_flags>& need_flags, bool encode_ignore_default, bool encode_with_array)
+			: msg_queue_base(need_flags, encode_ignore_default, encode_with_array)
 		{
 
 		}
@@ -83,7 +83,7 @@ namespace spiritsaway::property
 		item_msg_queue(msg_queue_base& parent_queue,
 			property_offset parent_offset,
 			const std::uint32_t& item_idx)
-			: msg_queue_base(parent_queue.m_need_flags)
+			: msg_queue_base(parent_queue.m_need_flags, parent_queue.m_encode_ignore_default, parent_queue.m_encode_with_array)
 			, m_parent_queue(parent_queue)
 			, m_item_idx(item_idx)
 			, m_parent_offset(parent_offset)
