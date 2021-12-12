@@ -408,7 +408,9 @@ void test_flags(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> tes
 
 int main()
 {
-	top_msg_queue cur_top_queue;
+	std::vector<property_flags> need_flags;
+	need_flags.push_back(property_flags{ 0 });
+	top_msg_queue cur_top_queue(need_flags);
 	PropertyMap test_a;
 	PropertyMap test_b;
 	prop_record_proxy<PropertyMap> test_a_record_proxy(test_a, cur_top_queue, property_offset(), property_flags{ property_flags::mask_all });

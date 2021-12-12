@@ -13,8 +13,9 @@ public:
 public:
 	prop_record_proxy(spiritsaway::test::simple_item& data, msg_queue_base& msg_queue,
 		const property_offset& offset, const property_flags& flag, std::uint32_t data_idx)
-		: m_queue(msg_queue, offset, flag, data_idx)
+		: m_queue(msg_queue, offset, data_idx)
 		, m_simple_item_data(data)
+		, m_flag(flag)
 	{
 
 	}

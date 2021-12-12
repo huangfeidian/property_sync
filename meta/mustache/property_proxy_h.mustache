@@ -20,8 +20,9 @@ public:
 	{{#is_property_item_direct_subclass}}
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,
 		const property_offset& offset, const property_flags& flag, std::uint32_t data_idx)
-		: m_queue(msg_queue, offset, flag, data_idx)
+		: m_queue(msg_queue, offset, data_idx)
 		, m_{{{class_name}}}_data(data)
+		, m_flag(flag)
 	{
 
 	}

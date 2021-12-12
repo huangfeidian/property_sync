@@ -25,9 +25,14 @@ namespace spiritsaway::property
 		const static std::uint64_t sync_clients = sync_self | sync_other;
 		const static std::uint64_t sync_all = sync_clients | sync_ghost;
 		const static std::uint64_t mask_all = std::numeric_limits<std::uint64_t>::max();
+		const static std::uint64_t mask_none = 0;
 		constexpr property_flags merge(property_flags other) const
 		{
 			return property_flags{ value & other.value };
+		}
+		constexpr bool include_by(property_flags other) const
+		{
+			return (value & other.value) == value;
 		}
 	};
 	
@@ -124,7 +129,38 @@ namespace spiritsaway::property
 	class msg_queue_base
 	{
 	public:
+		const std::vector<property_flags>& m_need_flags;
+		msg_queue_base(const std::vector<property_flags>& need_flags)
+			: m_need_flags(need_flags)
+		{
+
+		}
 		virtual void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
+		inline void add_multi(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data)
+		{
+			for (auto one_need_flag : m_need_flags)
+			{
+				if (one_need_flag.include_by(flag))
+				{
+					add(offset, cmd, one_need_flag, data);
+				}
+			}
+		}
+		inline bool is_flag_need(property_flags flag) const
+		{
+			for (auto one_need_flag : m_need_flags)
+			{
+				if (one_need_flag.include_by(flag))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		virtual ~msg_queue_base()
+		{
+
+		}
 	};
 	template <typename T, typename B = void>
 	class prop_record_proxy;

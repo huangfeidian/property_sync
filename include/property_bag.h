@@ -424,7 +424,10 @@ namespace spiritsaway::property
 		void clear()
 		{
 			m_data.clear();
-			m_queue.add(m_offset, property_cmd::clear, json());
+			if (m_queue.is_flag_need(m_flag))
+			{
+				m_queue.add_multi(m_offset, property_cmd::clear, m_flag, json());
+			}
 		}
 		std::vector<key_type> keys() const
 		{
@@ -439,8 +442,19 @@ namespace spiritsaway::property
 		void insert(const value_type& value)
 		{
 			m_data.insert(value);
-			m_queue.add(m_offset, property_cmd::bag_insert, m_flag,
-				value.encode());
+			for (auto one_need_flag : m_queue.m_need_flags)
+			{
+				if (one_need_flag.include_by(m_flag))
+				{
+					auto one_encode_result = value.encode_with_flag(one_need_flag);
+					if (one_encode_result.empty())
+					{
+						continue;
+					}
+					m_queue.add(m_offset, property_cmd::bag_insert, one_need_flag, one_encode_result);
+				}
+			}
+			
 		}
 
 		void insert(const json& value)
@@ -457,9 +471,9 @@ namespace spiritsaway::property
 
 		void erase(const key_type& key)
 		{
-			if (m_data.erase(key))
+			if (m_data.erase(key) && m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add(m_offset, property_cmd::bag_erase, m_flag, serialize::encode(key));
+				m_queue.add_multi(m_offset, property_cmd::bag_erase, m_flag, serialize::encode(key));
 			}
 
 		}
