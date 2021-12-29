@@ -76,12 +76,16 @@ namespace spiritsaway::property
 				n_parts++;
 			}
 			std::uint64_t remain_value = 0;
-			for (int i = 0; i + 1 < n_parts; i++)
+			for (int i = 1; i < n_parts; i++)
 			{
 				remain_value <<= 8;
 				remain_value |= parts[n_parts - i - 1];
 			}
-			return std::make_pair(property_offset(remain_value), parts[0]);
+			if (n_parts == 0)
+			{
+				n_parts = 1;
+			}
+			return std::make_pair(property_offset(remain_value), parts[n_parts -1]);
 		}
 		json encode() const
 		{
