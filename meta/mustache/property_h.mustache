@@ -14,7 +14,7 @@ const decltype(m_{{field_name}})& {{field_name}}() const
 
 public:
 
-bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
+bool replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
 
 bool operator==(const {{{class_name}}}& other) const;
 bool operator!=(const {{{class_name}}}& other) const;

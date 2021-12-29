@@ -36,7 +36,7 @@ const decltype(m_g)& g() const
 
 public:
 
-bool replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
+bool replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
 
 bool operator==(const PropertyMap& other) const;
 bool operator!=(const PropertyMap& other) const;

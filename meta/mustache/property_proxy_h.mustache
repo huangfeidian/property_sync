@@ -19,7 +19,7 @@ public:
     {{#is_property_item}}
 	{{#is_property_item_direct_subclass}}
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,
-		const property_offset& offset, const property_flags& flag, std::uint32_t data_idx)
+		const property_record_offset& offset, const property_flags& flag, std::uint32_t data_idx)
 		: m_queue(msg_queue, offset, data_idx)
 		, m_{{{class_name}}}_data(data)
 		, m_flag(flag)
@@ -30,7 +30,7 @@ public:
 	{{^is_property_item_direct_subclass}}
 	
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,
-		const property_offset& offset, std::uint32_t data_idx)
+		const property_record_offset& offset, std::uint32_t data_idx)
 		:  public prop_record_proxy<{{{base_class_name}}}>(data, msg_queue, offset, flag, data_idx)
 		, m_{{{class_name}}}_data(data)
 	{
@@ -41,7 +41,7 @@ public:
 	{{/is_property_item}}
 	{{^is_property_item}}
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,
-		const property_offset& offset)
+		const property_record_offset& offset)
 		: prop_record_proxy<{{{base_class_name}}}>(data, msg_queue, offset)
 		, m_{{{class_name}}}_data(data)
 	{
@@ -56,12 +56,12 @@ template <>
 class prop_record_proxy<{{{class_full_name}}}>
 {
 	{{{class_full_name}}}& m_{{{class_name}}}_data;
-	const property_offset m_offset;
+	const property_record_offset m_offset;
 	msg_queue_base& m_queue;
 	const property_flags m_flag;
 public:
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,
-		const property_offset& offset, const property_flags& flag)
+		const property_record_offset& offset, const property_flags& flag)
 		: m_{{{class_name}}}_data(data)
 		, m_offset(offset)
 		, m_queue(msg_queue)
@@ -79,7 +79,7 @@ public:
 {{#property_fields}}
 	prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})> {{field_name}}()
 	{
-		property_offset empty_offset;
+		property_record_offset empty_offset;
 		return prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})>(m_{{{class_name}}}_data.m_{{field_name}}, m_queue, empty_offset.merge({{{class_full_name}}}::index_for_{{field_name}}), m_flag.merge(property_flags{ {{{class_full_name}}}::flag_for_{{field_name}}}));
 	}
 {{/property_fields}}

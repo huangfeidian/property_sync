@@ -11,7 +11,7 @@ namespace spiritsaway::property
 	public:
 		prop_record_proxy(T& data,
 			msg_queue_base& msg_queue,
-			const property_offset& offset,
+			const property_record_offset& offset,
 			const property_flags& flag)
 			: m_data(data),
 			m_msg_queue(msg_queue),
@@ -55,7 +55,7 @@ namespace spiritsaway::property
 	private:
 		T& m_data;
 		msg_queue_base& m_msg_queue;
-		const property_offset m_offset;
+		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
 
@@ -73,7 +73,7 @@ namespace spiritsaway::property
 			: m_data(data)
 		{
 		}
-		bool replay(property_offset offset, property_cmd cmd, const json& data)
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -108,7 +108,7 @@ namespace spiritsaway::property
 	public:
 		prop_record_proxy(std::vector<T>& data,
 			msg_queue_base& msg_queue,
-			const property_offset& offset, 
+			const property_record_offset& offset, 
 			const property_flags& flag) 
 			: m_data(data)
 			, m_msg_queue(msg_queue)
@@ -192,7 +192,7 @@ namespace spiritsaway::property
 	private:
 		std::vector<T>& m_data;
 		msg_queue_base& m_msg_queue;
-		const property_offset m_offset;
+		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
 
@@ -207,7 +207,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, property_cmd cmd, const json& data)
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -297,7 +297,7 @@ namespace spiritsaway::property
 	public:
 		prop_record_proxy(std::unordered_map<T1, T2>& data,
 			msg_queue_base& msg_queue,
-			const property_offset& offset,
+			const property_record_offset& offset,
 			const property_flags& flag) :
 			m_data(data),
 			m_msg_queue(msg_queue),
@@ -351,7 +351,7 @@ namespace spiritsaway::property
 	private:
 		std::unordered_map<T1, T2>& m_data;
 		msg_queue_base& m_msg_queue;
-		const property_offset m_offset;
+		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
 
@@ -365,7 +365,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, property_cmd cmd, const json& data)
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{

@@ -36,18 +36,19 @@ namespace spiritsaway::property
 		}
 	};
 	
-
-	class property_offset
+	// record offset 和replay offset 都可以当作八字节的数组 但是两者的字节序是不同的 因此这里用类型区分了一下
+	// 同时为了记录数组里有几个值，record的时候所有的值都会加1 避免出现0 
+	class property_replay_offset
 	{
 		std::uint64_t m_value;
-		
+
 	public:
-		property_offset()
+		property_replay_offset()
 			: m_value(0)
 		{
 
 		}
-		property_offset(std::uint64_t value)
+		property_replay_offset(std::uint64_t value)
 			: m_value(value)
 		{
 
@@ -56,15 +57,19 @@ namespace spiritsaway::property
 		{
 			return m_value;
 		}
-		property_offset merge(property_offset child_var) const
+		std::pair<property_replay_offset, std::uint8_t> split() const
 		{
-			assert(m_value < (std::uint64_t(1) << 56));
-			assert(child_var.m_value < (std::uint64_t(1) << 8));
-			auto new_value = (m_value << 8) | (child_var.m_value & 0xff);
-			return property_offset(new_value);
+			auto temp_value = m_value;
+
+			return std::make_pair(property_replay_offset(temp_value >> 8), std::uint8_t(temp_value & 0xff));
 		}
-		std::pair<property_offset, std::uint8_t> split() const
+		bool decode(const json& data)
 		{
+
+			if (!serialize::decode(data, m_value))
+			{
+				return false;
+			}
 			auto temp_value = m_value;
 			std::array<std::uint8_t, 8> parts = { 0 };
 			std::uint8_t n_parts = 0;
@@ -72,32 +77,79 @@ namespace spiritsaway::property
 			{
 				std::uint8_t cur_part_value = static_cast<std::uint8_t>(temp_value & 0xff);
 				temp_value >>= 8;
-				parts[n_parts] = cur_part_value;
+				assert(cur_part_value >= 1);
+				parts[n_parts] = cur_part_value - 1;
 				n_parts++;
 			}
-			std::uint64_t remain_value = 0;
-			for (int i = 1; i < n_parts; i++)
+			m_value = 0;
+			while (n_parts > 0)
 			{
-				remain_value <<= 8;
-				remain_value |= parts[n_parts - i - 1];
+				m_value <<= 8;
+				n_parts--;
+				m_value += parts[n_parts];
 			}
-			if (n_parts == 0)
-			{
-				n_parts = 1;
-			}
-			return std::make_pair(property_offset(remain_value), parts[n_parts -1]);
+			return true;
 		}
+	};
+
+	class property_record_offset
+	{
+		std::uint64_t m_value;
+		
+	public:
+		property_record_offset()
+			: m_value(0)
+		{
+
+		}
+		property_record_offset(std::uint64_t value)
+			: m_value(value)
+		{
+
+		}
+		std::uint64_t value() const
+		{
+			return m_value;
+		}
+		property_record_offset merge(property_record_offset child_var) const
+		{
+			assert(m_value < (std::uint64_t(1) << 56));
+			assert((child_var.m_value + 1) < (std::uint64_t(1) << 8));
+			auto new_value = (m_value << 8) | ((child_var.m_value + 1) & 0xff); // 这里加一是为了避免出现0 因为查找的时候会以0作为终止符号
+			return property_record_offset(new_value);
+		}
+		
 		json encode() const
 		{
 			return m_value;
 		}
-		bool decode(const json& data)
+		
+		property_replay_offset to_replay_offset() const
 		{
-			return serialize::decode(data, m_value);
+			auto temp_value = m_value;
+			std::array<std::uint8_t, 8> parts = { 0 };
+			std::uint8_t n_parts = 0;
+			while (temp_value != 0)
+			{
+				// 这里判定temp_value是否是0 所以有效值绝对不能取0 所有merge过来的值都会加1
+				std::uint8_t cur_part_value = static_cast<std::uint8_t>(temp_value & 0xff);
+				temp_value >>= 8;
+				assert(cur_part_value >= 1);
+				parts[n_parts] = cur_part_value - 1;
+				n_parts++;
+			}
+			temp_value = 0;
+			while (n_parts > 0)
+			{
+				temp_value <<= 8;
+				n_parts--;
+				temp_value += parts[n_parts];
+			}
+			return property_replay_offset{ temp_value };
 		}
-
 	};
 
+	
 	enum class property_cmd : property_cmd_type
 	{
 		clear = 0,
@@ -126,7 +178,7 @@ namespace spiritsaway::property
 
 	struct mutate_msg
 	{
-		property_offset offset;
+		property_record_offset offset;
 		property_cmd cmd;
 		property_flags flag;
 		json data;
@@ -144,8 +196,8 @@ namespace spiritsaway::property
 		{
 
 		}
-		virtual void add(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
-		inline void add_multi(const property_offset& offset, property_cmd cmd, property_flags flag, const json& data)
+		virtual void add(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
+		inline void add_multi(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data)
 		{
 			for (auto one_need_flag : m_need_flags)
 			{
@@ -184,7 +236,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		bool replay(property_offset offset, property_cmd cmd, const json& data)
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			return m_data.replay_mutate_msg(offset, cmd, data);
 		}

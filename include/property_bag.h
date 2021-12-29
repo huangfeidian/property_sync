@@ -125,7 +125,7 @@ namespace spiritsaway::property
 		{
 			return false;
 		}
-		bool replay_mutate_msg(property_offset offset, property_cmd cmd, const json& data)
+		bool replay_mutate_msg(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			return false;
 		}
@@ -293,7 +293,7 @@ namespace spiritsaway::property
 		
 	protected:
 		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
-			property_offset parent_offset, property_flags parent_flag, const key_type& key)
+			property_record_offset parent_offset, property_flags parent_flag, const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
 
@@ -333,10 +333,10 @@ namespace spiritsaway::property
 		bool replay_item_mutate(const json& data)
 		{
 			std::uint64_t mutate_idx = 0;
-			std::uint64_t field_idx;
+			property_replay_offset field_offset;
 			std::uint8_t field_cmd;
 			json mutate_content;
-			if (!serialize::decode_multi(data, mutate_idx, field_idx, field_cmd, mutate_content))
+			if (!serialize::decode_multi(data, mutate_idx, field_offset, field_cmd, mutate_content))
 			{
 				return false;
 			}
@@ -344,7 +344,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			return m_data[mutate_idx].replay_mutate_msg(field_idx, property_cmd(field_cmd), mutate_content);
+			return m_data[mutate_idx].replay_mutate_msg(field_offset, property_cmd(field_cmd), mutate_content);
 		}
 		bool replay_set(const json& data)
 		{
@@ -358,7 +358,7 @@ namespace spiritsaway::property
 			
 		}
 	public:
-		bool replay_mutate_msg(property_offset offset, property_cmd cmd, const json& data)
+		bool replay_mutate_msg(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			if (offset.value() != 0)
 			{
@@ -388,14 +388,14 @@ namespace spiritsaway::property
 
 		property_bag<T>& m_data;
 		msg_queue_base& m_queue;
-		const property_offset m_offset;
+		const property_record_offset m_offset;
 		const property_flags m_flag;
 	public:
 		using key_type = typename T::key_type;
 		using value_type = T;
 		prop_record_proxy(property_bag<T>& data,
 			msg_queue_base& msg_queue,
-			const property_offset& offset,
+			const property_record_offset& offset,
 			const property_flags& flag)
 			:m_data(data)
 			, m_queue(msg_queue)

@@ -11,7 +11,7 @@ PropertyMap::PropertyMap()
 
 }
 
-bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
+bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
