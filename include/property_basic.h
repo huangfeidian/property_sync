@@ -1,5 +1,6 @@
 #pragma once
 #include <any_container/encode.h>
+#include <any_container/decode.h>
 
 namespace spiritsaway::property
 {
