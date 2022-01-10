@@ -83,12 +83,12 @@ namespace spiritsaway::property
 				n_parts++;
 			}
 			m_value = 0;
-			while (n_parts > 0)
+			for (int i = 0; i < n_parts; i++)
 			{
 				m_value <<= 8;
-				n_parts--;
-				m_value += parts[n_parts];
+				m_value += parts[i];
 			}
+			
 			return true;
 		}
 	};
@@ -140,11 +140,10 @@ namespace spiritsaway::property
 				n_parts++;
 			}
 			temp_value = 0;
-			while (n_parts > 0)
+			for (int i = 0; i < n_parts; i++)
 			{
 				temp_value <<= 8;
-				n_parts--;
-				temp_value += parts[n_parts];
+				temp_value += parts[i];
 			}
 			return property_replay_offset{ temp_value };
 		}
