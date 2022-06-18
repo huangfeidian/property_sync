@@ -1,11 +1,4 @@
 
-simple_item::simple_item()
-	: spiritsaway::property::property_item<int>()
-	, m_a{}
-	, m_b{}
-{
-
-}
 
 bool simple_item::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {

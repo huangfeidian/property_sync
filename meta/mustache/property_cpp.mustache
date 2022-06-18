@@ -1,13 +1,12 @@
-
+{{^has_base_class}}
 {{{class_name}}}::{{{class_name}}}()
-{{#has_base_class}}	: {{{base_class_name}}}()
-{{#property_fields}}
-	, m_{{field_name}}{}{{/property_fields}}{{/has_base_class}}{{^has_base_class}}{{#property_fields}}{{#first_field}}	: m_{{field_name}}{}{{/first_field}}
+{{#property_fields}}{{#first_field}}	: m_{{field_name}}{}{{/first_field}}
 {{^first_field}}
-	, m_{{field_name}}{}{{/first_field}}{{/property_fields}}{{/has_base_class}}
+	, m_{{field_name}}{}{{/first_field}}{{/property_fields}}
 {
 
 }
+{{/has_base_class}}
 
 bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {

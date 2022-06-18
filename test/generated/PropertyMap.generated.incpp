@@ -1,4 +1,3 @@
-
 PropertyMap::PropertyMap()
 	: m_a{}
 	, m_b{}

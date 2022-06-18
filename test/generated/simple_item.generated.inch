@@ -3,11 +3,16 @@
 public:
 friend class spiritsaway::property::prop_record_proxy<simple_item>;
 friend class spiritsaway::property::prop_replay_proxy<simple_item>;
-simple_item();
+using base_class = spiritsaway::property::property_item<int>;
+using base_class::base_class;
+
+
+
 const decltype(m_a)& a() const
 {
     return m_a;
 }
+
 const decltype(m_b)& b() const
 {
     return m_b;

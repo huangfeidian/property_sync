@@ -3,8 +3,16 @@
 public:
 friend class spiritsaway::property::prop_record_proxy<{{{class_name}}}>;
 friend class spiritsaway::property::prop_replay_proxy<{{{class_name}}}>;
+{{#has_base_class}}
+using base_class = {{{base_class_name}}};
+using base_class::base_class;
+{{/has_base_class}}
+{{^has_base_class}}
 {{{class_name}}}();
+{{/has_base_class}}
+
 {{#property_fields}}
+
 const decltype(m_{{field_name}})& {{field_name}}() const
 {
     return m_{{field_name}};
