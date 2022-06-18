@@ -422,6 +422,10 @@ namespace spiritsaway::property
 		{
 
 		}
+		const property_bag<T>& data() const
+		{
+			return m_data;
+		}
 		operator const std::vector<value_type>& () const
 		{
 			return m_data.m_data;

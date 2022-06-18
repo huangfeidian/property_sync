@@ -75,6 +75,11 @@ public:
 	}
 {{/has_base_class}}
 
+const {{{class_full_name}}}& data() const
+{
+	return m_{{class_name}}_data;
+}
+
 {{#is_property_item}}
 {{#property_fields}}
 	prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})> {{field_name}}()
