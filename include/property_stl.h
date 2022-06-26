@@ -419,4 +419,132 @@ namespace spiritsaway::property
 	};
 
 
+	template <typename T1, typename T2>
+	class prop_record_proxy<std::map<T1, T2>>
+	{
+	public:
+		prop_record_proxy(std::map<T1, T2>& data,
+			msg_queue_base& msg_queue,
+			const property_record_offset& offset,
+			const property_flags& flag) :
+			m_data(data),
+			m_msg_queue(msg_queue),
+			m_offset(offset),
+			m_flag(flag)
+		{
+
+		}
+		const std::map<T1, T2>& get() const
+		{
+			return m_data;
+		}
+
+		void set(const std::map<T1, T2>& data)
+		{
+			m_data = data;
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add_multi(m_offset, property_cmd::set, m_flag, serialize::encode(m_data));
+			}
+		}
+
+		void clear()
+		{
+			m_data.clear();
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add_multi(m_offset, property_cmd::clear, m_flag, json());
+			}
+		}
+
+		void insert(const T1& key, const T2& value)
+		{
+			m_data[key] = value;
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add_multi(m_offset, property_cmd::map_insert, m_flag, serialize::encode_multi(key, value));
+			}
+		}
+
+		void erase(const T1& key)
+		{
+			m_data.erase(key);
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add_multi(m_offset, property_cmd::map_erase, m_flag, serialize::encode(key));
+			}
+		}
+
+
+	private:
+		std::map<T1, T2>& m_data;
+		msg_queue_base& m_msg_queue;
+		const property_record_offset m_offset;
+		const property_flags m_flag;
+	};
+
+	template <typename T1, typename T2>
+	class prop_replay_proxy<std::map<T1, T2>>
+	{
+		std::map<T1, T2>& m_data;
+	public:
+		prop_replay_proxy(std::map<T1, T2>& data)
+			: m_data(data)
+		{
+
+		}
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+				return replay_clear(data);
+			case property_cmd::set:
+				return replay_set(data);
+			case property_cmd::map_insert:
+				return replay_insert(data);
+			case property_cmd::map_erase:
+				return replay_erase(data);
+			default:
+				return false;
+			}
+		}
+	private:
+		bool replay_set(const json& data)
+		{
+			return serialize::decode(data, m_data);
+		}
+		bool replay_clear(const json& data)
+		{
+			m_data.clear();
+			return true;
+		}
+		bool replay_insert(const json& data)
+		{
+			T1 key;
+			T2 value;
+			if (!serialize::decode_multi(data, key, value))
+			{
+				return false;
+			}
+			m_data[key] = value;
+			return true;
+		}
+		bool replay_erase(const json& data)
+		{
+			T1 key;
+			if (!serialize::decode(data, key))
+			{
+				return false;
+			}
+			m_data.erase(key);
+			return true;
+		}
+	};
+
+
 }
