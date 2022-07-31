@@ -98,7 +98,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	}
 	else if (basees_without_class.size() == 1)
 	{
-		auto cur_base = basees_without_class[0]->qualified_name();
+		auto cur_base = basees_without_class[0]->pretty_name();
 		if (cur_base.rfind("spiritsaway::property::property_item", 0) == 0)
 		{
 			render_args.set("is_property_item_direct_subclass", true);
