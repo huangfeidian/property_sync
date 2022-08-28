@@ -55,7 +55,7 @@ bool is_subclass_of_property_item(const class_node* one_class)
 	}
 	return false;
 }
-mustache::data generate_property_info_for_class(const class_node* one_class)
+mustache::data generate_property_info_for_class(const class_node* one_class, const std::string& flag_class)
 {
 	// 生成一个类的所有property信息
 	auto& the_logger = utils::get_logger();
@@ -115,15 +115,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 	}
 	
 	mustache::data field_list{ mustache::data::type::list };
-	std::vector<std::string> property_flags = {
-		"save_db",
-		"sync_self",
-		"sync_other",
-		"sync_ghost",
-		"sync_clients",
-		"sync_all"
 
-	};
 	bool first_field = true;
 	for (auto one_field : property_fields)
 	{
@@ -151,19 +143,16 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 		cur_field_render_arg.set("has_property_interface", has_property_interface);
 		std::string cur_property_flag;
 		auto cur_prop_annotation = one_field->annotations().find("property")->second;
-		for (const auto& one_flag : property_flags)
+		for (const auto& one_flag_pair : cur_prop_annotation)
 		{
-			if (cur_prop_annotation.find(one_flag) == cur_prop_annotation.end())
-			{
-				continue;
-			}
+			
 			if (cur_property_flag.empty())
 			{
-				cur_property_flag = "spiritsaway::property::property_flags::" + one_flag;
+				cur_property_flag = flag_class + one_flag_pair.first;
 			}
 			else
 			{
-				cur_property_flag += "|spiritsaway::property::property_flags::" + one_flag;
+				cur_property_flag += "|" + flag_class+ one_flag_pair.first;
 			}
 		}
 		if (cur_property_flag.empty())
@@ -184,7 +173,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class)
 }
 
 
-std::unordered_map<std::string, std::string> generate_property(const std::string& generated_folder, const std::string& mustache_folder)
+std::unordered_map<std::string, std::string> generate_property(const std::string& generated_folder, const std::string& mustache_folder, const std::string& flag_class)
 {
 	auto& the_logger = utils::get_logger();
 
@@ -219,7 +208,7 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 		auto new_proxy_file_path = generated_folder_path / generated_proxy_file_name;
 		auto new_cpp_file_path = generated_folder_path / generated_cpp_file_name;
 
-		auto render_args = generate_property_info_for_class(one_class);
+		auto render_args = generate_property_info_for_class(one_class, flag_class);
 
 		generator::append_output_to_stream(result, new_proxy_file_path.string(), property_proxy_mustache_tempalte.render(render_args));
 		generator::append_output_to_stream(result, new_h_file_path.string(), property_h_mustache_tempalte.render(render_args));
@@ -257,6 +246,7 @@ int main(int argc, const char** argv)
 	std::string property_namespace;
 	std::string mustache_folder;
 	std::string generated_folder;
+	std::string flag_class;
 	try
 	{
 		cur_json_content.at("include_dirs").get_to(include_dirs);
@@ -270,6 +260,7 @@ int main(int argc, const char** argv)
 		cur_json_content.at("mustache_folder").get_to(mustache_folder);
 
 		cur_json_content.at("generated_folder").get_to(generated_folder);
+		cur_json_content.at("flag_class").get_to(flag_class);
 
 	}
 	catch (std::exception& e)
@@ -282,6 +273,12 @@ int main(int argc, const char** argv)
 		std::cout << "empty src file" << std::endl;
 		return 1;
 	}
+	if(flag_class.empty())
+	{
+		std::cout<<"flag class is empty"<<std::endl;
+		return 1;
+	}
+	flag_class +="::";
 	src_file = file_folder + src_file;
 	if (mustache_folder.empty())
 	{
@@ -372,7 +369,7 @@ int main(int argc, const char** argv)
 	 json_out << setw(4) << result << endl;
 	std::unordered_map<std::string, std::string> file_content;
 	//utils::merge_file_content(file_content, generate_encode_decode());
-	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder));
+	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder, flag_class));
 	generator::write_content_to_file(file_content);
 	clang_disposeTranslationUnit(m_translationUnit);
 

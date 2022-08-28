@@ -26,6 +26,11 @@ public:
 
 
 
+const spiritsaway::test::simple_item& data() const
+{
+	return m_simple_item_data;
+}
+
 	prop_record_proxy<decltype(m_simple_item_data.m_a)> a()
 	{
 		property_record_offset empty_offset;

@@ -356,16 +356,16 @@ void test_set(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_
 void test_flags(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_a_record_proxy, prop_replay_proxy<PropertyMap> test_b_replay_proxy)
 {
 	mutate_msg msg;
-	std::cout << "test a save db is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ property_flags::save_db }, true, false) << std::endl;
+	std::cout << "test a save db is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ test_property_flags::save_db }, true, false) << std::endl;
 
-	std::cout << "test a sync_clients is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ property_flags::sync_clients }, true, false) << std::endl;
-	std::cout << "test a sync_clients  and save db is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ property_flags::sync_clients | property_flags::save_db }, true, false) << std::endl;
+	std::cout << "test a sync_clients is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ test_property_flags::sync_clients }, true, false) << std::endl;
+	std::cout << "test a sync_clients  and save db is " << test_a_record_proxy.get_PropertyMap().encode_with_flag(property_flags{ test_property_flags::sync_clients | test_property_flags::save_db }, true, false) << std::endl;
 
 	std::vector< property_flags> filter_flags_vec;
-	filter_flags_vec.push_back(property_flags{ property_flags::sync_clients });
-	filter_flags_vec.push_back(property_flags{ property_flags::save_db });
-	filter_flags_vec.push_back(property_flags{ property_flags::sync_ghost });
-	filter_flags_vec.push_back(property_flags{ property_flags::save_db | property_flags::sync_clients });
+	filter_flags_vec.push_back(property_flags{ test_property_flags::sync_clients });
+	filter_flags_vec.push_back(property_flags{ test_property_flags::save_db });
+	filter_flags_vec.push_back(property_flags{ test_property_flags::sync_ghost });
+	filter_flags_vec.push_back(property_flags{ test_property_flags::save_db | test_property_flags::sync_clients });
 
 	auto mut_g = test_a_record_proxy.g();
 	json test_data;
@@ -396,15 +396,15 @@ int main()
 	top_msg_queue cur_top_queue(need_flags, true, true);
 	PropertyMap test_a;
 	PropertyMap test_b;
-	prop_record_proxy<PropertyMap> test_a_record_proxy(test_a, cur_top_queue, property_record_offset(), property_flags{ property_flags::mask_all });
+	prop_record_proxy<PropertyMap> test_a_record_proxy(test_a, cur_top_queue, property_record_offset(), property_flags{ test_property_flags::mask_all });
 	prop_replay_proxy<PropertyMap> test_b_replay_proxy(test_b);
 
 	test_number(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	test_vector(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	test_map(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	test_bag(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
-	need_flags.push_back(property_flags{ property_flags::save_db });
-	need_flags.push_back(property_flags{ property_flags::sync_clients });
+	need_flags.push_back(property_flags{ test_property_flags::save_db });
+	need_flags.push_back(property_flags{ test_property_flags::sync_clients });
 	test_flags(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	return 1;
 }

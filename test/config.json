@@ -15,7 +15,8 @@
 	],
 	"mustache_folder": "../meta/mustache",
 	"generated_folder": "./generated",
-	"namespace": "spiritsaway::test"
+	"namespace": "spiritsaway::test",
+	"flag_class": "spiritsaway::property::test_property_flags"
 
 
 }

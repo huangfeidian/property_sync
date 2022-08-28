@@ -25,6 +25,11 @@ public:
 		return m_PropertyMap_data;
 	}
 
+const spiritsaway::test::PropertyMap& data() const
+{
+	return m_PropertyMap_data;
+}
+
 
 	prop_record_proxy<decltype(m_PropertyMap_data.m_a)> a()
 	{

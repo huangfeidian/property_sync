@@ -9,22 +9,10 @@ namespace spiritsaway::property
 	using property_idx_type = std::uint8_t;
 	using property_cmd_type = std::uint8_t;// 对于变量的改变操作类型 全量赋值 清空 等等
 	constexpr std::uint8_t depth_max = 8;
-	enum class property_flags_enum: std::uint8_t
-	{
-		save_db = 0,
-		sync_self,
-		sync_ghost,
-		sync_other,
-	};
+
 	struct property_flags
 	{
 		std::uint64_t value;
-		const static std::uint64_t save_db = 1 << std::uint8_t(property_flags_enum::save_db);
-		const static std::uint64_t sync_self = 1 << std::uint8_t(property_flags_enum::sync_self);
-		const static std::uint64_t sync_ghost = 1 << std::uint8_t(property_flags_enum::sync_ghost);
-		const static std::uint64_t sync_other = 1 << std::uint8_t(property_flags_enum::sync_other);
-		const static std::uint64_t sync_clients = sync_self | sync_other;
-		const static std::uint64_t sync_all = sync_clients | sync_ghost;
 		const static std::uint64_t mask_all = std::numeric_limits<std::uint64_t>::max();
 		const static std::uint64_t mask_none = 0;
 		constexpr property_flags merge(property_flags other) const

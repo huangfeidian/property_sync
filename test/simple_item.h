@@ -2,6 +2,7 @@
 
 #include "property.h"
 #include "macro.h"
+#include "prop_flags.h"
 
 using namespace spiritsaway::serialize;
 using namespace spiritsaway::property;
