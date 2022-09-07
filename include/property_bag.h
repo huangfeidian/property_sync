@@ -266,7 +266,7 @@ namespace spiritsaway::property
 				{
 					auto pre_index = cur_iter->second;
 					m_index.erase(cur_iter);
-					m_index[m_data[pre_index].id()] = pre_index;
+					m_index[m_data.back().id()] = pre_index;
 					std::swap(m_data[pre_index], m_data.back());
 					m_data.pop_back();
 				}
