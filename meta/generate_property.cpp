@@ -166,7 +166,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 	render_args.set("property_fields", field_list);
 	render_args.set("class_name", one_class->unqualified_name());
 	render_args.set("class_full_name", one_class->qualified_name());
-
+	render_args.set("class_namespace", one_class->get_resident_ns()->qualified_name);
 	return render_args;
 	
 
