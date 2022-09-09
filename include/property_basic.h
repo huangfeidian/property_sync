@@ -42,6 +42,10 @@ namespace spiritsaway::property
 		{
 
 		}
+		bool operator==(const property_replay_offset& other_offset) const
+		{
+			return m_value == other_offset.m_value;
+		}
 		std::uint64_t value() const
 		{
 			return m_value;
@@ -171,6 +175,15 @@ namespace spiritsaway::property
 		property_flags flag;
 		json data;
 	};
+
+	struct replay_msg
+	{
+		property_replay_offset offset;
+		property_cmd cmd;
+		property_flags flag;
+		const json& data;
+	};
+
 	class msg_queue_base
 	{
 	public:
@@ -263,4 +276,16 @@ namespace spiritsaway::property
 		}
 	};
 
+}
+
+namespace std
+{
+	template <>
+	struct hash<spiritsaway::property::property_replay_offset>
+	{
+		std::size_t operator()(const spiritsaway::property::property_replay_offset& cur_offset) const
+		{
+			return std::hash<std::uint64_t>()(cur_offset.value());
+		}
+	};
 }
