@@ -6,14 +6,14 @@ namespace spiritsaway::property
 	
 	class msg_queue_for_offset_get: public msg_queue_base
 	{
-		static const std::vector<property_flag>& empty_flags()
+		static const std::vector<property_flags>& invalid_flags()
 		{
-			static std::vector<property_flag> the_flags;
+			static std::vector<property_flags> the_flags;
 			return the_flags;
 		}
 	public:
 		msg_queue_for_offset_get()
-		: msg_queue_base(empty_flags(), true, true)
+		: msg_queue_base(invalid_flags(), true, true)
 		{
 
 		}
