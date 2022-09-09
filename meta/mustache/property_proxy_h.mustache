@@ -56,8 +56,9 @@ template <>
 class prop_record_proxy<{{{class_full_name}}}>
 {
 	{{{class_full_name}}}& m_{{{class_name}}}_data;
-	const property_record_offset m_offset;
 	msg_queue_base& m_queue;
+public:
+	const property_record_offset m_offset;
 	const property_flags m_flag;
 public:
 	prop_record_proxy({{{class_full_name}}}& data, msg_queue_base& msg_queue,

@@ -55,6 +55,7 @@ namespace spiritsaway::property
 	private:
 		T& m_data;
 		msg_queue_base& m_msg_queue;
+	public:
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
@@ -192,6 +193,7 @@ namespace spiritsaway::property
 	private:
 		std::vector<T>& m_data;
 		msg_queue_base& m_msg_queue;
+	public:
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
@@ -351,6 +353,7 @@ namespace spiritsaway::property
 	private:
 		std::unordered_map<T1, T2>& m_data;
 		msg_queue_base& m_msg_queue;
+	public:
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};
@@ -479,6 +482,7 @@ namespace spiritsaway::property
 	private:
 		std::map<T1, T2>& m_data;
 		msg_queue_base& m_msg_queue;
+	public:
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	};

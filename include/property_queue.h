@@ -4,6 +4,24 @@
 namespace spiritsaway::property
 {
 	
+	class msg_queue_for_offset_get: public msg_queue_base
+	{
+		static const std::vector<property_flag>& empty_flags()
+		{
+			static std::vector<property_flag> the_flags;
+			return the_flags;
+		}
+	public:
+		msg_queue_for_offset_get()
+		: msg_queue_base(empty_flags(), true, true)
+		{
+
+		}
+		void add(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
+		{
+			return;
+		}
+	};
 	class aggregation_msg_queue : public msg_queue_base
 	{
 		msg_queue_base& m_parent_queue;
