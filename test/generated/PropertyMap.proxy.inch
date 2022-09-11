@@ -7,8 +7,9 @@ template <>
 class prop_record_proxy<spiritsaway::test::PropertyMap>
 {
 	spiritsaway::test::PropertyMap& m_PropertyMap_data;
-	const property_record_offset m_offset;
 	msg_queue_base& m_queue;
+public:
+	const property_record_offset m_offset;
 	const property_flags m_flag;
 public:
 	prop_record_proxy(spiritsaway::test::PropertyMap& data, msg_queue_base& msg_queue,

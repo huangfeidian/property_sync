@@ -159,6 +159,13 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 		{
 			cur_property_flag = "0";
 		}
+		for (const auto& one_pair : one_field->annotations())
+		{
+			for (const auto& detail_pair : one_pair.second)
+			{
+				cur_field_render_arg.set("annotate_" + one_pair.first + "_" + detail_pair.first, detail_pair.second);
+			}
+		}
 		cur_field_render_arg.set("field_flags", cur_property_flag);
 		field_list << cur_field_render_arg;
 		field_begin_index++;
@@ -167,6 +174,13 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 	render_args.set("class_name", one_class->unqualified_name());
 	render_args.set("class_full_name", one_class->qualified_name());
 	render_args.set("class_namespace", one_class->get_resident_ns()->qualified_name);
+	for (const auto& one_pair : one_class->annotations())
+	{
+		for (const auto& detail_pair : one_pair.second)
+		{
+			render_args.set("annotate_" + one_pair.first + "_" + detail_pair.first, detail_pair.second);
+		}
+	}
 	return render_args;
 	
 
