@@ -357,7 +357,45 @@ namespace spiritsaway::property
 			return m_used_slots.size() * bit_mask_sz;
 		}
 
-		
+		bool operator==(const property_slots_bag& other) const
+		{
+			if (m_index != other.m_index || m_used_slots != other.m_used_slots)
+			{
+				return false;
+			}
+			if (m_data.size() != other.m_data.size())
+			{
+				return false;
+			}
+			for (int i = 0; i < m_data.size(); i++)
+			{
+				auto item_a = get_slot(i);
+				auto item_b = other.get_slot(i);
+				if (item_a)
+				{
+					if (!item_b)
+					{
+						return false;
+					}
+					if (!item_a->operator==(*item_b))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if (item_b)
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		bool operator!=(const property_slots_bag& other) const
+		{
+			return !(*this == other);
+		}
 	protected:
 		bool insert(std::unique_ptr<Item> temp_item)
 		{
