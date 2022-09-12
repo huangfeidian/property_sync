@@ -145,20 +145,15 @@ namespace spiritsaway::property
 	enum class property_cmd : property_cmd_type
 	{
 		clear = 0,
-		set = 1,
-		vector_push_back = 10,
-		vector_idx_mutate = 11,
-		vector_idx_delete = 12,
-		vector_insert_head = 13,
-		vector_pop_back = 14,
-		map_insert = 20,
-		map_erase = 21,
-		set_add = 30,
-		set_erase = 31,
-		bag_insert = 41,
-		bag_erase = 42,
-		bag_set = 43,
-		item_change = 44,
+		set,
+		add,
+		erase,
+		push,
+		pop,
+		item_change,
+		slot_swap,
+		slot_resize,
+		slot_move
 
 	};
 	enum class notify_kind

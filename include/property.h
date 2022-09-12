@@ -3,6 +3,7 @@
 #include "property_queue.h"
 #include "property_stl.h"
 #include "property_bag.h"
+#include "property_slots.h"
 
 namespace spiritsaway::property
 {

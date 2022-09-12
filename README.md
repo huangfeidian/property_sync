@@ -362,7 +362,7 @@ enum mutate_cmd
     vector_pop,
     vector_mutate_item,
     vector_del_item,
-    map_insert,
+    add,
     map_pop,
 }
 queue<tuple<int, mutate_cmd, json>> _cmds;
@@ -398,7 +398,7 @@ void clear_y()
 void insert_z(const int& k, const int& v)
 {
     _z[k] = v;
-    _cmd.emplace_back(mutate_cmd::map_insert, index_for_z, encode_multi(k, v));
+    _cmd.emplace_back(mutate_cmd::add, index_for_z, encode_multi(k, v));
 }
 
 void pop_z(const int& key)
@@ -613,7 +613,7 @@ template<typename T>
 		void push_back(const T& _new_data)
 		{
 			_data.push_back(_new_data);
-			_msg_queue.add(_offset, var_mutate_cmd::vector_push_back, encode(_new_data));
+			_msg_queue.add(_offset, var_mutate_cmd::add, encode(_new_data));
 		}
 		
 		void pop_back()
@@ -622,7 +622,7 @@ template<typename T>
 			{
 				_data.pop_back();
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_pop_back, json());
+			_msg_queue.add(_offset, var_mutate_cmd::erase, json());
 		}
 		
 		void idx_mutate(std::size_t idx, const T& _new_data)
@@ -631,7 +631,7 @@ template<typename T>
 			{
 				_data[idx] = _new_data;
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_idx_mutate, encode_multi(idx, _new_data));
+			_msg_queue.add(_offset, var_mutate_cmd::item_change, encode_multi(idx, _new_data));
 		}
 		
 		void idx_delete(std::size_t idx)
@@ -640,7 +640,7 @@ template<typename T>
 			{
 				_data.erase(_data.begin() + idx);
 			}
-			_msg_queue.add(_offset, var_mutate_cmd::vector_idx_mutate, encode(idx));
+			_msg_queue.add(_offset, var_mutate_cmd::item_change, encode(idx));
 		}
 		
 		bool replay(var_mutate_cmd _cmd, const json& j_data)
@@ -651,13 +651,13 @@ template<typename T>
 				return replay_clear(j_data);
 			case var_mutate_cmd::set:
 				return replay_set(j_data);
-			case var_mutate_cmd::vector_push_back:
+			case var_mutate_cmd::add:
 				return replay_push_back(j_data);
-			case var_mutate_cmd::vector_pop_back:
+			case var_mutate_cmd::erase:
 				return replay_pop_back(j_data);
-			case var_mutate_cmd::vector_idx_mutate:
+			case var_mutate_cmd::item_change:
 				return replay_idx_mutate(j_data);
-			case var_mutate_cmd::vector_idx_delete:
+			case var_mutate_cmd::erase:
 				return replay_idx_delete(j_data);
 			default:
 				return false;

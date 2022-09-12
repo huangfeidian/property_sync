@@ -312,6 +312,23 @@ void test_bag(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
+	test_data["a"] = 1;
+	test_data["id"] = 3;
+	mut_g.insert(test_data);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	auto g_3_proxy = mut_g.get(3);
+	if (!g_3_proxy)
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
 
 	mut_g.erase(2);
 	msg = cur_top_queue.front();
