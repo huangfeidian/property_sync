@@ -6,7 +6,7 @@ namespace spiritsaway::property
 {
 
 	template <typename T>
-	class property_slot_item
+	class property_slot_item: public property_item
 	{
 	protected:
 		T m_id;
@@ -172,7 +172,7 @@ namespace spiritsaway::property
 
 
 	template <typename Item>
-	class property_slot_bag
+	class property_slots
 	{
 	public:
 		static_assert(std::is_base_of<property_slot_item<typename Item::key_type>, Item>::value,
@@ -185,8 +185,18 @@ namespace spiritsaway::property
 		std::vector<std::unique_ptr<Item>> m_data;
 		std::vector<std::uint32_t> m_used_slots; // true for used false for empty
 		std::unordered_map<key_type, std::uint32_t> m_index;
+
+	private:
+		Item* get_slot(std::uint32_t slot)
+		{
+			if (slot >= m_data.size())
+			{
+				return nullptr;
+			}
+			return m_data[slot].get();
+		}
 	public:
-		property_slot_bag()
+		property_slots()
 		{
 
 		}
@@ -252,7 +262,7 @@ namespace spiritsaway::property
 		{
 			if (!m_data.empty())
 			{
-				// std::cout << "the bag is not empty while decode data " << data.dump() << " to property_slot_bag " << std::endl;
+				// std::cout << "the bag is not empty while decode data " << data.dump() << " to property_slots " << std::endl;
 				return false;
 			}
 			if (!data.is_object())
@@ -304,7 +314,7 @@ namespace spiritsaway::property
 				return true;
 			}
 		}
-		friend void swap(property_slot_bag& a, property_slot_bag& b)
+		friend void swap(property_slots& a, property_slots& b)
 		{
 			std::swap(a.m_index, b.m_index);
 			std::swap(a.m_data, b.m_data);
@@ -357,7 +367,7 @@ namespace spiritsaway::property
 			return m_used_slots.size() * bit_mask_sz;
 		}
 
-		bool operator==(const property_slots_bag& other) const
+		bool operator==(const property_slots& other) const
 		{
 			if (m_index != other.m_index || m_used_slots != other.m_used_slots)
 			{
@@ -392,7 +402,7 @@ namespace spiritsaway::property
 			}
 			return true;
 		}
-		bool operator!=(const property_slots_bag& other) const
+		bool operator!=(const property_slots& other) const
 		{
 			return !(*this == other);
 		}
@@ -412,10 +422,9 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			auto cur_slot = temp_item->slot();
 			m_data[cur_slot] = std::move(temp_item);
 			m_used_slots[cur_slot / bit_mask_sz] |= (1 << (cur_slot % bit_mask_sz));
-			m_index[m_data[cur_slot].id()] = cur_slot;
+			m_index[m_data[cur_slot]->id()] = cur_slot;
 			return true;
 		}
 		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
@@ -429,7 +438,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				return std::make_unique<prop_record_proxy<Item>>(m_data[cur_iter->second], parent_queue, parent_offset, parent_flag, cur_iter->second);
+				return std::make_unique<prop_record_proxy<Item>>(*m_data[cur_iter->second], parent_queue, parent_offset, parent_flag, cur_iter->second);
 			}
 		}
 
@@ -487,7 +496,7 @@ namespace spiritsaway::property
 		}
 		bool replay_set(const json& data)
 		{
-			property_slot_bag temp;
+			property_slots temp;
 			if (!temp.decode(data))
 			{
 				return false;
@@ -560,7 +569,7 @@ namespace spiritsaway::property
 			}
 			Item* pre_item_from = get_slot(slot_from);
 			Item* pre_item_to = get_slot(slot_to);
-			if (!pre_item_from || pre_item_b)
+			if (!pre_item_from || pre_item_to)
 			{
 				return false;
 			}
@@ -608,21 +617,21 @@ namespace spiritsaway::property
 				return false;
 			}
 		}
-		friend class prop_record_proxy<property_slot_bag<Item>>;
+		friend class prop_record_proxy<property_slots<Item>>;
 	};
 
 	template <typename T>
-	class prop_record_proxy<property_slot_bag<T>>
+	class prop_record_proxy<property_slots<T>>
 	{
 
-		property_slot_bag<T>& m_data;
+		property_slots<T>& m_data;
 		msg_queue_base& m_queue;
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	public:
 		using key_type = typename T::key_type;
 		using value_type = T;
-		prop_record_proxy(property_slot_bag<T>& data,
+		prop_record_proxy(property_slots<T>& data,
 			msg_queue_base& msg_queue,
 			const property_record_offset& offset,
 			const property_flags& flag)
@@ -633,7 +642,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		const property_slot_bag<T>& data() const
+		const property_slots<T>& data() const
 		{
 			return m_data;
 		}
@@ -643,7 +652,7 @@ namespace spiritsaway::property
 			m_data.clear();
 			if (m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::clear, m_flag, json());
+				m_queue.add(m_offset, property_cmd::clear, m_flag, json());
 			}
 		}
 
@@ -656,7 +665,7 @@ namespace spiritsaway::property
 
 		void set(const json& other)
 		{
-			property_slot_bag new_bag;
+			property_slots new_bag;
 			if (!new_bag.decode(other))
 			{
 				return;
@@ -668,7 +677,7 @@ namespace spiritsaway::property
 				{
 					auto one_encode_result = other.encode_with_flag(one_need_flag);
 
-					m_queue.add(m_offset, property_cmd::set, one_need_flag, one_encode_result);
+					m_queue.add_for_flag(m_offset, property_cmd::set, one_need_flag, one_encode_result);
 				}
 			}
 		}
@@ -696,7 +705,7 @@ namespace spiritsaway::property
 			m_data.erase(cur_slot);
 			if (pre_data && m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
+				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
 			}
 			return true;
 
@@ -711,7 +720,7 @@ namespace spiritsaway::property
 			m_data.erase(cur_slot);
 			if (pre_data && m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
+				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
 			}
 			return true;
 		}
@@ -721,7 +730,7 @@ namespace spiritsaway::property
 			m_data.resize(new_sz);
 			if (m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::slot_resize, m_flag, serialize::encode(new_sz));
+				m_queue.add(m_offset, property_cmd::slot_resize, m_flag, serialize::encode(new_sz));
 			}
 		}
 
@@ -733,7 +742,7 @@ namespace spiritsaway::property
 			}
 			if (m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::slot_swap, m_flag, serialize::encode_multi(slot_a, slot_b));
+				m_queue.add(m_offset, property_cmd::slot_swap, m_flag, serialize::encode_multi(slot_a, slot_b));
 			}
 			return true;
 		}
@@ -746,7 +755,7 @@ namespace spiritsaway::property
 			}
 			if (m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::slot_move, m_flag, serialize::encode_multi(slot_from, slot_to));
+				m_queue.add(m_offset, property_cmd::slot_move, m_flag, serialize::encode_multi(slot_from, slot_to));
 			}
 			return true;
 
@@ -778,7 +787,7 @@ namespace spiritsaway::property
 				{
 					auto one_encode_result = m_data.m_data[cur_slot]->encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-					m_queue.add(m_offset, property_cmd::add, one_need_flag, one_encode_result);
+					m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, one_encode_result);
 				}
 			}
 

@@ -34,26 +34,49 @@ json load_json_file(const std::string& filename)
 	}
 	return json::parse(cur_file_content);
 }
-bool is_subclass_of_property_item(const class_node* one_class)
+enum class property_item_type
 {
-	const std::string property_item_full_name = "spiritsaway::property::property_item";
+	none = 0,
+	bag,
+	slot,
+	vec
+};
+property_item_type subtype_of_property_item(const class_node* one_class, bool check_parent)
+{
+	const std::string property_bag_item_full_name = "spiritsaway::property::property_bag_item";
+	const std::string property_slot_item_full_name = "spiritsaway::property::property_slot_item";
+	const std::string property_vec_item_full_name = "spiritsaway::property::property_vec_item";
 	auto base_classes = one_class->base_classes();
 	auto basees_without_class = one_class->bases();
-	for (const auto one_sub_class : base_classes)
+	if(check_parent)
 	{
-		if (is_subclass_of_property_item(one_sub_class))
+		for (const auto one_sub_class : base_classes)
 		{
-			return true;
+			auto temp_item_type = subtype_of_property_item(one_sub_class, check_parent);
+			if (temp_item_type != property_item_type::none)
+			{
+				return temp_item_type;
+			}
 		}
 	}
+	
 	for (const auto one_sub_class : basees_without_class)
 	{
-		if (one_sub_class->qualified_name().rfind(property_item_full_name, 0) == 0)
+		if (one_sub_class->qualified_name().rfind(property_bag_item_full_name, 0) == 0)
 		{
-			return true;
+			return property_item_type::bag;
 		}
+		if (one_sub_class->qualified_name().rfind(property_slot_item_full_name, 0) == 0)
+		{
+			return property_item_type::slot;
+		}
+		if (one_sub_class->qualified_name().rfind(property_vec_item_full_name, 0) == 0)
+		{
+			return property_item_type::vec;
+		}
+
 	}
-	return false;
+	return property_item_type::none;
 }
 mustache::data generate_property_info_for_class(const class_node* one_class, const std::string& flag_class)
 {
@@ -82,11 +105,18 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 		return "";
 	}
 	mustache::data render_args;
-	if (is_subclass_of_property_item(one_class))
+	auto cur_item_type = subtype_of_property_item(one_class, true);
+	render_args.set("is_property_item", int(cur_item_type));
+	if (cur_item_type == property_item_type::bag)
 	{
-		render_args.set("is_property_item", true);
+		
 		field_begin_index++;
 		field_end_index++;
+	}
+	else if(cur_item_type == property_item_type::slot)
+	{
+		field_begin_index+=2;
+		field_end_index+=2;
 	}
 	render_args.set("property_idx_begin", std::to_string(field_begin_index));
 	render_args.set("property_idx_max", std::to_string(field_end_index));
@@ -99,13 +129,12 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 	else if (basees_without_class.size() == 1)
 	{
 		auto cur_base = basees_without_class[0]->pretty_name();
-		if (cur_base.rfind("spiritsaway::property::property_item", 0) == 0)
+		if (subtype_of_property_item(one_class, false) != property_item_type::none)
 		{
 			render_args.set("is_property_item_direct_subclass", true);
 			render_args.set("has_base_class", true);
 			render_args.set("base_class_name", cur_base);
 
-			field_begin_index = 1;
 		}
 
 	}
@@ -125,6 +154,14 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 		auto cur_field_class_type = one_field->decl_type()->related_class();
 		auto cur_field_full_name = one_field->decl_type()->qualified_name();
 		if (cur_field_full_name.rfind("spiritsaway::property::property_bag", 0) == 0)
+		{
+			has_property_interface = true;
+		}
+		if (cur_field_full_name.rfind("spiritsaway::property::property_slots", 0) == 0)
+		{
+			has_property_interface = true;
+		}
+		if (cur_field_full_name.rfind("spiritsaway::property::property_vec", 0) == 0)
 		{
 			has_property_interface = true;
 		}
@@ -232,13 +269,13 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 }
 int main(int argc, const char** argv)
 {
-	if (argc != 2)
-	{
-		std::cout << "please specify the json file path" << std::endl;
-		return 1;
-	}
-	std::string json_file_path = argv[1];
-	// std::string json_file_path = "../../test/config.json";
+	//if (argc != 2)
+	//{
+	//	std::cout << "please specify the json file path" << std::endl;
+	//	return 1;
+	//}
+	// std::string json_file_path = argv[1];
+	std::string json_file_path = "../../test/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;

@@ -1,6 +1,6 @@
 
 
-bool simple_item::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
+bool simple_slot_item::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
@@ -18,14 +18,14 @@ bool simple_item::replay_mutate_msg(spiritsaway::property::property_replay_offse
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		default:
-			return spiritsaway::property::property_item<int>::replay_mutate_msg(offset, cmd, data);
+			return spiritsaway::property::property_slot_item<int>::replay_mutate_msg(offset, cmd, data);
 		
 	}
 }
 
-bool simple_item::operator==(const simple_item& other) const
+bool simple_slot_item::operator==(const simple_slot_item& other) const
 {
-	if(!spiritsaway::property::property_item<int>::operator==(other))
+	if(!spiritsaway::property::property_slot_item<int>::operator==(other))
 	{
 		return false;
 	}
@@ -39,15 +39,15 @@ bool simple_item::operator==(const simple_item& other) const
 	}
 	return true;
 }
-bool simple_item::operator!=(const simple_item& other) const
+bool simple_slot_item::operator!=(const simple_slot_item& other) const
 {
 	return !(operator==(other));
 }
 
 
-json simple_item::encode() const
+json simple_slot_item::encode() const
 {
-	json result = spiritsaway::property::property_item<int>::encode();
+	json result = spiritsaway::property::property_slot_item<int>::encode();
 	
 	
 	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
@@ -61,9 +61,9 @@ json simple_item::encode() const
 	}
 	return result;
 }
-void simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const
+void simple_slot_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const
 {
-	spiritsaway::property::property_item<int>::encode_with_flag(flag, ignore_default, result);
+	spiritsaway::property::property_slot_item<int>::encode_with_flag(flag, ignore_default, result);
 
 	if((flag_for_a & flag.value) == flag.value)
 	{
@@ -84,9 +84,9 @@ void simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	return;
 }
 
-void simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const
+void simple_slot_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const
 {
-	spiritsaway::property::property_item<int>::encode_with_flag(flag, ignore_default, result);
+	spiritsaway::property::property_slot_item<int>::encode_with_flag(flag, ignore_default, result);
 
 	if((flag_for_a & flag.value) == flag.value)
 	{
@@ -106,7 +106,7 @@ void simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 	return;
 }
-json simple_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const
+json simple_slot_item::encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const
 {
 	if (replace_key_by_index)
 	{
@@ -122,20 +122,20 @@ json simple_item::encode_with_flag(const spiritsaway::property::property_flags f
 	}
 }
 
-bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
+bool simple_slot_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 {
-	if(!spiritsaway::property::property_item<int>::decode(data, next_idx))
+	if(!spiritsaway::property::property_slot_item<int>::decode(data, next_idx))
 	{
 		return false;
 	}
 	while(next_idx < data.size())
 	{
 		const auto& one_item = data[next_idx];
-		if(one_item.first >= index_end_for_simple_item)
+		if(one_item.first >= index_end_for_simple_slot_item)
 		{
 			return true;
 		}
-		if(one_item.first < index_begin_for_simple_item)
+		if(one_item.first < index_begin_for_simple_slot_item)
 		{
 			return false;
 		}
@@ -165,9 +165,9 @@ bool simple_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data,
 	return true;
 }
 
-bool simple_item::decode(const json::object_t& data)
+bool simple_slot_item::decode(const json::object_t& data)
 {
-	if(!spiritsaway::property::property_item<int>::decode(data))
+	if(!spiritsaway::property::property_slot_item<int>::decode(data))
 	{
 		return false;
 	}
@@ -193,7 +193,7 @@ bool simple_item::decode(const json::object_t& data)
 	return true;
 }
 
-bool simple_item::decode(const json& data)
+bool simple_slot_item::decode(const json& data)
 {
 	if(data.is_object())
 	{
@@ -222,9 +222,9 @@ bool simple_item::decode(const json& data)
 	
 }
 
-bool simple_item::has_default_value() const
+bool simple_slot_item::has_default_value() const
 {
-	if(!spiritsaway::property::property_item<int>::has_default_value())
+	if(!spiritsaway::property::property_slot_item<int>::has_default_value())
 	{
 		return false;
 	}

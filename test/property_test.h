@@ -13,6 +13,7 @@ namespace spiritsaway::test
 		Meta(property(sync_clients)) std::unordered_map<int, int> m_e;
 		Meta(property) std::unordered_map<std::string, int> m_f;
 		Meta(property(save_db, sync_clients)) simple_bag m_g;
+		Meta(property(save_db, sync_clients)) simple_slots m_h;
 #include <PropertyMap.generated.inch>		
 	};
 	

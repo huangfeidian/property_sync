@@ -83,11 +83,13 @@ const {{{class_full_name}}}& data() const
 
 {{#is_property_item}}
 {{#property_fields}}
+{{^annotate_property_no_proxy}}
 	prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})> {{field_name}}()
 	{
 		property_record_offset empty_offset;
 		return prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})>(m_{{{class_name}}}_data.m_{{field_name}}, m_queue, empty_offset.merge({{{class_full_name}}}::index_for_{{field_name}}), m_flag.merge(property_flags{ {{{class_full_name}}}::flag_for_{{field_name}}}));
 	}
+{{/annotate_property_no_proxy}}
 {{/property_fields}}
 
 {{/is_property_item}}

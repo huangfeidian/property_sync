@@ -6,7 +6,7 @@ namespace spiritsaway::property
 {
 
 	template <typename T>
-	class property_item
+	class property_bag_item: public property_item
 	{
 	protected:
 		T m_id;
@@ -17,11 +17,11 @@ namespace spiritsaway::property
 		{
 			return m_id;
 		}
-		property_item()
+		property_bag_item()
 		{
 
 		}
-		property_item(
+		property_bag_item(
 			const T& id) :
 			m_id(id)
 		{
@@ -109,15 +109,15 @@ namespace spiritsaway::property
 
 			
 		}
-		bool operator==(const property_item& other) const
+		bool operator==(const property_bag_item& other) const
 		{
 			return m_id == other.m_id;
 		}
-		bool operator!=(const property_item& other) const
+		bool operator!=(const property_bag_item& other) const
 		{
 			return m_id != other.m_id;
 		}
-		friend void swap(property_item& a, property_item& b)
+		friend void swap(property_bag_item& a, property_bag_item& b)
 		{
 			std::swap(a.m_id, b.m_id);
 		}
@@ -137,8 +137,8 @@ namespace spiritsaway::property
 	{
 
 	public:
-		static_assert(std::is_base_of<property_item<typename Item::key_type>, Item>::value,
-			"item should be derived from property_item<K>");
+		static_assert(std::is_base_of<property_bag_item<typename Item::key_type>, Item>::value,
+			"item should be derived from property_bag_item<K>");
 		using key_type = typename Item::key_type;
 		using value_type = Item;
 		const static std::uint8_t index_for_item = 0;
@@ -435,7 +435,7 @@ namespace spiritsaway::property
 			m_data.clear();
 			if (m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::clear, m_flag, json());
+				m_queue.add(m_offset, property_cmd::clear, m_flag, json());
 			}
 		}
 		std::vector<key_type> keys() const
@@ -485,7 +485,7 @@ namespace spiritsaway::property
 		{
 			if (m_data.erase(key) && m_queue.is_flag_need(m_flag))
 			{
-				m_queue.add_multi(m_offset, property_cmd::erase, m_flag, serialize::encode(key));
+				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(key));
 			}
 
 		}
@@ -506,7 +506,7 @@ namespace spiritsaway::property
 					{
 						auto one_encode_result = value.encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-						m_queue.add(m_offset, property_cmd::add, one_need_flag, one_encode_result);
+						m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, one_encode_result);
 					}
 				}
 			}
@@ -522,7 +522,7 @@ namespace spiritsaway::property
 					{
 						auto one_encode_result = m_data.m_data[insert_result.first].encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-						m_queue.add(m_offset, property_cmd::add, one_need_flag, one_encode_result);
+						m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, one_encode_result);
 					}
 				}
 

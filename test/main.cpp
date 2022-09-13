@@ -113,7 +113,16 @@ void test_vector(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> te
 		std::cout << "fail to relay " << __LINE__ << std::endl;
 	}
 
-	mut_d.pop_back();
+	mut_d.erase_multi(1, 2);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	mut_d.erase_multi(0, 2);
 	msg = cur_top_queue.front();
 	cur_top_queue.pop_front();
 	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
@@ -370,6 +379,82 @@ void test_set(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_
 	mutate_msg msg;
 }
 
+void test_slots(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_a_record_proxy, prop_replay_proxy<PropertyMap> test_b_replay_proxy)
+{
+	mutate_msg msg;
+	// test g begin
+	auto mut_h = test_a_record_proxy.h();
+	json test_data;
+	test_data["a"] = 1;
+	test_data["id"] = 2;
+	test_data["slot"] = 0;
+	mut_h.insert(test_data);
+	assert(cur_top_queue.empty());
+	mut_h.resize(10);
+
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	mut_h.insert(test_data);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	auto h_2_proxy = mut_h.get(2);
+	if (!h_2_proxy)
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+	h_2_proxy->a().set(3);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	test_data["a"] = 1;
+	test_data["id"] = 3;
+	test_data["slot"] = mut_h.data().get_first_empty_slot();
+	mut_h.insert(test_data);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+	auto g_3_proxy = mut_h.get(3);
+	if (!g_3_proxy)
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+
+
+	mut_h.erase(2);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+	}
+	std::cout << "test a is " << test_a_record_proxy.get_PropertyMap().encode() << std::endl;
+	std::cout << "test b is " << test_b_replay_proxy.data().encode() << std::endl;
+}
+
+
 void test_flags(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> test_a_record_proxy, prop_replay_proxy<PropertyMap> test_b_replay_proxy)
 {
 	mutate_msg msg;
@@ -420,6 +505,7 @@ int main()
 	test_vector(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	test_map(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	test_bag(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
+	test_slots(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);
 	need_flags.push_back(property_flags{ test_property_flags::save_db });
 	need_flags.push_back(property_flags{ test_property_flags::sync_clients });
 	test_flags(cur_top_queue, test_a_record_proxy, test_b_replay_proxy);

@@ -178,7 +178,10 @@ namespace spiritsaway::property
 		property_flags flag;
 		const json& data;
 	};
+	struct property_item
+	{
 
+	};
 	class msg_queue_base
 	{
 	public:
@@ -192,14 +195,14 @@ namespace spiritsaway::property
 		{
 
 		}
-		virtual void add(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
-		inline void add_multi(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data)
+		virtual void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) = 0;
+		inline void add(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data)
 		{
 			for (auto one_need_flag : m_need_flags)
 			{
 				if (one_need_flag.include_by(flag))
 				{
-					add(offset, cmd, one_need_flag, data);
+					add_for_flag(offset, cmd, one_need_flag, data);
 				}
 			}
 		}

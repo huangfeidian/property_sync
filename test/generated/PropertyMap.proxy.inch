@@ -60,5 +60,9 @@ const spiritsaway::test::PropertyMap& data() const
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_g)>(m_PropertyMap_data.m_g, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_g), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_g}));
 	}
+	prop_record_proxy<decltype(m_PropertyMap_data.m_h)> h()
+	{
+		return prop_record_proxy<decltype(m_PropertyMap_data.m_h)>(m_PropertyMap_data.m_h, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_h), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_h}));
+	}
 };
 #endif
