@@ -365,7 +365,7 @@ namespace spiritsaway::property
 					}
 				}
 			}
-			return m_used_slots.size() * bit_mask_sz;
+			return std::uint32_t(m_used_slots.size() * bit_mask_sz);
 		}
 
 		bool operator==(const property_slots& other) const
@@ -511,7 +511,7 @@ namespace spiritsaway::property
 			auto pre_sz = m_data.size();
 			if (new_sz < m_data.size())
 			{
-				for (std::uint32_t i = new_sz; i++; i < pre_sz)
+				for (std::uint32_t i = new_sz; i < pre_sz; i++)
 				{
 					erase(i);
 				}
@@ -677,12 +677,12 @@ namespace spiritsaway::property
 			{
 				return;
 			}
-			std::swap(m_data, other);
+			std::swap(m_data, new_bag);
 			for (auto one_need_flag : m_queue.m_need_flags)
 			{
 				if (one_need_flag.include_by(m_flag))
 				{
-					auto one_encode_result = other.encode_with_flag(one_need_flag);
+					auto one_encode_result = m_data.encode_with_flag(one_need_flag,m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
 					m_queue.add_for_flag(m_offset, property_cmd::set, one_need_flag, one_encode_result);
 				}

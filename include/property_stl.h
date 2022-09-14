@@ -5,7 +5,7 @@ namespace spiritsaway::property
 {
 	template <typename T>
 	class prop_record_proxy<T, std::enable_if_t<
-		std::is_arithmetic_v<T> || std::is_same_v<T, std::string>, void>
+		std::is_arithmetic_v<T> || std::is_same_v<T, std::string> ||std::is_same_v<T, json>, void>
 	>
 	{
 	public:
@@ -64,7 +64,7 @@ namespace spiritsaway::property
 
 	template <typename T>
 	class prop_replay_proxy<T, std::enable_if_t<
-		std::is_arithmetic_v<T> || std::is_same_v<T, std::string>, void>
+		std::is_arithmetic_v<T> || std::is_same_v<T, std::string> || std::is_same_v<T, json>, void>
 	>
 	{
 	private:

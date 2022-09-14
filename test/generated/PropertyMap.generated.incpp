@@ -7,6 +7,7 @@ PropertyMap::PropertyMap()
 	, m_f{}
 	, m_g{}
 	, m_h{}
+	, m_i{}
 {
 
 }
@@ -58,6 +59,11 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 			auto temp_proxy = make_replay_proxy(m_h);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
+		case index_for_i:
+		{
+			auto temp_proxy = make_replay_proxy(m_i);
+			return temp_proxy.replay(remain_offset, cmd, data);
+		}
 		default:
 		
 			return false;
@@ -96,6 +102,10 @@ bool PropertyMap::operator==(const PropertyMap& other) const
 		return false;
 	}
 	if(m_h != other.m_h)
+	{
+		return false;
+	}
+	if(m_i != other.m_i)
 	{
 		return false;
 	}
@@ -149,6 +159,11 @@ json PropertyMap::encode() const
 	if(!m_h.has_default_value())
 	{
 		result["h"] = m_h.encode();
+	}
+	
+	if(!m_i.has_default_value())
+	{
+		result["i"] = m_i.encode();
 	}
 	
 	return result;
@@ -221,6 +236,14 @@ void PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 		}
 		
 	}
+	if((flag_for_i & flag.value) == flag.value)
+	{
+		if(!ignore_default || !m_i.has_default_value())
+		{
+			result.push_back(spiritsaway::serialize::encode(std::make_pair(index_for_i, m_i.encode_with_flag(flag, ignore_default, true))));
+		}
+		
+	}
 	return;
 }
 
@@ -289,6 +312,14 @@ void PropertyMap::encode_with_flag(const spiritsaway::property::property_flags f
 		if(!ignore_default || !m_h.has_default_value())
 		{
 			result["h"] = m_h.encode_with_flag(flag, ignore_default, false);
+		}
+		
+	}
+	if((flag_for_i & flag.value) == flag.value)
+	{
+		if(!ignore_default || !m_i.has_default_value())
+		{
+			result["i"] = m_i.encode_with_flag(flag, ignore_default, false);
 		}
 		
 	}
@@ -390,6 +421,14 @@ bool PropertyMap::decode(const std::vector<std::pair<std::uint8_t, json>>& data,
 				}
 				break;
 			}
+			case index_for_i:
+			{
+				if(!spiritsaway::serialize::decode(one_item.second, m_i))
+				{
+					return false;
+				}
+				break;
+			}
 			default:
 				return false;
 		}
@@ -474,6 +513,15 @@ bool PropertyMap::decode(const json::object_t& data)
 		}
 	}
 	
+	iter = data.find("i");
+	if(iter != data.end())
+	{
+		if(!spiritsaway::serialize::decode(iter->second, m_i))
+		{
+			return false;
+		}
+	}
+	
 	return true;
 }
 
@@ -545,6 +593,11 @@ bool PropertyMap::has_default_value() const
 	}
 	
 	if(!m_h.has_default_value())
+	{
+		return false;
+	}
+	
+	if(!m_i.has_default_value())
 	{
 		return false;
 	}

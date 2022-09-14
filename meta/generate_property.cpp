@@ -120,7 +120,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 	}
 	render_args.set("property_idx_begin", std::to_string(field_begin_index));
 	render_args.set("property_idx_max", std::to_string(field_end_index));
-	if (base_classes.size() == 1)
+	if (base_classes.size() == 1 && base_classes[0]->unqualified_name() != "property_vec_item")
 	{
 		render_args.set("has_base_class", true);
 		render_args.set("base_class_name", base_classes[0]->unqualified_name());
@@ -269,13 +269,13 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 }
 int main(int argc, const char** argv)
 {
-	//if (argc != 2)
-	//{
-	//	std::cout << "please specify the json file path" << std::endl;
-	//	return 1;
-	//}
-	// std::string json_file_path = argv[1];
-	std::string json_file_path = "../../test/config.json";
+	if (argc != 2)
+	{
+		std::cout << "please specify the json file path" << std::endl;
+		return 1;
+	}
+	std::string json_file_path = argv[1];
+	// std::string json_file_path = "../../test/config.json";
 	if (json_file_path.empty())
 	{
 		std::cout << "empty json file path" << std::endl;

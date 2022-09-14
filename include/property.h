@@ -4,6 +4,7 @@
 #include "property_stl.h"
 #include "property_bag.h"
 #include "property_slots.h"
+#include "property_vec.h"
 
 namespace spiritsaway::property
 {

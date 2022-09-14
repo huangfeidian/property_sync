@@ -47,6 +47,11 @@ const decltype(m_h)& h() const
     return m_h;
 }
 
+const decltype(m_i)& i() const
+{
+    return m_i;
+}
+
 
 public:
 
@@ -71,6 +76,7 @@ friend void swap(PropertyMap& a, PropertyMap& b)
 	std::swap(a.m_f, b.m_f);
 	std::swap(a.m_g, b.m_g);
 	std::swap(a.m_h, b.m_h);
+	std::swap(a.m_i, b.m_i);
 }
 
 json encode() const;
@@ -106,9 +112,12 @@ constexpr static std::uint64_t flag_for_g = spiritsaway::property::test_property
 constexpr static std::uint8_t index_for_h = 7;
 constexpr static std::uint64_t flag_for_h = spiritsaway::property::test_property_flags::save_db|spiritsaway::property::test_property_flags::sync_clients;
 
+constexpr static std::uint8_t index_for_i = 8;
+constexpr static std::uint64_t flag_for_i = spiritsaway::property::test_property_flags::save_db|spiritsaway::property::test_property_flags::sync_clients;
+
 
 constexpr static std::uint8_t index_begin_for_PropertyMap = 0;
-constexpr static std::uint8_t index_end_for_PropertyMap = 8;
+constexpr static std::uint8_t index_end_for_PropertyMap = 9;
 private:
 
 #endif

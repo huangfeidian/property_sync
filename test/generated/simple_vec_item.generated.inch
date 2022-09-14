@@ -1,0 +1,63 @@
+
+#ifndef __meta_parse__
+public:
+friend class spiritsaway::property::prop_record_proxy<simple_vec_item>;
+friend class spiritsaway::property::prop_replay_proxy<simple_vec_item>;
+using base_class = spiritsaway::property::property_vec_item;
+using base_class::base_class;
+
+
+
+const decltype(m_a)& a() const
+{
+    return m_a;
+}
+
+const decltype(m_b)& b() const
+{
+    return m_b;
+}
+
+
+public:
+
+bool replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data);
+
+bool operator==(const simple_vec_item& other) const;
+bool operator!=(const simple_vec_item& other) const;
+
+json encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, bool replace_key_by_index) const;
+void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const;
+void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const;
+
+friend void swap(simple_vec_item& a, simple_vec_item& b)
+{
+	swap((spiritsaway::property::property_vec_item&)a, (spiritsaway::property::property_vec_item&)b);
+
+	std::swap(a.m_a, b.m_a);
+	std::swap(a.m_b, b.m_b);
+}
+
+json encode() const;
+
+bool decode(const json& data);
+bool decode(const json::object_t& data);
+bool decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx);
+
+bool has_default_value() const;
+
+protected:
+constexpr static std::uint8_t index_for_a = 0;
+constexpr static std::uint64_t flag_for_a = spiritsaway::property::test_property_flags::sync_clients;
+
+constexpr static std::uint8_t index_for_b = 1;
+constexpr static std::uint64_t flag_for_b = spiritsaway::property::test_property_flags::save_db;
+
+
+constexpr static std::uint8_t index_begin_for_simple_vec_item = 0;
+constexpr static std::uint8_t index_end_for_simple_vec_item = 2;
+private:
+
+#endif
+
+

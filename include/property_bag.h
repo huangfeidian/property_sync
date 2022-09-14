@@ -283,7 +283,7 @@ namespace spiritsaway::property
 			auto cur_iter = m_index.find(temp_item.id());
 			if (cur_iter == m_index.end())
 			{
-				m_index[temp_item.id()] = m_data.size();
+				m_index[temp_item.id()] = std::uint32_t(m_data.size());
 				m_data.push_back(std::move(temp_item));
 				return std::make_pair(m_data.size() - 1, true);
 			}
@@ -299,7 +299,7 @@ namespace spiritsaway::property
 			if (cur_iter == m_index.end())
 			{
 				value_type temp_item(key);
-				m_index[temp_item.id()] = m_data.size();
+				m_index[temp_item.id()] = std::uint32_t(m_data.size());
 				m_data.push_back(temp_item);
 				return std::make_pair(m_data.size() - 1, true);
 			}
@@ -462,7 +462,7 @@ namespace spiritsaway::property
 			{
 				if (one_need_flag.include_by(m_flag))
 				{
-					auto one_encode_result = other.encode_with_flag(one_need_flag);
+					auto one_encode_result = m_data.encode_with_flag(one_need_flag,m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
 					m_queue.add(m_offset, property_cmd::set, one_need_flag, one_encode_result);
 				}
