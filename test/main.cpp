@@ -471,6 +471,17 @@ void test_slots(top_msg_queue& cur_top_queue, prop_record_proxy<PropertyMap> tes
 	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
 	{
 		std::cout << "fail to relay " << __LINE__ << std::endl;
+
+	}
+	auto cur_slot = mut_h.data().get(3)->slot();
+	mut_h.erase_by_slot(cur_slot);
+	msg = cur_top_queue.front();
+	cur_top_queue.pop_front();
+	test_b_replay_proxy.replay(msg.offset.to_replay_offset(), msg.cmd, msg.data);
+	if (!(test_a_record_proxy.get_PropertyMap() == test_b_replay_proxy.data()))
+	{
+		std::cout << "fail to relay " << __LINE__ << std::endl;
+
 	}
 	std::cout << "test a is " << test_a_record_proxy.get_PropertyMap().encode() << std::endl;
 	std::cout << "test b is " << test_b_replay_proxy.data().encode() << std::endl;

@@ -183,7 +183,7 @@ namespace spiritsaway::property
 	protected:
 		const static std::uint8_t bit_mask_sz = sizeof(std::uint32_t) * 8;
 		std::vector<std::unique_ptr<Item>> m_data;
-		std::vector<std::uint32_t> m_used_slots; // true for used false for empty
+		std::vector<std::uint32_t> m_used_slots; // true for used false for empty 其实可以尝试用sso的方式避免动态内存分配
 		std::unordered_map<key_type, std::uint32_t> m_index;
 
 	private:
@@ -343,6 +343,7 @@ namespace spiritsaway::property
 			const auto& cur_item = *m_data[slot];
 			m_index.erase(cur_item.id());
 			m_used_slots[slot / bit_mask_sz] -= (1 << (slot % bit_mask_sz));
+			m_data[slot].reset();
 			return true;
 		}
 	public:
