@@ -546,6 +546,7 @@ namespace spiritsaway::property
 			}
 			pre_item_a->set_slot(slot_b);
 			pre_item_b->set_slot(slot_a);
+			std::swap(m_data[slot_b], m_data[slot_a]);
 			m_index[pre_item_a->id()] = slot_b;
 			m_index[pre_item_b->id()] = slot_a;
 			return true;
@@ -573,6 +574,11 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
+			if (slot_to >= m_data.size())
+			{
+				return false;
+			}
+			std::swap(m_data[slot_from], m_data[slot_to]);
 			pre_item_from->set_slot(slot_to);
 			m_index[pre_item_from->id()] = slot_to;
 			m_used_slots[slot_from / bit_mask_sz] -= (1 << (slot_from % bit_mask_sz));
