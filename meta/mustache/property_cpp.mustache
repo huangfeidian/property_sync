@@ -1,3 +1,5 @@
+namespace {{class_namespace}}
+{
 {{^has_base_class}}
 {{{class_name}}}::{{{class_name}}}()
 {{#property_fields}}{{#first_field}}	: m_{{field_name}}{}{{/first_field}}
@@ -18,7 +20,7 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_replay_
 {{#property_fields}}		
 		case index_for_{{field_name}}:
 		{
-			auto temp_proxy = make_replay_proxy(m_{{field_name}});
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_{{field_name}});
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 {{/property_fields}}
@@ -262,3 +264,4 @@ bool {{{class_name}}}::has_default_value() const
 }
 
 
+}

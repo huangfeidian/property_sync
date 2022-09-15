@@ -1,3 +1,5 @@
+namespace spiritsaway::test
+{
 
 
 bool simple_slot_item::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
@@ -9,12 +11,12 @@ bool simple_slot_item::replay_mutate_msg(spiritsaway::property::property_replay_
 	{
 		case index_for_a:
 		{
-			auto temp_proxy = make_replay_proxy(m_a);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_a);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_b:
 		{
-			auto temp_proxy = make_replay_proxy(m_b);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_b);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		default:
@@ -242,3 +244,4 @@ bool simple_slot_item::has_default_value() const
 }
 
 
+}

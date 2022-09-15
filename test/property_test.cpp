@@ -1,6 +1,4 @@
 ﻿#include "property_test.h"
 
-namespace spiritsaway::test
-{
-	#include <PropertyMap.generated.incpp>
-}
+
+#include <PropertyMap.generated.incpp>

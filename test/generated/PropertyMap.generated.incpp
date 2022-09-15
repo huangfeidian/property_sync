@@ -1,3 +1,5 @@
+namespace spiritsaway::test
+{
 PropertyMap::PropertyMap()
 	: m_a{}
 	, m_b{}
@@ -21,47 +23,47 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 	{
 		case index_for_a:
 		{
-			auto temp_proxy = make_replay_proxy(m_a);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_a);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_b:
 		{
-			auto temp_proxy = make_replay_proxy(m_b);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_b);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_c:
 		{
-			auto temp_proxy = make_replay_proxy(m_c);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_c);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_d:
 		{
-			auto temp_proxy = make_replay_proxy(m_d);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_d);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_e:
 		{
-			auto temp_proxy = make_replay_proxy(m_e);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_e);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_f:
 		{
-			auto temp_proxy = make_replay_proxy(m_f);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_f);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_g:
 		{
-			auto temp_proxy = make_replay_proxy(m_g);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_g);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_h:
 		{
-			auto temp_proxy = make_replay_proxy(m_h);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_h);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		case index_for_i:
 		{
-			auto temp_proxy = make_replay_proxy(m_i);
+			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_i);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		default:
@@ -606,3 +608,4 @@ bool PropertyMap::has_default_value() const
 }
 
 
+}
