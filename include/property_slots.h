@@ -1,6 +1,7 @@
 #pragma once
 
 #include "property_basic.h"
+#include <optional>
 
 namespace spiritsaway::property
 {
@@ -204,6 +205,12 @@ namespace spiritsaway::property
 		{
 			return m_index;
 		}
+
+		std::uint32_t capacity() const
+		{
+			return std::uint32_t(m_data.size());
+		}
+
 		json encode() const
 		{
 			json::array_t data_arr;
@@ -428,30 +435,30 @@ namespace spiritsaway::property
 			m_index[m_data[cur_slot]->id()] = cur_slot;
 			return true;
 		}
-		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
+		std::optional<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
 			property_record_offset parent_offset, property_flags parent_flag, const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
 
 			if (cur_iter == m_index.end())
 			{
-				return nullptr;
+				return {};
 			}
 			else
 			{
-				return std::make_unique<prop_record_proxy<Item>>(*m_data[cur_iter->second], parent_queue, parent_offset, parent_flag, cur_iter->second);
+				return prop_record_proxy<Item>(*m_data[cur_iter->second], parent_queue, parent_offset, parent_flag, cur_iter->second);
 			}
 		}
 
-		std::unique_ptr<prop_record_proxy<Item>> get_slot(msg_queue_base& parent_queue,
+		std::optional<prop_record_proxy<Item>> get_slot(msg_queue_base& parent_queue,
 			property_record_offset parent_offset, property_flags parent_flag, std::uint32_t slot)
 		{
 			if(slot >= m_data.size() || !m_data[slot])
 			{
-				return nullptr;
+				return {};
 				
 			}
-			return std::make_unique<prop_record_proxy<Item>>(*m_data[slot], parent_queue, parent_offset, parent_flag, slot);
+			return prop_record_proxy<Item>(*m_data[slot], parent_queue, parent_offset, parent_flag, slot);
 		}
 		
 		bool replay_insert(const json& data)
@@ -663,10 +670,17 @@ namespace spiritsaway::property
 			}
 		}
 
-		void insert(const value_type& value)
+		std::optional<std::uint32_t> insert(const value_type& value)
 		{
+			auto cur_slot = m_data.get_first_empty_slot();
+			if(cur_slot >= m_data.capacity())
+			{
+				return {};
+			}
 			auto new_value_ptr = std::make_unique<value_type>(value);
-			return insert(std::move(new_value_ptr));
+			new_value_ptr->set_slot(cur_slot);
+			insert(std::move(new_value_ptr));
+			return cur_slot;
 
 		}
 
@@ -689,14 +703,21 @@ namespace spiritsaway::property
 			}
 		}
 
-		void insert(const json& value)
+		std::optional<std::uint32_t> insert(const json& value)
 		{
+			auto cur_slot = m_data.get_first_empty_slot();
+			if(cur_slot >= m_data.capacity())
+			{
+				return {};
+			}
 			auto new_value_ptr = std::make_unique<value_type>();
 			if (!new_value_ptr->decode(value))
 			{
-				return;
+				return {};
 			}
+			new_value_ptr->set_slot(cur_slot);
 			insert(std::move(new_value_ptr));
+			return cur_slot;
 		}
 
 
@@ -768,11 +789,11 @@ namespace spiritsaway::property
 
 		}
 		
-		std::unique_ptr<prop_record_proxy<value_type>> get(const key_type& key)
+		std::optional<prop_record_proxy<value_type>> get(const key_type& key)
 		{
 			return m_data.get(m_queue, m_offset, m_flag, key);
 		}
-		std::unique_ptr<prop_record_proxy<value_type>> get_slot(std::uint32_t cur_slot)
+		std::optional<prop_record_proxy<value_type>> get_slot(std::uint32_t cur_slot)
 		{
 			return m_data.get_slot(m_queue, m_offset, m_flag, cur_slot);
 		}

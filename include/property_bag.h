@@ -308,18 +308,18 @@ namespace spiritsaway::property
 				return std::make_pair(cur_iter->second, false);
 			}
 		}
-		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
+		std::optional<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
 			property_record_offset parent_offset, property_flags parent_flag, const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
 
 			if (cur_iter == m_index.end())
 			{
-				return nullptr;
+				return {};
 			}
 			else
 			{
-				return std::make_unique<prop_record_proxy<Item>>(m_data[cur_iter->second], parent_queue, parent_offset , parent_flag, cur_iter->second);
+				return prop_record_proxy<Item>(m_data[cur_iter->second], parent_queue, parent_offset , parent_flag, cur_iter->second);
 			}
 		}
 
@@ -489,7 +489,7 @@ namespace spiritsaway::property
 			}
 
 		}
-		std::unique_ptr<prop_record_proxy<value_type>> get(const key_type& key)
+		std::optional<prop_record_proxy<value_type>> get(const key_type& key)
 		{
 			return m_data.get(m_queue, m_offset, m_flag, key);
 		}

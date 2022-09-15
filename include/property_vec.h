@@ -219,15 +219,15 @@ namespace spiritsaway::property
 			m_data.erase(m_data.begin() + idx, m_data.begin() + idx + num);
 			return true;
 		}
-		std::unique_ptr<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
+		std::optional<prop_record_proxy<Item>> get(msg_queue_base& parent_queue,
 			property_record_offset parent_offset, property_flags parent_flag, std::uint32_t slot)
 		{
 			if (slot >= m_data.size() || !m_data[slot])
 			{
-				return nullptr;
+				return {};
 
 			}
-			return std::make_unique<prop_record_proxy<Item>>(*m_data[slot], parent_queue, parent_offset, parent_flag, slot);
+			return prop_record_proxy<Item>(*m_data[slot], parent_queue, parent_offset, parent_flag, slot);
 		}
 	protected:
 		
@@ -441,7 +441,7 @@ namespace spiritsaway::property
 				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(idx));
 			}
 		}
-		std::unique_ptr<prop_record_proxy<value_type>> get(std::uint32_t idx)
+		std::optional<prop_record_proxy<value_type>> get(std::uint32_t idx)
 		{
 			return m_data.get(m_queue, m_offset, m_flag, idx);
 		}
