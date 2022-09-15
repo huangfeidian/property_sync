@@ -285,7 +285,7 @@ namespace spiritsaway::property
 				return false;
 			}
 			m_data.resize(sz_iter->get<std::uint32_t>());
-			m_used_slots.swap(std::vector<std::uint32_t>((m_data.size() + bit_mask_sz - 1) / bit_mask_sz));
+			m_used_slots = std::vector<std::uint32_t>((m_data.size() + bit_mask_sz - 1) / bit_mask_sz);
 			for (const auto& one_slot_json : data_iter->get<json::array_t>())
 			{
 				std::unique_ptr< value_type> temp_slot = std::make_unique<value_type>();
@@ -672,7 +672,7 @@ namespace spiritsaway::property
 
 		void set(const json& other)
 		{
-			property_slots new_bag;
+			property_slots<T> new_bag;
 			if (!new_bag.decode(other))
 			{
 				return;
