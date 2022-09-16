@@ -11,6 +11,7 @@ namespace spiritsaway::test
 
 	class Meta(property) simple_bag_item : public property_bag_item<int>
 	{
+	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
 
@@ -19,6 +20,7 @@ namespace spiritsaway::test
 
 	class Meta(property) simple_slot_item : public property_slot_item<int>
 	{
+	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
 
@@ -27,6 +29,7 @@ namespace spiritsaway::test
 
 	class Meta(property) simple_vec_item : public property_vec_item
 	{
+	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
 

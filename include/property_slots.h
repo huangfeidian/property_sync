@@ -9,7 +9,7 @@ namespace spiritsaway::property
 	template <typename T>
 	class property_slot_item: public property_item
 	{
-	protected:
+	public:
 		T m_id;
 		std::uint32_t m_slot = 0;
 

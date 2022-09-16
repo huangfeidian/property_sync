@@ -8,7 +8,7 @@ namespace spiritsaway::property
 	template <typename T>
 	class property_bag_item: public property_item
 	{
-	protected:
+	public:
 		T m_id;
 
 	public:
