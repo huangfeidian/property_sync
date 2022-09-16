@@ -698,7 +698,7 @@ namespace spiritsaway::property
 				{
 					auto one_encode_result = m_data.encode_with_flag(one_need_flag,m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-					m_queue.add_for_flag(m_offset, property_cmd::set, one_need_flag, one_encode_result);
+					m_queue.add_for_flag(m_offset, property_cmd::set, one_need_flag, m_flag, one_encode_result);
 				}
 			}
 		}
@@ -815,7 +815,7 @@ namespace spiritsaway::property
 				{
 					auto one_encode_result = m_data.m_data[cur_slot]->encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-					m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, one_encode_result);
+					m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, m_flag, one_encode_result);
 				}
 			}
 

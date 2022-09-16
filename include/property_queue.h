@@ -17,7 +17,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
+		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
 			return;
 		}
@@ -36,9 +36,9 @@ namespace spiritsaway::property
 
 		}
 		aggregation_msg_queue(const aggregation_msg_queue& other) = default;
-		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
+		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
-			m_parent_queue.add_for_flag(m_parent_offset.merge(offset), cmd, flag, data );
+			m_parent_queue.add_for_flag(m_parent_offset.merge(offset), cmd, need_flag, data_flag, data );
 			return;
 		}
 		
@@ -56,9 +56,9 @@ namespace spiritsaway::property
 		}
 		top_msg_queue(const top_msg_queue& other) = default;
 		
-		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
+		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
-			m_queue.push_back(mutate_msg{ offset, cmd, flag, data });
+			m_queue.push_back(mutate_msg{ offset, cmd, need_flag, data });
 		}
 		std::vector<mutate_msg> dump()
 		{
@@ -109,9 +109,9 @@ namespace spiritsaway::property
 
 		}
 		item_msg_queue(const item_msg_queue& other) = default;
-		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags flag, const json& data) override
+		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
-			m_parent_queue.add_for_flag(m_parent_offset, property_cmd::item_change, flag, serialize::encode_multi(m_item_idx, offset, cmd, data));
+			m_parent_queue.add_for_flag(m_parent_offset, property_cmd::item_change, need_flag, data_flag, serialize::encode_multi(m_item_idx, offset, cmd, data));
 			return;
 		}
 		
