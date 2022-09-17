@@ -640,6 +640,7 @@ namespace spiritsaway::property
 
 		property_slots<T>& m_data;
 		msg_queue_base& m_queue;
+	public:
 		const property_record_offset m_offset;
 		const property_flags m_flag;
 	public:
