@@ -671,13 +671,25 @@ namespace spiritsaway::property
 			}
 		}
 
-		std::optional<std::uint32_t> insert(const value_type& value)
+		std::optional<std::uint32_t> insert(const value_type& value, bool with_slot = false)
 		{
-			auto cur_slot = m_data.get_first_empty_slot();
-			if(cur_slot >= m_data.capacity())
+			std::uint32_t cur_slot = value.slot();
+			if(!with_slot)
 			{
-				return {};
+				auto cur_slot = m_data.get_first_empty_slot();
+				if(cur_slot >= m_data.capacity())
+				{
+					return {};
+				}
 			}
+			else
+			{
+				if(m_data.m_data[cur_slot])
+				{
+					return {};
+				}
+			}
+			
 			auto new_value_ptr = std::make_unique<value_type>(value);
 			new_value_ptr->set_slot(cur_slot);
 			insert(std::move(new_value_ptr));
