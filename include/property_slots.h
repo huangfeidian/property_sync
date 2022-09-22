@@ -1,24 +1,18 @@
 #pragma once
 
-#include "property_basic.h"
+#include "property_bag.h"
 #include <optional>
 
 namespace spiritsaway::property
 {
 
 	template <typename T>
-	class property_slot_item: public property_item
+	class property_slot_item: public property_bag_item<T>
 	{
 	public:
-		T m_id;
 		std::uint32_t m_slot = 0;
 
 	public:
-		using key_type = T;
-		const T& id() const
-		{
-			return m_id;
-		}
 		std::uint32_t slot() const
 		{
 			return m_slot;
@@ -32,27 +26,26 @@ namespace spiritsaway::property
 
 		}
 		property_slot_item(const T& id, const std::uint32_t slot)
-		 : m_id(id)
+		 : property_bag_item<T>(id)
 		 , m_slot(slot)
 		{
 
 		}
 		json encode() const
 		{
-			json result;
-			result["id"] = m_id;
+			json result = property_bag_item<T>::encode();
 			result["slot"] = m_slot;
 			return result;
 		}
 		void encode_with_flag(const property_flags flag, bool ignore_default, json::object_t& result) const
 		{
-			result["id"] = m_id;
+			property_bag_item<T>::encode_with_flag(flag, ignore_default, result);
 			result["slot"] = m_slot;
 		}
 
 		void encode_with_flag(const property_flags flag, bool ignore_default, json::array_t& result) const
 		{
-			result.push_back(spiritsaway::serialize::encode(std::make_pair(0, m_id)));
+			property_bag_item<T>::encode_with_flag(flag, ignore_default, result);
 			result.push_back(spiritsaway::serialize::encode(std::make_pair(1, m_slot)));
 		}
 		json encode_with_flag(const property_flags flag, bool ignore_default, bool replace_key_by_index) const
@@ -72,12 +65,7 @@ namespace spiritsaway::property
 		}
 		bool decode(const json::object_t& data)
 		{
-			auto id_iter = data.find("id");
-			if (id_iter == data.end())
-			{
-				return false;
-			}
-			if (!spiritsaway::serialize::decode(id_iter->second, m_id))
+			if(!property_bag_item<T>::decode(data))
 			{
 				return false;
 			}
@@ -94,20 +82,11 @@ namespace spiritsaway::property
 		}
 		bool decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 		{
-			if (next_idx != 0)
+			if(!property_bag_item<T>::decode(data, next_idx))
 			{
 				return false;
 			}
-			if (data.size() < 2)
-			{
-				return false;
-			}
-			if (data[0].first != next_idx)
-			{
-				return false;
-			}
-			next_idx++;
-			if(!spiritsaway::serialize::decode(data[0].second, m_id))
+			if(next_idx != 1)
 			{
 				return false;
 			}
@@ -147,11 +126,11 @@ namespace spiritsaway::property
 		}
 		bool operator==(const property_slot_item& other) const
 		{
-			return m_id == other.m_id && m_slot == other.m_slot;
+			return this->m_id == other.m_id && m_slot == other.m_slot;
 		}
 		bool operator!=(const property_slot_item& other) const
 		{
-			return m_id != other.m_id || m_slot != other.m_slot;
+			return this->m_id != other.m_id || m_slot != other.m_slot;
 		}
 		friend void swap(property_slot_item& a, property_slot_item& b)
 		{

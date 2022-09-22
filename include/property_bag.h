@@ -1,12 +1,12 @@
 #pragma once
 
-#include "property_basic.h"
+#include "property_vec.h"
 
 namespace spiritsaway::property
 {
 
 	template <typename T>
-	class property_bag_item: public property_item
+	class property_bag_item: public property_vec_item
 	{
 	public:
 		T m_id;
