@@ -672,9 +672,33 @@ namespace spiritsaway::property
 			
 			auto new_value_ptr = std::make_unique<value_type>(value);
 			new_value_ptr->set_slot(cur_slot);
-			insert(std::move(new_value_ptr));
+			insert_impl(std::move(new_value_ptr));
 			return cur_slot;
 
+		}
+
+		std::optional<std::uint32_t> insert(std::unique_ptr<value_type> value_ptr, bool with_slot = false)
+		{
+			std::uint32_t cur_slot = value_ptr->slot();
+			if(!with_slot)
+			{
+				auto cur_slot = m_data.get_first_empty_slot();
+				if(cur_slot >= m_data.capacity())
+				{
+					return {};
+				}
+			}
+			else
+			{
+				if(m_data.m_data[cur_slot])
+				{
+					return {};
+				}
+			}
+			
+			value_ptr->set_slot(cur_slot);
+			insert_impl(std::move(value_ptr));
+			return cur_slot;
 		}
 
 		void set(const json& other)
@@ -709,7 +733,7 @@ namespace spiritsaway::property
 				return {};
 			}
 			new_value_ptr->set_slot(cur_slot);
-			insert(std::move(new_value_ptr));
+			insert_impl(std::move(new_value_ptr));
 			return cur_slot;
 		}
 
@@ -789,7 +813,7 @@ namespace spiritsaway::property
 
 
 	protected:
-		void insert(std::unique_ptr<value_type> value)
+		void insert_impl(std::unique_ptr<value_type> value)
 		{
 			auto cur_slot = value->slot();
 			auto insert_result = m_data.insert(std::move(value));

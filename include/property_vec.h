@@ -501,7 +501,6 @@ namespace spiritsaway::property
 			return insert(idx, std::move(temp_item));
 		}
 
-	protected:
 		void push(std::unique_ptr<T> temp_item)
 		{
 			m_data.m_data.push_back(std::move(temp_item));

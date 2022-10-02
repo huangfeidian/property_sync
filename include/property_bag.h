@@ -143,7 +143,7 @@ namespace spiritsaway::property
 		using value_type = Item;
 		const static std::uint8_t index_for_item = 0;
 	protected:
-		std::vector<Item> m_data;
+		std::vector<std::unique_ptr<Item>> m_data;
 		std::unordered_map<key_type, std::uint32_t> m_index;
 		
 	public:
@@ -156,7 +156,13 @@ namespace spiritsaway::property
 
 		json encode() const
 		{
-			return spiritsaway::serialize::encode(m_data);
+			json::array_t json_data;
+			json_data.reserve(m_data.size());
+			for(const auto& one_item: m_data)
+			{
+				json_data.push_back(spiritsaway::serialize::encode(*one_item));
+			}
+			return json_data;
 		}
 		json encode_with_flag(const property_flags flag, bool ignore_default, bool replace_key_by_index) const
 		{
@@ -164,7 +170,7 @@ namespace spiritsaway::property
 			json_data.resize(m_data.size());
 			for (std::uint32_t i = 0; i < m_data.size(); i++)
 			{
-				json_data[i] = m_data[i].encode_with_flag(flag, ignore_default, replace_key_by_index);
+				json_data[i] = m_data[i]->encode_with_flag(flag, ignore_default, replace_key_by_index);
 			}
 			return json_data;
 		}
@@ -250,11 +256,12 @@ namespace spiritsaway::property
 				{
 					auto pre_index = cur_iter->second;
 					m_index.erase(cur_iter);
-					m_index[m_data.back().id()] = pre_index;
+					m_index[m_data.back()->id()] = pre_index;
 					std::swap(m_data[pre_index], m_data.back());
 					
 				}
-				std::unique_ptr<value_type> result = std::make_unique<value_type>(std::move(m_data.back()));
+				std::unique_ptr<value_type> result = std::move(m_data.back());
+				m_data.pop_back();
 				return result;
 			}
 		}
@@ -281,16 +288,21 @@ namespace spiritsaway::property
 	protected:
 		std::pair<std::uint32_t, bool> insert(value_type&& temp_item)
 		{
-			auto cur_iter = m_index.find(temp_item.id());
+			auto cur_item_ptr = std::make_unique<value_type>(std::move(temp_item));
+			return insert(std::move(cur_item_ptr));
+		}
+		std::pair<std::uint32_t, bool> insert(std::unique_ptr<value_type> temp_item_ptr)
+		{
+			auto cur_iter = m_index.find(temp_item_ptr->id());
 			if (cur_iter == m_index.end())
 			{
-				m_index[temp_item.id()] = std::uint32_t(m_data.size());
-				m_data.push_back(std::move(temp_item));
+				m_index[temp_item_ptr->id()] = std::uint32_t(m_data.size());
+				m_data.push_back(std::move(temp_item_ptr));
 				return std::make_pair(m_data.size() - 1, true);
 			}
 			else
 			{
-				m_data[cur_iter->second] = std::move(temp_item);
+				m_data[cur_iter->second] = std::move(temp_item_ptr);
 				return std::make_pair(cur_iter->second, false);
 			}
 		}
@@ -299,9 +311,9 @@ namespace spiritsaway::property
 			auto cur_iter = m_index.find(key);
 			if (cur_iter == m_index.end())
 			{
-				value_type temp_item(key);
-				m_index[temp_item.id()] = std::uint32_t(m_data.size());
-				m_data.push_back(temp_item);
+				std::unique_ptr<value_type> temp_item_ptr = std::make_unique<value_type>(key);
+				m_index[temp_item_ptr->id()] = std::uint32_t(m_data.size());
+				m_data.push_back(std::move(temp_item_ptr));
 				return std::make_pair(m_data.size() - 1, true);
 			}
 			else
@@ -320,7 +332,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				return prop_record_proxy<Item>(m_data[cur_iter->second], parent_queue, parent_offset , parent_flag, cur_iter->second);
+				return prop_record_proxy<Item>(*m_data[cur_iter->second], parent_queue, parent_offset , parent_flag, cur_iter->second);
 			}
 		}
 
@@ -331,7 +343,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			insert(std::move(temp_item));
+			insert(std::make_unique<value_type>(std::move(temp_item)));
 			return true;
 		}
 		bool replay_clear(const json& data)
@@ -362,7 +374,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			return m_data[mutate_idx].replay_mutate_msg(field_offset, property_cmd(field_cmd), mutate_content);
+			return m_data[mutate_idx]->replay_mutate_msg(field_offset, property_cmd(field_cmd), mutate_content);
 		}
 		bool replay_set(const json& data)
 		{
@@ -426,10 +438,6 @@ namespace spiritsaway::property
 		const property_bag<T>& data() const
 		{
 			return m_data;
-		}
-		operator const std::vector<value_type>& () const
-		{
-			return m_data.m_data;
 		}
 
 		void clear()
@@ -500,7 +508,7 @@ namespace spiritsaway::property
 		prop_record_proxy<value_type> get_insert(const key_type& key)
 		{
 			auto cur_result = m_data.get_insert(key);
-			auto& value = m_data.m_data[cur_result.first];
+			auto& value = *m_data.m_data[cur_result.first];
 			if(cur_result.second)
 			{
 				
@@ -524,7 +532,7 @@ namespace spiritsaway::property
 				{
 					if (one_need_flag.include_by(m_flag))
 					{
-						auto one_encode_result = m_data.m_data[insert_result.first].encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+						auto one_encode_result = m_data.m_data[insert_result.first]->encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
 						m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, m_flag, one_encode_result);
 					}
