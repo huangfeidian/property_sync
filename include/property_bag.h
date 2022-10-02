@@ -222,11 +222,26 @@ namespace spiritsaway::property
 
 		bool operator==(const property_bag& other) const
 		{
-			return m_data == other.m_data;
+			if (m_data.size() != other.m_data.size())
+			{
+				return false;
+			}
+			for (std::uint32_t i = 0; i < m_data.size(); i++)
+			{
+				if (m_data[i]->operator==(*other.m_data[i]))
+				{
+					continue;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		bool operator!=(const property_bag& other) const
 		{
-			return m_data != other.m_data;
+			return !(operator==(other));
 		}
 		friend void swap(property_bag& a, property_bag& b)
 		{
