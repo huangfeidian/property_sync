@@ -289,7 +289,7 @@ namespace spiritsaway::property
 			}
 			else
 			{
-				return &m_data[cur_iter->second];
+				return m_data[cur_iter->second].get();
 			}
 		}
 		
