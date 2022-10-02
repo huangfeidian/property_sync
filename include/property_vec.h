@@ -201,14 +201,16 @@ namespace spiritsaway::property
 			return true;
 		}
 
-		bool erase(std::uint32_t idx)
+		std::unique_ptr<value_type> erase(std::uint32_t idx)
 		{
 			if (idx >= m_data.size())
 			{
-				return false;
+				return {};
 			}
+			std::unique_ptr<value_type> result;
+			std::swap(result, m_data[idx]);
 			m_data.erase(m_data.begin() + idx);
-			return true;
+			return result;
 		}
 		bool erase_multi(std::uint32_t idx, std::uint32_t num)
 		{
@@ -431,16 +433,15 @@ namespace spiritsaway::property
 			}
 		}
 
-		void erase(std::uint32_t idx)
+		std::unique_ptr<value_type> erase(std::uint32_t idx)
 		{
-			if (!m_data.erase(idx))
-			{
-				return;
-			}
-			if (m_queue.is_flag_need(m_flag))
+			auto result = m_data.erase(idx);
+
+			if (result && m_queue.is_flag_need(m_flag))
 			{
 				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(idx));
 			}
+			return result;
 		}
 		std::optional<prop_record_proxy<value_type>> get(std::uint32_t idx)
 		{

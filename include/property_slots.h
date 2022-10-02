@@ -320,17 +320,18 @@ namespace spiritsaway::property
 		{
 			return m_index.size() == m_data.size();
 		}
-		bool erase(std::uint32_t slot)
+		std::unique_ptr<value_type> erase(std::uint32_t slot)
 		{
 			if (slot >= m_data.size() || !m_data[slot])
 			{
-				return false;
+				return {};
 			}
 			const auto& cur_item = *m_data[slot];
 			m_index.erase(cur_item.id());
 			m_used_slots[slot / bit_mask_sz] -= (1 << (slot % bit_mask_sz));
-			m_data[slot].reset();
-			return true;
+			std::unique_ptr<value_type> result;
+			std::swap(result, m_data[slot]);
+			return result;
 		}
 	public:
 
@@ -463,7 +464,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			return erase(cur_slot);
+			return !!erase(cur_slot);
 		}
 		bool replay_item_mutate(const json& data)
 		{
@@ -714,35 +715,31 @@ namespace spiritsaway::property
 
 
 
-		bool erase(const key_type& key)
+		std::unique_ptr<value_type> erase(const key_type& key)
 		{
 			auto pre_data = m_data.get(key);
 			if (!pre_data)
 			{
-				return false;
+				return {};
 			}
 			auto cur_slot = pre_data->slot();
-			m_data.erase(cur_slot);
+			auto result = m_data.erase(cur_slot);
 			if (pre_data && m_queue.is_flag_need(m_flag))
 			{
 				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
 			}
-			return true;
+			return result;
 
 		}
-		bool erase_by_slot(std::uint32_t cur_slot)
+		std::unique_ptr<value_type> erase_by_slot(std::uint32_t cur_slot)
 		{
-			auto pre_data = m_data.get_slot(cur_slot);
-			if (!pre_data)
-			{
-				return false;
-			}
-			m_data.erase(cur_slot);
-			if (pre_data && m_queue.is_flag_need(m_flag))
+
+			auto result = m_data.erase(cur_slot);
+			if (result && m_queue.is_flag_need(m_flag))
 			{
 				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(cur_slot));
 			}
-			return true;
+			return result;
 		}
 
 		void resize(std::uint32_t new_sz)

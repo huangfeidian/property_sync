@@ -232,19 +232,19 @@ namespace spiritsaway::property
 			m_index.clear();
 			m_data.clear();
 		}
-		bool erase(const key_type& key)
+		std::unique_ptr<value_type> erase(const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
 			if (cur_iter == m_index.end())
 			{
-				return false;
+				return {};
 			}
 			else
 			{
+				
 				if (cur_iter->second == m_data.size() - 1)
 				{
 					m_index.erase(cur_iter);
-					m_data.pop_back();
 				}
 				else
 				{
@@ -252,9 +252,10 @@ namespace spiritsaway::property
 					m_index.erase(cur_iter);
 					m_index[m_data.back().id()] = pre_index;
 					std::swap(m_data[pre_index], m_data.back());
-					m_data.pop_back();
+					
 				}
-				return true;
+				std::unique_ptr<value_type> result = std::make_unique<value_type>(std::move(m_data.back()));
+				return result;
 			}
 		}
 		const Item* get(const key_type& key) const
@@ -345,7 +346,7 @@ namespace spiritsaway::property
 			{
 				return false;
 			}
-			return erase(cur_k);
+			return !!erase(cur_k);
 		}
 		bool replay_item_mutate(const json& data)
 		{
@@ -482,12 +483,14 @@ namespace spiritsaway::property
 		
 
 
-		void erase(const key_type& key)
+		std::unique_ptr<value_type> erase(const key_type& key)
 		{
-			if (m_data.erase(key) && m_queue.is_flag_need(m_flag))
+			std::unique_ptr<value_type> result = m_data.erase(key);
+			if (result && m_queue.is_flag_need(m_flag))
 			{
 				m_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(key));
 			}
+			return result;
 
 		}
 		std::optional<prop_record_proxy<value_type>> get(const key_type& key)
