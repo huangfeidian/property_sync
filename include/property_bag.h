@@ -476,7 +476,13 @@ namespace spiritsaway::property
 		void insert(const value_type& value)
 		{
 			value_type new_value = value;
-			return insert(std::move(new_value));
+			return insert(std::make_unique<value_type>(std::move(new_value)));
+			
+		}
+
+		void insert(value_type&& value)
+		{
+			return insert(std::make_unique<value_type>(std::move(value)));
 			
 		}
 
@@ -501,7 +507,7 @@ namespace spiritsaway::property
 			{
 				return;
 			}
-			insert(std::move(one_item));
+			return insert(std::make_unique<value_type>(std::move(one_item)));
 		}
 		
 
@@ -539,21 +545,22 @@ namespace spiritsaway::property
 			}
 			return  prop_record_proxy<value_type>(value, m_queue, m_offset, m_flag, cur_result.first);
 		}
-	protected:
-			void insert(value_type&& value)
+
+
+		void insert(std::unique_ptr<value_type> value_ptr)
+		{
+			auto insert_result = m_data.insert(std::move(value_ptr));
+			for (auto one_need_flag : m_queue.m_need_flags)
 			{
-				auto insert_result = m_data.insert(std::move(value));
-				for (auto one_need_flag : m_queue.m_need_flags)
+				if (one_need_flag.include_by(m_flag))
 				{
-					if (one_need_flag.include_by(m_flag))
-					{
-						auto one_encode_result = m_data.m_data[insert_result.first]->encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+					auto one_encode_result = m_data.m_data[insert_result.first]->encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
 
-						m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, m_flag, one_encode_result);
-					}
+					m_queue.add_for_flag(m_offset, property_cmd::add, one_need_flag, m_flag, one_encode_result);
 				}
-
 			}
+
+		}
 	};
 
 }
