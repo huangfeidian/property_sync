@@ -26,10 +26,10 @@ public:
 		return m_PropertyMap_data;
 	}
 
-const spiritsaway::test::PropertyMap& data() const
-{
-	return m_PropertyMap_data;
-}
+	const spiritsaway::test::PropertyMap& data() const
+	{
+		return m_PropertyMap_data;
+	}
 
 
 	prop_record_proxy<decltype(m_PropertyMap_data.m_a)> a()
@@ -67,6 +67,23 @@ const spiritsaway::test::PropertyMap& data() const
 	prop_record_proxy<decltype(m_PropertyMap_data.m_i)> i()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_i)>(m_PropertyMap_data.m_i, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_i), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_i}));
+	}
+
+	void clear()
+	{
+		m_PropertyMap_data.clear();
+		if (m_queue.is_flag_need(m_flag))
+		{
+			m_queue.add(m_offset.merge(spiritsaway::test::PropertyMap::index_end_for_PropertyMap), property_cmd::clear, m_flag, json());
+		}
+	}
+	void set(const spiritsaway::test::PropertyMap& other)
+	{
+		m_PropertyMap_data = other;
+		if (m_queue.is_flag_need(m_flag))
+		{
+			m_queue.add(m_offset.merge(spiritsaway::test::PropertyMap::index_end_for_PropertyMap), property_cmd::set, m_flag, m_PropertyMap_data.encode());
+		}
 	}
 };
 #endif

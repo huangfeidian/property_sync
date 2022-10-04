@@ -26,10 +26,10 @@ public:
 
 
 
-const spiritsaway::test::simple_slot_item& data() const
-{
-	return m_simple_slot_item_data;
-}
+	const spiritsaway::test::simple_slot_item& data() const
+	{
+		return m_simple_slot_item_data;
+	}
 
 	prop_record_proxy<decltype(m_simple_slot_item_data.m_a)> a()
 	{

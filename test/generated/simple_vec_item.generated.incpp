@@ -19,6 +19,7 @@ bool simple_vec_item::replay_mutate_msg(spiritsaway::property::property_replay_o
 			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_b);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
+		
 		default:
 			return spiritsaway::property::property_vec_item::replay_mutate_msg(offset, cmd, data);
 		

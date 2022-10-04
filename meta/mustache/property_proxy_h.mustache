@@ -76,10 +76,10 @@ public:
 	}
 {{/has_base_class}}
 
-const {{{class_full_name}}}& data() const
-{
-	return m_{{class_name}}_data;
-}
+	const {{{class_full_name}}}& data() const
+	{
+		return m_{{class_name}}_data;
+	}
 
 {{#is_property_item}}
 {{#property_fields}}
@@ -100,6 +100,23 @@ const {{{class_full_name}}}& data() const
 		return prop_record_proxy<decltype(m_{{{class_name}}}_data.m_{{field_name}})>(m_{{{class_name}}}_data.m_{{field_name}}, m_queue, m_offset.merge({{{class_full_name}}}::index_for_{{field_name}}), m_flag.merge(property_flags{ {{{class_full_name}}}::flag_for_{{field_name}}}));
 	}
 {{/property_fields}}
+
+	void clear()
+	{
+		m_{{class_name}}_data.clear();
+		if (m_queue.is_flag_need(m_flag))
+		{
+			m_queue.add(m_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::clear, m_flag, json());
+		}
+	}
+	void set(const {{{class_full_name}}}& other)
+	{
+		m_{{class_name}}_data = other;
+		if (m_queue.is_flag_need(m_flag))
+		{
+			m_queue.add(m_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::set, m_flag, m_{{class_name}}_data.encode());
+		}
+	}
 {{/is_property_item}}
 };
 #endif

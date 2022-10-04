@@ -9,47 +9,47 @@ PropertyMap();
 
 const decltype(m_a)& a() const
 {
-    return m_a;
+	return m_a;
 }
 
 const decltype(m_b)& b() const
 {
-    return m_b;
+	return m_b;
 }
 
 const decltype(m_c)& c() const
 {
-    return m_c;
+	return m_c;
 }
 
 const decltype(m_d)& d() const
 {
-    return m_d;
+	return m_d;
 }
 
 const decltype(m_e)& e() const
 {
-    return m_e;
+	return m_e;
 }
 
 const decltype(m_f)& f() const
 {
-    return m_f;
+	return m_f;
 }
 
 const decltype(m_g)& g() const
 {
-    return m_g;
+	return m_g;
 }
 
 const decltype(m_h)& h() const
 {
-    return m_h;
+	return m_h;
 }
 
 const decltype(m_i)& i() const
 {
-    return m_i;
+	return m_i;
 }
 
 
@@ -77,6 +77,11 @@ friend void swap(PropertyMap& a, PropertyMap& b)
 	std::swap(a.m_g, b.m_g);
 	std::swap(a.m_h, b.m_h);
 	std::swap(a.m_i, b.m_i);
+}
+
+void clear()
+{
+	*this = PropertyMap();
 }
 
 json encode() const;

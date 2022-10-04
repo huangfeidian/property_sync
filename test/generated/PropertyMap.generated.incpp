@@ -66,6 +66,31 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 			auto temp_proxy = spiritsaway::property::make_replay_proxy(m_i);
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
+		case index_end_for_PropertyMap:
+		{
+			if(cmd == spiritsaway::property::property_cmd::clear)
+			{
+				*this = PropertyMap();
+				return true;
+			}
+			else if(cmd == spiritsaway::property::property_cmd::set)
+			{
+				PropertyMap new_value;
+				if(!serialize::decode(new_value, data))
+				{
+					return false;
+				}
+				else
+				{
+					std::swap(*this, new_value);
+					return true;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
 		default:
 		
 			return false;

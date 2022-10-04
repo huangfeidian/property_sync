@@ -24,6 +24,33 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_replay_
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 {{/property_fields}}
+		{{^is_property_item}}
+		case index_end_for_{{class_name}}:
+		{
+			if(cmd == spiritsaway::property::property_cmd::clear)
+			{
+				*this = {{{class_name}}}();
+				return true;
+			}
+			else if(cmd == spiritsaway::property::property_cmd::set)
+			{
+				{{class_name}} new_value;
+				if(!serialize::decode(new_value, data))
+				{
+					return false;
+				}
+				else
+				{
+					std::swap(*this, new_value);
+					return true;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		{{/is_property_item}}
 		default:
 		{{#has_base_class}}
 			return {{{base_class_name}}}::replay_mutate_msg(offset, cmd, data);

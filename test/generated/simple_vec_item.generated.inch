@@ -10,12 +10,12 @@ using base_class::base_class;
 
 const decltype(m_a)& a() const
 {
-    return m_a;
+	return m_a;
 }
 
 const decltype(m_b)& b() const
 {
-    return m_b;
+	return m_b;
 }
 
 
@@ -36,6 +36,11 @@ friend void swap(simple_vec_item& a, simple_vec_item& b)
 
 	std::swap(a.m_a, b.m_a);
 	std::swap(a.m_b, b.m_b);
+}
+
+void clear()
+{
+	*this = simple_vec_item();
 }
 
 json encode() const;
