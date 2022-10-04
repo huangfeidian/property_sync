@@ -152,6 +152,17 @@ namespace spiritsaway::property
 		{
 
 		}
+		property_bag(const property_bag& other)
+		{
+			m_data.clear();
+			m_index.clear();
+			m_index = other.m_index;
+			m_data.reserve(other.m_data.size());
+			for (const auto& one_item : other.m_data)
+			{
+				m_data.emplace_back(std::make_unique<Item>(*one_item));
+			}
+		}
 
 		property_bag& operator=(const property_bag& other)
 		{
@@ -165,6 +176,7 @@ namespace spiritsaway::property
 			}
 			return *this;
 		}
+
 
 
 		json encode() const

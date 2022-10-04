@@ -1,6 +1,7 @@
 #pragma once
 
 #include "property_basic.h"
+#include <algorithm>
 
 namespace spiritsaway::property
 {
@@ -87,6 +88,15 @@ namespace spiritsaway::property
 		property_vec()
 		{
 
+		}
+		property_vec(const property_vec& other)
+		{
+			m_data.clear();
+			m_data.reserve(other.m_data.size());
+			for (const auto& one_item : other.m_data)
+			{
+				m_data.emplace_back(std::make_unique<Item>(*one_item));
+			}
 		}
 		property_vec& operator=(const property_vec& other)
 		{
