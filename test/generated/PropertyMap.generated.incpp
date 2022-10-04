@@ -76,7 +76,7 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 			else if(cmd == spiritsaway::property::property_cmd::set)
 			{
 				PropertyMap new_value;
-				if(!serialize::decode(new_value, data))
+				if(!serialize::decode(data, new_value))
 				{
 					return false;
 				}
