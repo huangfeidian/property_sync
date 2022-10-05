@@ -1,6 +1,7 @@
 #pragma once
 
 #include "property_basic.h"
+#include <algorithm>
 
 namespace spiritsaway::property
 {
