@@ -16,6 +16,7 @@ PropertyMap::PropertyMap()
 
 bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
 {
+	using std::swap;
 	auto split_result = offset.split();
 	auto field_index = split_result.second;
 	auto remain_offset = split_result.first;
@@ -70,11 +71,13 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 		{
 			if(cmd == spiritsaway::property::property_cmd::clear)
 			{
-				*this = PropertyMap();
+				PropertyMap temp_clear_instance{};
+				swap(*this, temp_clear_instance);
 				return true;
 			}
 			else if(cmd == spiritsaway::property::property_cmd::set)
 			{
+				
 				PropertyMap new_value;
 				if(!serialize::decode(data, new_value))
 				{
@@ -82,7 +85,7 @@ bool PropertyMap::replay_mutate_msg(spiritsaway::property::property_replay_offse
 				}
 				else
 				{
-					std::swap(*this, new_value);
+					swap(*this, new_value);
 					return true;
 				}
 			}

@@ -66,22 +66,25 @@ void encode_with_flag(const spiritsaway::property::property_flags flag, bool ign
 
 friend void swap(PropertyMap& a, PropertyMap& b)
 {
+	using std::swap;
 
 
-	std::swap(a.m_a, b.m_a);
-	std::swap(a.m_b, b.m_b);
-	std::swap(a.m_c, b.m_c);
-	std::swap(a.m_d, b.m_d);
-	std::swap(a.m_e, b.m_e);
-	std::swap(a.m_f, b.m_f);
-	std::swap(a.m_g, b.m_g);
-	std::swap(a.m_h, b.m_h);
-	std::swap(a.m_i, b.m_i);
+	swap(a.m_a, b.m_a);
+	swap(a.m_b, b.m_b);
+	swap(a.m_c, b.m_c);
+	swap(a.m_d, b.m_d);
+	swap(a.m_e, b.m_e);
+	swap(a.m_f, b.m_f);
+	swap(a.m_g, b.m_g);
+	swap(a.m_h, b.m_h);
+	swap(a.m_i, b.m_i);
 }
 
 void clear()
 {
-	*this = PropertyMap();
+	using std::swap;
+	PropertyMap temp_empty_instance;
+	swap(*this, temp_empty_instance);
 }
 
 json encode() const;

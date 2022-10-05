@@ -1,7 +1,6 @@
 #pragma once
 #include <any_container/encode.h>
 #include <any_container/decode.h>
-
 namespace spiritsaway::property
 {
 	// 每个变量在当前定义内只能是uint8的整数索引 所以一个类里面只能定义255个变量 

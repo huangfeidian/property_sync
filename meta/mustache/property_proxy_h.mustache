@@ -109,12 +109,23 @@ public:
 			m_queue.add(m_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::clear, m_flag, json());
 		}
 	}
-	void set(const {{{class_full_name}}}& other)
+	void set(const json& other_json)
 	{
-		m_{{class_name}}_data = other;
-		if (m_queue.is_flag_need(m_flag))
+		{{{class_full_name}}} new_{{class_name}}_data;
+		if(!serialize::decode(other_json, new_{{class_name}}_data))
 		{
-			m_queue.add(m_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::set, m_flag, m_{{class_name}}_data.encode());
+			return;
+		}
+		using std::swap;
+		swap(m_{{class_name}}_data, new_{{class_name}}_data);
+		for (auto one_need_flag : m_queue.m_need_flags)
+		{
+			if (one_need_flag.include_by(m_flag))
+			{
+				auto one_encode_result = m_{{class_name}}_data.encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+
+				m_queue.add_for_flag(m_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::set, one_need_flag, m_flag, one_encode_result);
+			}
 		}
 	}
 {{/is_property_item}}

@@ -153,18 +153,18 @@ namespace spiritsaway::property
 
 		}
 
-		property_bag& operator=(const property_bag& other)
-		{
-			m_data.clear();
-			m_index.clear();
-			m_index = other.m_index;
-			m_data.reserve(other.m_data.size());
-			for(const auto& one_item: other.m_data)
-			{
-				m_data.emplace_back(std::make_unique<Item>(*one_item));
-			}
-			return *this;
-		}
+		// property_bag& operator=(const property_bag& other)
+		// {
+		// 	m_data.clear();
+		// 	m_index.clear();
+		// 	m_index = other.m_index;
+		// 	m_data.reserve(other.m_data.size());
+		// 	for(const auto& one_item: other.m_data)
+		// 	{
+		// 		m_data.emplace_back(std::make_unique<Item>(*one_item));
+		// 	}
+		// 	return *this;
+		// }
 
 
 		json encode() const
@@ -406,12 +406,13 @@ namespace spiritsaway::property
 		}
 		bool replay_set(const json& data)
 		{
+			using std::swap;
 			property_bag temp;
 			if (!temp.decode(data))
 			{
 				return false;
 			}
-			std::swap(*this, temp);
+			swap(*this, temp);
 			return true;
 			
 		}

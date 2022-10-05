@@ -88,16 +88,16 @@ namespace spiritsaway::property
 		{
 
 		}
-		property_vec& operator=(const property_vec& other)
-		{
-			m_data.clear();
-			m_data.reserve(other.m_data.size());
-			for(const auto& one_item: other.m_data)
-			{
-				m_data.emplace_back(std::make_unique<Item>(*one_item));
-			}
-			return *this;
-		}
+		// property_vec& operator=(const property_vec& other)
+		// {
+		// 	m_data.clear();
+		// 	m_data.reserve(other.m_data.size());
+		// 	for(const auto& one_item: other.m_data)
+		// 	{
+		// 		m_data.emplace_back(std::make_unique<Item>(*one_item));
+		// 	}
+		// 	return *this;
+		// }
 		std::uint32_t size() const
 		{
 			return std::uint32_t(m_data.size());
@@ -338,12 +338,13 @@ namespace spiritsaway::property
 		}
 		bool replay_set(const json& data)
 		{
+			using std::swap;
 			property_vec temp;
 			if (!temp.decode(data))
 			{
 				return false;
 			}
-			std::swap(*this, temp);
+			swap(*this, temp);
 			return true;
 
 		}
@@ -415,12 +416,13 @@ namespace spiritsaway::property
 		}
 		void set(const json& other)
 		{
+			using std::swap;
 			property_vec<T> new_vec;
 			if (!new_vec.decode(other))
 			{
 				return;
 			}
-			std::swap(m_data, new_vec);
+			swap(m_data, new_vec);
 			for (auto one_need_flag : m_queue.m_need_flags)
 			{
 				if (one_need_flag.include_by(m_flag))

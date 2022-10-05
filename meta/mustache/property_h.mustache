@@ -33,18 +33,21 @@ void encode_with_flag(const spiritsaway::property::property_flags flag, bool ign
 
 friend void swap({{{class_name}}}& a, {{{class_name}}}& b)
 {
+	using std::swap;
 {{#has_base_class}}
 	swap(({{{base_class_name}}}&)a, ({{{base_class_name}}}&)b);
 {{/has_base_class}}
 
 {{#property_fields}}	
-	std::swap(a.m_{{field_name}}, b.m_{{field_name}});
+	swap(a.m_{{field_name}}, b.m_{{field_name}});
 {{/property_fields}}
 }
 
 void clear()
 {
-	*this = {{{class_name}}}();
+	using std::swap;
+	{{{class_name}}} temp_empty_instance;
+	swap(*this, temp_empty_instance);
 }
 
 json encode() const;
