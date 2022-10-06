@@ -80,6 +80,8 @@ friend void swap(PropertyMap& a, PropertyMap& b)
 	swap(a.m_i, b.m_i);
 }
 
+
+
 void clear()
 {
 	using std::swap;

@@ -39,6 +39,11 @@ friend void swap(simple_slot_item& a, simple_slot_item& b)
 	swap(a.m_b, b.m_b);
 }
 
+void update_fields(const simple_slot_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes);
+bool set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values);
+void clear_fields(const std::vector<std::uint8_t>& related_indexes);
+
+
 void clear()
 {
 	using std::swap;

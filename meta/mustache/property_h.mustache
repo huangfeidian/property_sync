@@ -43,6 +43,13 @@ friend void swap({{{class_name}}}& a, {{{class_name}}}& b)
 {{/property_fields}}
 }
 
+{{#is_property_item}}
+void update_fields(const {{class_name}}& other, const json& other_json, std::vector<std::uint8_t>& field_indexes);
+bool set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values);
+void clear_fields(const std::vector<std::uint8_t>& related_indexes);
+
+{{/is_property_item}}
+
 void clear()
 {
 	using std::swap;

@@ -54,6 +54,26 @@ bool {{{class_name}}}::replay_mutate_msg(spiritsaway::property::property_replay_
 			}
 		}
 		{{/is_property_item}}
+		{{#is_property_item}}
+		case index_end_for_{{class_name}}:
+		{
+			if(cmd == spiritsaway::property::property_cmd::update_fields)
+			{
+				std::vector<std::uint8_t> related_fields;
+				std::vector<std::pair<std::uint8_t, json>> field_values;
+				if(!serialize::decode_multi(data, related_fields, field_values))
+				{
+					return false;
+				}
+				clear_fields(related_fields);
+				return set_fields(field_values);
+			}
+			else
+			{
+				return false;
+			}
+		}
+		{{/is_property_item}}
 		default:
 		{{#has_base_class}}
 			return {{{base_class_name}}}::replay_mutate_msg(offset, cmd, data);
@@ -292,6 +312,73 @@ bool {{{class_name}}}::has_default_value() const
 	{{/property_fields}}
 	return true;
 }
+{{#is_property_item}}
+void {{{class_name}}}::update_fields(const {{{class_name}}}& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
+{
+	{{#has_base_class}}
+	{{{base_class_name}}}::update_fields(other, other_json, field_indexes);
+	{{/has_base_class}}
+	{{#property_fields}}
+	auto temp_iter_for_{{field_name}} = other_json.find("{{field_name}}");
+	if(temp_iter_for_{{field_name}} != other_json.end())
+	{
+		m_{{field_name}} = other.m_{{field_name}};
+		field_indexes.push_back(index_for_{{field_name}});
+	}
+	{{/property_fields}}
+}
 
+void {{{class_name}}}::clear_fields(const std::vector<std::uint8_t>& related_indexes)
+{
+	{{#has_base_class}}
+	{{{base_class_name}}}::clear_fields(related_indexes);
+	{{/has_base_class}}
+	for(auto one_idx: related_indexes)
+	{
+		switch(one_idx)
+		{
+		{{#property_fields}}
+		case index_for_{{field_name}}:
+		{
+			m_{{field_name}} = {};
+			break;
+		}
+		{{/property_fields}}
+		default:
+			break;
+		}
+	}
+}
+
+bool {{{class_name}}}::set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values)
+{
+	{{#has_base_class}}
+	if(!{{{base_class_name}}}::set_fields(field_values))
+	{
+		return false;
+	}
+	{{/has_base_class}}
+	for(auto one_idx_pair: field_values)
+	{
+		switch(one_idx_pair.first)
+		{
+		{{#property_fields}}
+		case index_for_{{field_name}}:
+		{
+			if(!serialize::decode(one_idx_pair.second, m_{{field_name}}))
+			{
+				return false;
+			}
+			break;
+		}
+		{{/property_fields}}
+		default:
+			break;
+		}
+	}
+	return true;
+	
+}
+{{/is_property_item}}
 
 }

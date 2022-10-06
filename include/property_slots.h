@@ -145,6 +145,19 @@ namespace spiritsaway::property
 		{
 			return false;
 		}
+
+		void update_fields(const property_slot_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
+		{
+			return ;
+		}
+		void clear_fields(const std::vector<std::uint8_t>& related_indexes)
+		{
+			return;
+		}
+		bool set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values)
+		{
+			return true;
+		}
 	};
 
 

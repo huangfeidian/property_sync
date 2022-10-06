@@ -35,6 +35,11 @@ namespace spiritsaway::property
 				return result;
 			}
 		}
+
+		void update_fields(const property_vec_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
+		{
+			return ;
+		}
 		bool decode(const json::object_t& data)
 		{
 			return true;
@@ -59,6 +64,14 @@ namespace spiritsaway::property
 		bool replay_mutate_msg(property_replay_offset offset, property_cmd cmd, const json& data)
 		{
 			return false;
+		}
+		void clear_fields(const std::vector<std::uint8_t>& related_indexes)
+		{
+
+		}
+		bool set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values)
+		{
+			return true;
 		}
 
 		friend void swap(property_vec_item& a, property_vec_item& b)

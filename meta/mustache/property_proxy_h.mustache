@@ -129,5 +129,31 @@ public:
 		}
 	}
 {{/is_property_item}}
+
+{{#is_property_item}}
+	void update_fields(const json& other_json)
+	{
+		{{{class_full_name}}} new_{{class_name}}_data;
+		if(!serialize::decode(other_json, new_{{class_name}}_data))
+		{
+			return;
+		}
+		std::vector<std::uint8_t> related_field_indexes;
+		related_field_indexes.reserve(8);
+		m_{{class_name}}_data.update_fields(new_{{class_name}}_data, other_json, related_field_indexes);
+		json::array_t temp_encode_array(2);
+		temp_encode_array[0] = related_field_indexes;
+		property_record_offset empty_offset;
+		for (auto one_need_flag : m_queue.m_need_flags)
+		{
+			if (one_need_flag.include_by(m_flag))
+			{
+				temp_encode_array[1] = new_{{class_name}}_data.encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+
+				m_queue.add_for_flag(empty_offset.merge({{{class_full_name}}}::index_end_for_{{class_name}}), property_cmd::update_fields, one_need_flag, m_flag, json(temp_encode_array));
+			}
+		}
+	}
+{{/is_property_item}}
 };
 #endif

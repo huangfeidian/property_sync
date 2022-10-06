@@ -152,8 +152,8 @@ namespace spiritsaway::property
 		item_change,
 		slot_swap,
 		slot_resize,
-		slot_move
-
+		slot_move,
+		update_fields,
 	};
 	enum class notify_kind
 	{

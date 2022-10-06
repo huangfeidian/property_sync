@@ -21,6 +21,24 @@ bool simple_vec_item::replay_mutate_msg(spiritsaway::property::property_replay_o
 			return temp_proxy.replay(remain_offset, cmd, data);
 		}
 		
+		case index_end_for_simple_vec_item:
+		{
+			if(cmd == spiritsaway::property::property_cmd::update_fields)
+			{
+				std::vector<std::uint8_t> related_fields;
+				std::vector<std::pair<std::uint8_t, json>> field_values;
+				if(!serialize::decode_multi(data, related_fields, field_values))
+				{
+					return false;
+				}
+				clear_fields(related_fields);
+				return set_fields(field_values);
+			}
+			else
+			{
+				return false;
+			}
+		}
 		default:
 			return spiritsaway::property::property_vec_item::replay_mutate_msg(offset, cmd, data);
 		
@@ -244,6 +262,78 @@ bool simple_vec_item::has_default_value() const
 	}
 	return true;
 }
+void simple_vec_item::update_fields(const simple_vec_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
+{
+	spiritsaway::property::property_vec_item::update_fields(other, other_json, field_indexes);
+	auto temp_iter_for_a = other_json.find("a");
+	if(temp_iter_for_a != other_json.end())
+	{
+		m_a = other.m_a;
+		field_indexes.push_back(index_for_a);
+	}
+	auto temp_iter_for_b = other_json.find("b");
+	if(temp_iter_for_b != other_json.end())
+	{
+		m_b = other.m_b;
+		field_indexes.push_back(index_for_b);
+	}
+}
 
+void simple_vec_item::clear_fields(const std::vector<std::uint8_t>& related_indexes)
+{
+	spiritsaway::property::property_vec_item::clear_fields(related_indexes);
+	for(auto one_idx: related_indexes)
+	{
+		switch(one_idx)
+		{
+		case index_for_a:
+		{
+			m_a = {};
+			break;
+		}
+		case index_for_b:
+		{
+			m_b = {};
+			break;
+		}
+		default:
+			break;
+		}
+	}
+}
+
+bool simple_vec_item::set_fields(const std::vector<std::pair<std::uint8_t, json>>& field_values)
+{
+	if(!spiritsaway::property::property_vec_item::set_fields(field_values))
+	{
+		return false;
+	}
+	for(auto one_idx_pair: field_values)
+	{
+		switch(one_idx_pair.first)
+		{
+		case index_for_a:
+		{
+			if(!serialize::decode(one_idx_pair.second, m_a))
+			{
+				return false;
+			}
+			break;
+		}
+		case index_for_b:
+		{
+			if(!serialize::decode(one_idx_pair.second, m_b))
+			{
+				return false;
+			}
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	return true;
+	
+}
 
 }

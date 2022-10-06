@@ -43,5 +43,29 @@ public:
 	}
 
 
+
+	void update_fields(const json& other_json)
+	{
+		spiritsaway::test::simple_vec_item new_simple_vec_item_data;
+		if(!serialize::decode(other_json, new_simple_vec_item_data))
+		{
+			return;
+		}
+		std::vector<std::uint8_t> related_field_indexes;
+		related_field_indexes.reserve(8);
+		m_simple_vec_item_data.update_fields(new_simple_vec_item_data, other_json, related_field_indexes);
+		json::array_t temp_encode_array(2);
+		temp_encode_array[0] = related_field_indexes;
+		property_record_offset empty_offset;
+		for (auto one_need_flag : m_queue.m_need_flags)
+		{
+			if (one_need_flag.include_by(m_flag))
+			{
+				temp_encode_array[1] = new_simple_vec_item_data.encode_with_flag(one_need_flag, m_queue.m_encode_ignore_default, m_queue.m_encode_with_array);
+
+				m_queue.add_for_flag(empty_offset.merge(spiritsaway::test::simple_vec_item::index_end_for_simple_vec_item), property_cmd::update_fields, one_need_flag, m_flag, json(temp_encode_array));
+			}
+		}
+	}
 };
 #endif
