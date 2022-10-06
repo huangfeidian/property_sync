@@ -36,37 +36,73 @@ public:
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_a)>(m_PropertyMap_data.m_a, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_a), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_a}));
 	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_a)> replay_a()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_a)>(m_PropertyMap_data.m_a);
+	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_b)> b()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_b)>(m_PropertyMap_data.m_b, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_b), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_b}));
+	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_b)> replay_b()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_b)>(m_PropertyMap_data.m_b);
 	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_c)> c()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_c)>(m_PropertyMap_data.m_c, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_c), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_c}));
 	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_c)> replay_c()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_c)>(m_PropertyMap_data.m_c);
+	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_d)> d()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_d)>(m_PropertyMap_data.m_d, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_d), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_d}));
+	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_d)> replay_d()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_d)>(m_PropertyMap_data.m_d);
 	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_e)> e()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_e)>(m_PropertyMap_data.m_e, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_e), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_e}));
 	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_e)> replay_e()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_e)>(m_PropertyMap_data.m_e);
+	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_f)> f()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_f)>(m_PropertyMap_data.m_f, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_f), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_f}));
+	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_f)> replay_f()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_f)>(m_PropertyMap_data.m_f);
 	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_g)> g()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_g)>(m_PropertyMap_data.m_g, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_g), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_g}));
 	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_g)> replay_g()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_g)>(m_PropertyMap_data.m_g);
+	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_h)> h()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_h)>(m_PropertyMap_data.m_h, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_h), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_h}));
 	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_h)> replay_h()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_h)>(m_PropertyMap_data.m_h);
+	}
 	prop_record_proxy<decltype(m_PropertyMap_data.m_i)> i()
 	{
 		return prop_record_proxy<decltype(m_PropertyMap_data.m_i)>(m_PropertyMap_data.m_i, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_i), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_i}));
+	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_i)> replay_i()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_i)>(m_PropertyMap_data.m_i);
 	}
 
 	void clear()

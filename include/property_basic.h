@@ -55,6 +55,7 @@ namespace spiritsaway::property
 
 			return std::make_pair(property_replay_offset(temp_value >> 8), std::uint8_t(temp_value & 0xff));
 		}
+
 		bool decode(const json& data)
 		{
 
@@ -109,6 +110,19 @@ namespace spiritsaway::property
 			assert((child_var.m_value + 1) < (std::uint64_t(1) << 8));
 			auto new_value = (m_value << 8) | ((child_var.m_value + 1) & 0xff); // 这里加一是为了避免出现0 因为查找的时候会以0作为终止符号
 			return property_record_offset(new_value);
+		}
+		property_record_offset merge_all(property_record_offset child_var) const
+		{
+			std::uint64_t new_value = m_value;
+			std::uint64_t child_value = child_var.m_value;
+			while(child_value)
+			{
+				std::uint8_t cur_part_value = static_cast<std::uint8_t>(child_value & 0xff);
+				child_value >>= 8;
+				assert(cur_part_value >= 1);
+				new_value = (new_value <<8) | cur_part_value;
+			}
+			return new_value;
 		}
 		
 		json encode() const
