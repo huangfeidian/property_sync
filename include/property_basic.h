@@ -188,7 +188,6 @@ namespace spiritsaway::property
 	{
 		property_replay_offset offset;
 		property_cmd cmd;
-		property_flags flag;
 		const json& data;
 	};
 	struct property_item
