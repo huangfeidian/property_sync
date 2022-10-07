@@ -224,7 +224,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 }
 
 
-std::unordered_map<std::string, std::string> generate_property(const std::string& generated_folder, const std::string& mustache_folder, const std::string& flag_class)
+std::unordered_map<std::string, std::string> generate_property(const std::string& generated_folder, const std::string& mustache_folder, const std::string& flag_class, const std::string& base_namespace)
 {
 	auto& the_logger = utils::get_logger();
 
@@ -248,10 +248,10 @@ std::unordered_map<std::string, std::string> generate_property(const std::string
 	auto property_cpp_mustache_file = std::ifstream(mustache_folder + "/property_cpp.mustache");
 	std::string property_cpp_template_str = std::string(std::istreambuf_iterator<char>(property_cpp_mustache_file), std::istreambuf_iterator<char>());
 	mustache::mustache property_cpp_mustache_tempalte(property_cpp_template_str);
-	auto generated_folder_path = std::filesystem::path(generated_folder);
+	
 	for (auto one_class : all_property_classes)
 	{
-
+		auto generated_folder_path = spiritsaway::meta::utils::create_dir_for_sub_namespace(base_namespace, one_class->get_resident_ns()->qualified_name, generated_folder);
 		auto generated_h_file_name = one_class->unqualified_name() + ".generated.inch";
 		auto generated_proxy_file_name = one_class->unqualified_name() + ".proxy.inch";
 		auto generated_cpp_file_name = one_class->unqualified_name() + ".generated.incpp";
@@ -420,7 +420,7 @@ int main(int argc, const char** argv)
 	 json_out << setw(4) << result << endl;
 	std::unordered_map<std::string, std::string> file_content;
 	//utils::merge_file_content(file_content, generate_encode_decode());
-	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder, flag_class));
+	generator::merge_file_content(file_content, generate_property(generated_folder, mustache_folder, flag_class, property_namespace));
 	generator::write_content_to_file(file_content);
 	clang_disposeTranslationUnit(m_translationUnit);
 

@@ -59,7 +59,7 @@ bool decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_
 
 bool has_default_value() const;
 
-protected:
+public:
 constexpr static std::uint8_t index_for_a = 1;
 constexpr static std::uint64_t flag_for_a = spiritsaway::property::test_property_flags::sync_clients;
 
