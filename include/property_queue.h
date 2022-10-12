@@ -66,7 +66,7 @@ namespace spiritsaway::property
 			result.reserve(m_queue.size());
 			while (!m_queue.empty())
 			{
-				result.push_back(m_queue.front());
+				result.push_back(std::move(m_queue.front()));
 				m_queue.pop_front();
 			}
 			return result;
