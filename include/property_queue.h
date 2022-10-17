@@ -38,7 +38,7 @@ namespace spiritsaway::property
 		aggregation_msg_queue(const aggregation_msg_queue& other) = default;
 		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
-			m_parent_queue.add_for_flag(m_parent_offset.merge(offset), cmd, need_flag, data_flag, data );
+			m_parent_queue.add_for_flag(m_parent_offset.merge(offset), cmd, data_flag, data_flag, data );
 			return;
 		}
 		
@@ -58,7 +58,7 @@ namespace spiritsaway::property
 		
 		void add_for_flag(const property_record_offset& offset, property_cmd cmd, property_flags need_flag, property_flags data_flag, const json& data) override
 		{
-			m_queue.push_back(mutate_msg{ offset, cmd, need_flag, data });
+			m_queue.push_back(mutate_msg{ offset, cmd, data_flag, data });
 		}
 		std::vector<mutate_msg> dump()
 		{
