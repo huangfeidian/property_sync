@@ -682,7 +682,7 @@ namespace spiritsaway::property
 			std::uint32_t cur_slot = value.slot();
 			if(!with_slot)
 			{
-				auto cur_slot = m_data.get_first_empty_slot();
+				cur_slot = m_data.get_first_empty_slot();
 				if(cur_slot >= m_data.capacity())
 				{
 					return {};
@@ -708,7 +708,7 @@ namespace spiritsaway::property
 			std::uint32_t cur_slot = value_ptr->slot();
 			if(!with_slot)
 			{
-				auto cur_slot = m_data.get_first_empty_slot();
+				cur_slot = m_data.get_first_empty_slot();
 				if(cur_slot >= m_data.capacity())
 				{
 					return {};
