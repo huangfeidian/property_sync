@@ -189,7 +189,10 @@ namespace spiritsaway::property
 		// 	return *this;
 		// }
 
-
+		const std::unordered_map<key_type, std::uint32_t>& index() const
+		{
+			return m_index;
+		}
 
 		json encode() const
 		{
