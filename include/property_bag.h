@@ -189,6 +189,11 @@ namespace spiritsaway::property
 		// 	return *this;
 		// }
 
+		const std::vector<std::unique_ptr<Item>>& data() const
+		{
+			return m_data;
+		}
+		
 		const std::unordered_map<key_type, std::uint32_t>& index() const
 		{
 			return m_index;
