@@ -263,7 +263,7 @@ namespace spiritsaway::property
 	{
 		bool operator()(const T& data) const
 		{
-			return data.empty();
+			return data == T{};
 
 		}
 	};
@@ -276,6 +276,8 @@ namespace spiritsaway::property
 			return data == 0;
 		}
 	};
+
+
 	template <typename T>
 	struct has_default_value< T, std::enable_if_t <
 		std::is_same_v<decltype(std::declval<T>().has_default_value()), bool>, void>>
