@@ -104,6 +104,14 @@ public:
 	{
 		return prop_replay_proxy<decltype(m_PropertyMap_data.m_i)>(m_PropertyMap_data.m_i);
 	}
+	prop_record_proxy<decltype(m_PropertyMap_data.m_j)> j()
+	{
+		return prop_record_proxy<decltype(m_PropertyMap_data.m_j)>(m_PropertyMap_data.m_j, m_queue, m_offset.merge(spiritsaway::test::PropertyMap::index_for_j), m_flag.merge(property_flags{ spiritsaway::test::PropertyMap::flag_for_j}));
+	}
+	prop_replay_proxy<decltype(m_PropertyMap_data.m_j)> replay_j()
+	{
+		return prop_replay_proxy<decltype(m_PropertyMap_data.m_j)>(m_PropertyMap_data.m_j);
+	}
 
 	void clear()
 	{

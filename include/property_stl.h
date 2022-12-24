@@ -51,7 +51,6 @@ namespace spiritsaway::property
 		}
 
 
-
 	private:
 		T& m_data;
 		msg_queue_base& m_msg_queue;
@@ -101,6 +100,129 @@ namespace spiritsaway::property
 			return true;
 		}
 		
+	};
+
+	template <typename T, std::size_t N>
+	class prop_record_proxy<std::array<T, N>>
+	{
+	public:
+		prop_record_proxy(std::array<T, N>& data,
+			msg_queue_base& msg_queue,
+			const property_record_offset& offset,
+			const property_flags& flag)
+			: m_data(data),
+			m_msg_queue(msg_queue),
+			m_flag(flag),
+			m_offset(offset)
+
+		{
+
+		}
+		const std::array<T, N>& get() const
+		{
+			return m_data;
+		}
+
+		void set(const std::array<T, N>& data)
+		{
+			m_data = data;
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset,
+					property_cmd::set, m_flag, serialize::encode(m_data));
+			}
+			
+
+
+		}
+
+		void clear()
+		{
+			m_data = {};
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset,
+					property_cmd::clear, m_flag, json());
+			}
+			
+		}
+
+		void item_change(std::size_t idx, const T& new_data)
+		{
+			if (idx < m_data.size())
+			{
+				m_data[idx] = new_data;
+			}
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset, property_cmd::item_change, m_flag, serialize::encode_multi(idx, new_data));
+			}
+		}
+
+	private:
+		std::array<T, N>& m_data;
+		msg_queue_base& m_msg_queue;
+	public:
+		const property_record_offset m_offset;
+		const property_flags m_flag;
+	};
+
+	template <typename T, std::size_t N>
+	class prop_replay_proxy<std::array<T,N>>
+	{
+	private:
+		std::array<T, N>& m_data;
+	public:
+		prop_replay_proxy(std::array<T, N>& data)
+			: m_data(data)
+		{
+		}
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+				return replay_clear(data);
+			case property_cmd::set:
+				return replay_set(data);
+			case property_cmd::item_change:
+				return replay_item_change(data);
+			default:
+				return false;
+			}
+		}
+	private:
+		bool replay_set(const json& data)
+		{
+			return serialize::decode(data, m_data);
+		}
+		bool replay_clear(const json& data)
+		{
+			m_data = {};
+			return true;
+		}
+		bool replay_item_change(const json& data)
+		{
+			std::uint32_t idx;
+			T temp;
+			if (!serialize::decode_multi(data, idx, temp))
+			{
+				return false;
+			}
+			if (idx < m_data.size())
+			{
+				m_data[idx] = temp;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	};
 
 	template<typename T>
@@ -324,8 +446,12 @@ namespace spiritsaway::property
 			if (idx < m_data.size())
 			{
 				m_data[idx] = temp;
+				return true;
 			}
-			return true;
+			else
+			{
+				return false;
+			}
 		}
 		bool replay_erase(const json& data)
 		{
