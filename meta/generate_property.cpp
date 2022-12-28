@@ -91,7 +91,7 @@ mustache::data generate_property_info_for_class(const class_node* one_class, con
 		{
 			return _cur_node.unqualified_name().rfind("m_", 0) == 0 && filter_with_annotation<variable_node>("property", _cur_node);
 		});
-	std::sort(property_fields.begin(), property_fields.end(), sort_by_unqualified_name<language::variable_node>);
+	// std::sort(property_fields.begin(), property_fields.end(), sort_by_unqualified_name<language::variable_node>);
 	std::size_t field_begin_index = property_fields_with_base.size() - property_fields.size();
 	std::size_t field_end_index = property_fields_with_base.size();
 	std::ostringstream h_stream;
