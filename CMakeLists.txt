@@ -25,6 +25,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:i
 
 target_link_libraries(${CMAKE_PROJECT_NAME} INTERFACE any_container)
 
+target_precompile_headers(${CMAKE_PROJECT_NAME} INTERFACE [["property/property.h"]])
+
 foreach(p LIB BIN INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
 	if(NOT IS_ABSOLUTE "${${var}}")
