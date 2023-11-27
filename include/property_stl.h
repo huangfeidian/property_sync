@@ -443,6 +443,7 @@ namespace spiritsaway::property
 		}
 		bool replay_pop_erase(const json& data)
 		{
+			std::uint32_t idx;
 			if (data.is_number_unsigned())
 			{
 				if (!serialize::decode(data, idx))
