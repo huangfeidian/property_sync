@@ -163,6 +163,7 @@ namespace spiritsaway::property
 		erase,
 		push,
 		pop,
+		pop_erase,
 		item_change,
 		slot_swap,
 		slot_resize,

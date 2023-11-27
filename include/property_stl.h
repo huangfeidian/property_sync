@@ -328,6 +328,25 @@ namespace spiritsaway::property
 			}
 		}
 
+		void pop_erase(std::uint32_t idx)
+		{
+			if (idx < m_data.size())
+			{
+				if (idx + 1 != m_data.size())
+				{
+					std::swap(m_data[idx], m_data.back());
+				}
+				m_data.pop_back();
+			}
+			else
+			{
+				return;
+			}
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset, property_cmd::pop_erase, m_flag, serialize::encode(idx));
+			}
+		}
 		void erase_multi(std::uint32_t idx, std::uint32_t num)
 		{
 			if (idx >= m_data.size() || num > m_data.size() - idx)
@@ -380,6 +399,8 @@ namespace spiritsaway::property
 				return replay_item_change(data);
 			case property_cmd::erase:
 				return replay_erase(data);
+			case property_cmd::pop_erase:
+
 			case property_cmd::pop:
 				return replay_pop(data);
 			case property_cmd::push:
@@ -419,6 +440,34 @@ namespace spiritsaway::property
 			}
 			m_data.pop_back();
 			return true;
+		}
+		bool replay_pop_erase(const json& data)
+		{
+			if (data.is_number_unsigned())
+			{
+				if (!serialize::decode(data, idx))
+				{
+					return false;
+				}
+				if (idx < m_data.size())
+				{
+					if (idx + 1 != m_data.size())
+					{
+						std::swap(m_data[idx], m_data.back());
+					}
+					m_data.pop_back();
+					return true;
+				}
+				else
+				{
+					return true;
+				}
+
+			}
+			else
+			{
+				return false;
+			}
 		}
 		bool replay_add(const json& data)
 		{
@@ -546,6 +595,17 @@ namespace spiritsaway::property
 			}
 		}
 
+		void erase_multi(const std::vector<T1>& keys)
+		{
+			for (const auto& one_key : keys)
+			{
+				m_data.erase(one_key);
+			}
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(keys));
+			}
+		}
 
 	private:
 		std::unordered_map<T1, T2>& m_data;
@@ -608,13 +668,30 @@ namespace spiritsaway::property
 		}
 		bool replay_erase(const json& data)
 		{
-			T1 key;
-			if (!serialize::decode(data, key))
+			if (!data.is_array())
 			{
-				return false;
+				T1 key;
+				if (!serialize::decode(data, key))
+				{
+					return false;
+				}
+				m_data.erase(key);
+				return true;
 			}
-			m_data.erase(key);
-			return true;
+			else
+			{
+				std::vector<T1> keys;
+				if (!serialize::decode(data, keys))
+				{
+					return false;
+				}
+				for (const auto& one_key : keys)
+				{
+					m_data.erase(one_key);
+				}
+				return true;
+			}
+			
 		}
 	};
 
@@ -672,6 +749,17 @@ namespace spiritsaway::property
 			if (m_msg_queue.is_flag_need(m_flag))
 			{
 				m_msg_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(key));
+			}
+		}
+		void erase_multi(const std::vector<T1>& keys)
+		{
+			for (const auto& one_key : keys)
+			{
+				m_data.erase(one_key);
+			}
+			if (m_msg_queue.is_flag_need(m_flag))
+			{
+				m_msg_queue.add(m_offset, property_cmd::erase, m_flag, serialize::encode(keys));
 			}
 		}
 
@@ -737,13 +825,29 @@ namespace spiritsaway::property
 		}
 		bool replay_erase(const json& data)
 		{
-			T1 key;
-			if (!serialize::decode(data, key))
+			if (!data.is_array())
 			{
-				return false;
+				T1 key;
+				if (!serialize::decode(data, key))
+				{
+					return false;
+				}
+				m_data.erase(key);
+				return true;
 			}
-			m_data.erase(key);
-			return true;
+			else
+			{
+				std::vector<T1> keys;
+				if (!serialize::decode(data, keys))
+				{
+					return false;
+				}
+				for (const auto& one_key : keys)
+				{
+					m_data.erase(one_key);
+				}
+				return true;
+			}
 		}
 	};
 
