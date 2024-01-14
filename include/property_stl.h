@@ -589,6 +589,10 @@ namespace spiritsaway::property
 
 		void erase(const T1& key)
 		{
+			if(m_data.find(key) == m_data.end())
+			{
+				return;
+			}
 			m_data.erase(key);
 			if (m_msg_queue.is_flag_need(m_flag))
 			{
@@ -746,6 +750,10 @@ namespace spiritsaway::property
 
 		void erase(const T1& key)
 		{
+			if(m_data.find(key) == m_data.end())
+			{
+				return;
+			}
 			m_data.erase(key);
 			if (m_msg_queue.is_flag_need(m_flag))
 			{
