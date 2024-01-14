@@ -298,6 +298,12 @@ namespace spiritsaway::property
 			m_index.clear();
 			m_data.clear();
 		}
+		
+		std::uint64_t size() const
+		{
+			return m_index.size();
+		}
+
 		std::unique_ptr<value_type> erase(const key_type& key)
 		{
 			auto cur_iter = m_index.find(key);
