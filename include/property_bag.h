@@ -166,28 +166,14 @@ namespace spiritsaway::property
 		}
 		property_bag(const property_bag& other)
 		{
-			m_data.clear();
-			m_index.clear();
-			m_index = other.m_index;
-			m_data.reserve(other.m_data.size());
-			for (const auto& one_item : other.m_data)
-			{
-				m_data.emplace_back(std::make_unique<Item>(*one_item));
-			}
+			reset_by_other(other);
 		}
 
-		// property_bag& operator=(const property_bag& other)
-		// {
-		// 	m_data.clear();
-		// 	m_index.clear();
-		// 	m_index = other.m_index;
-		// 	m_data.reserve(other.m_data.size());
-		// 	for(const auto& one_item: other.m_data)
-		// 	{
-		// 		m_data.emplace_back(std::make_unique<Item>(*one_item));
-		// 	}
-		// 	return *this;
-		// }
+		property_bag& operator=(const property_bag& other)
+		{
+			reset_by_other(other);
+			return *this;
+		}
 
 		const std::vector<std::unique_ptr<Item>>& data() const
 		{
@@ -352,6 +338,17 @@ namespace spiritsaway::property
 		
 		
 	protected:
+		void reset_by_other(const property_bag& other)
+		{
+			m_data.clear();
+			m_index.clear();
+			m_index = other.m_index;
+			m_data.reserve(other.m_data.size());
+			for(const auto& one_item: other.m_data)
+			{
+				m_data.emplace_back(std::make_unique<Item>(*one_item));
+			}
+		}
 		std::pair<std::uint32_t, bool> insert(value_type&& temp_item)
 		{
 			auto cur_item_ptr = std::make_unique<value_type>(std::move(temp_item));

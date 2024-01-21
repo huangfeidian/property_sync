@@ -193,18 +193,15 @@ namespace spiritsaway::property
 		{
 
 		}
-		// property_slots& operator=(const property_slots& other) 
-		// {
-		// 	m_data.clear();
-		// 	m_used_slots = other.m_used_slots;
-		// 	m_index = other.m_index;
-		// 	m_data.reserve(other.m_data.size());
-		// 	for(const auto& one_item: other.m_data)
-		// 	{
-		// 		m_data.emplace_back(std::make_unique<Item>(*one_item));
-		// 	}
-		// 	return *this;
-		// }
+		property_slots(const property_slots& other)
+		{
+			reset_by_other(other);
+		}
+		property_slots& operator=(const property_slots& other)
+		{
+			reset_by_other(other);
+			return *this;
+		}
 		const std::unordered_map<key_type, std::uint32_t>& index() const
 		{
 			return m_index;
@@ -420,6 +417,18 @@ namespace spiritsaway::property
 			return !(*this == other);
 		}
 	protected:
+		void reset_by_other(const property_slots& other) 
+		{
+			m_data.clear();
+			m_index.clear();
+			m_used_slots.clear();
+			resize(other.m_data.size());
+			m_data.reserve(other.m_data.size());
+			for (const auto& one_item : other.m_data)
+			{
+				insert(std::make_unique<Item>(*one_item));
+			}
+		}
 		bool insert(std::unique_ptr<Item> temp_item)
 		{
 			auto cur_slot = temp_item->slot();
