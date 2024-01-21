@@ -102,16 +102,16 @@ namespace spiritsaway::property
 		{
 
 		}
-		// property_vec& operator=(const property_vec& other)
-		// {
-		// 	m_data.clear();
-		// 	m_data.reserve(other.m_data.size());
-		// 	for(const auto& one_item: other.m_data)
-		// 	{
-		// 		m_data.emplace_back(std::make_unique<Item>(*one_item));
-		// 	}
-		// 	return *this;
-		// }
+		property_vec(const property_vec& other)
+		{
+			reset_by_other(other);
+		}
+
+		property_vec& operator=(const property_vec& other)
+		{
+			reset_by_other(other);
+			return *this;
+		}
 		std::uint32_t size() const
 		{
 			return std::uint32_t(m_data.size());
@@ -214,7 +214,15 @@ namespace spiritsaway::property
 		}
 	protected:
 
-
+		void reset_by_other(const property_vec& other)
+		{
+			m_data.clear();
+			m_data.reserve(other.size());
+			for(const auto& one_item: other.m_data)
+			{
+				m_data.push_back(std::make_unique<Item>(*one_item));
+			}
+		}
 		bool insert(std::uint32_t idx, std::unique_ptr<Item> new_data)
 		{
 			if (idx >= m_data.size())
