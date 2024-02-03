@@ -152,6 +152,22 @@ namespace spiritsaway::property
 			}
 			return property_replay_offset{ temp_value };
 		}
+
+		// 获取最顶层的field index
+		std::uint8_t top() const
+		{
+			auto temp_value = m_value;
+			std::uint8_t result = 0;
+			while (temp_value != 0)
+			{
+				// 这里判定temp_value是否是0 所以有效值绝对不能取0 所有merge过来的值都会加1
+				std::uint8_t cur_part_value = static_cast<std::uint8_t>(temp_value & 0xff);
+				temp_value >>= 8;
+				assert(cur_part_value >= 1);
+				result = cur_part_value - 1;
+			}
+			return result;
+		}
 	};
 
 	
