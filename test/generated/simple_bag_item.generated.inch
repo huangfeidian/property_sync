@@ -30,6 +30,8 @@ json encode_with_flag(const spiritsaway::property::property_flags flag, bool ign
 void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::array_t& result) const;
 void encode_with_flag(const spiritsaway::property::property_flags flag, bool ignore_default, json::object_t& result) const;
 
+json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default = true) const;
+
 friend void swap(simple_bag_item& a, simple_bag_item& b)
 {
 	using std::swap;
@@ -51,7 +53,7 @@ void clear()
 	swap(*this, temp_empty_instance);
 }
 
-json encode() const;
+json encode(bool ignore_default = true) const;
 
 bool decode(const json& data);
 bool decode(const json::object_t& data);

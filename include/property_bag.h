@@ -27,7 +27,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			json result;
 			result["id"] = m_id;
@@ -185,13 +185,13 @@ namespace spiritsaway::property
 			return m_index;
 		}
 
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			json::array_t json_data;
 			json_data.reserve(m_data.size());
 			for(const auto& one_item: m_data)
 			{
-				json_data.push_back(spiritsaway::serialize::encode(*one_item));
+				json_data.push_back(one_item->encode(ignore_default));
 			}
 			return json_data;
 		}

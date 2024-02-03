@@ -7,7 +7,7 @@ namespace spiritsaway::property
 {
 	struct property_vec_item: public property_item
 	{
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			return json::object_t{};
 		}
@@ -128,13 +128,13 @@ namespace spiritsaway::property
 		{
 			return m_data.empty();
 		}
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			json::array_t data_arr;
 			data_arr.reserve(m_data.size());
 			for (const auto& one_slot : m_data)
 			{
-				data_arr.push_back(one_slot->encode());
+				data_arr.push_back(one_slot->encode(ignore_default));
 			}
 			return data_arr;
 		}

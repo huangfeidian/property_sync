@@ -67,17 +67,17 @@ bool simple_slot_item::operator!=(const simple_slot_item& other) const
 }
 
 
-json simple_slot_item::encode() const
+json simple_slot_item::encode(bool ignore_default) const
 {
-	json result = spiritsaway::property::property_slot_item<int>::encode();
+	json result = spiritsaway::property::property_slot_item<int>::encode(ignore_default);
 	
 	
-	if(!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+	if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 	{
 		result["a"] = spiritsaway::serialize::encode(m_a);
 	}
 	
-	if(!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+	if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 	{
 		result["b"] = spiritsaway::serialize::encode(m_b);
 	}
@@ -142,6 +142,37 @@ json simple_slot_item::encode_with_flag(const spiritsaway::property::property_fl
 		encode_with_flag(flag, ignore_default, result);
 		return result;
 	}
+}
+
+json simple_slot_item::encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+{
+	json result;
+	for(const auto& one_offset: offsets)
+	{
+		switch(one_offset)
+		{
+			case index_for_a:
+			{
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+				{
+					result["a"] = spiritsaway::serialize::encode(m_a);
+				}
+			}
+			case index_for_b:
+			{
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+				{
+					result["b"] = spiritsaway::serialize::encode(m_b);
+				}
+			}
+			default:
+				break;
+		}
+		
+	}
+	return result;
 }
 
 bool simple_slot_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)

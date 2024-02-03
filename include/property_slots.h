@@ -31,7 +31,7 @@ namespace spiritsaway::property
 		{
 
 		}
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			json result = property_bag_item<T>::encode();
 			result["slot"] = m_slot;
@@ -212,7 +212,7 @@ namespace spiritsaway::property
 			return std::uint32_t(m_data.size());
 		}
 
-		json encode() const
+		json encode(bool ignore_default = true) const
 		{
 			json::array_t data_arr;
 			data_arr.reserve(m_index.size());
@@ -220,7 +220,7 @@ namespace spiritsaway::property
 			{
 				if (one_slot)
 				{
-					data_arr.push_back(one_slot->encode());
+					data_arr.push_back(one_slot->encode(ignore_default));
 				}
 			}
 			json result;
