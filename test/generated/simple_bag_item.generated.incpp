@@ -158,6 +158,7 @@ json simple_bag_item::encode_fields(const std::vector<std::uint8_t>& offsets, bo
 				{
 					result["a"] = spiritsaway::serialize::encode(m_a);
 				}
+				break;
 			}
 			case index_for_b:
 			{
@@ -166,6 +167,7 @@ json simple_bag_item::encode_fields(const std::vector<std::uint8_t>& offsets, bo
 				{
 					result["b"] = spiritsaway::serialize::encode(m_b);
 				}
+				break;
 			}
 			default:
 				break;
@@ -174,6 +176,48 @@ json simple_bag_item::encode_fields(const std::vector<std::uint8_t>& offsets, bo
 	}
 	return result;
 }
+
+json simple_bag_item::encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+{
+	json result;
+	for(const auto& one_offset: offsets)
+	{
+		switch(one_offset)
+		{
+			case index_for_a:
+			{
+				if((flag_for_a & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+				{
+					result["a"] = spiritsaway::serialize::encode(m_a);
+				}
+				break;
+			}
+			case index_for_b:
+			{
+				if((flag_for_b & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+				{
+					result["b"] = spiritsaway::serialize::encode(m_b);
+				}
+				break;
+			}
+			default:
+				break;
+		}
+		
+	}
+	return result;
+}
+
 
 bool simple_bag_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 {

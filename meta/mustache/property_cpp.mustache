@@ -219,6 +219,7 @@ json {{{class_name}}}::encode_fields(const std::vector<std::uint8_t>& offsets, b
 					result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
 				}
 				{{/has_property_interface}}
+				break;
 			}
 			{{/property_fields}}
 			default:
@@ -228,6 +229,44 @@ json {{{class_name}}}::encode_fields(const std::vector<std::uint8_t>& offsets, b
 	}
 	return result;
 }
+
+json {{{class_name}}}::encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+{
+	json result;
+	for(const auto& one_offset: offsets)
+	{
+		switch(one_offset)
+		{
+			{{#property_fields}}
+			case index_for_{{field_name}}:
+			{
+				if((flag_for_{{field_name}} & flag.value) != flag.value)
+				{
+					break;
+				}
+				{{#has_property_interface}}
+				if(!ignore_default || !m_{{field_name}}.has_default_value())
+				{
+					result["{{field_name}}"] = m_{{field_name}}.encode(ignore_default);
+				}
+				{{/has_property_interface}}
+				{{^has_property_interface}}
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_{{field_name}})>()(m_{{field_name}}))
+				{
+					result["{{field_name}}"] = spiritsaway::serialize::encode(m_{{field_name}});
+				}
+				{{/has_property_interface}}
+				break;
+			}
+			{{/property_fields}}
+			default:
+				break;
+		}
+		
+	}
+	return result;
+}
+
 
 bool {{{class_name}}}::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 {

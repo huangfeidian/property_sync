@@ -71,6 +71,8 @@ void encode_with_flag(const spiritsaway::property::property_flags flag, bool ign
 
 json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default = true) const;
 
+json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default = true) const;
+
 friend void swap(PropertyMap& a, PropertyMap& b)
 {
 	using std::swap;

@@ -417,6 +417,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["a"] = spiritsaway::serialize::encode(m_a);
 				}
+				break;
 			}
 			case index_for_b:
 			{
@@ -425,6 +426,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["b"] = spiritsaway::serialize::encode(m_b);
 				}
+				break;
 			}
 			case index_for_c:
 			{
@@ -433,6 +435,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["c"] = spiritsaway::serialize::encode(m_c);
 				}
+				break;
 			}
 			case index_for_d:
 			{
@@ -441,6 +444,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["d"] = spiritsaway::serialize::encode(m_d);
 				}
+				break;
 			}
 			case index_for_e:
 			{
@@ -449,6 +453,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["e"] = spiritsaway::serialize::encode(m_e);
 				}
+				break;
 			}
 			case index_for_f:
 			{
@@ -457,6 +462,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["f"] = spiritsaway::serialize::encode(m_f);
 				}
+				break;
 			}
 			case index_for_g:
 			{
@@ -465,6 +471,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 					result["g"] = m_g.encode(ignore_default);
 				}
 				
+				break;
 			}
 			case index_for_h:
 			{
@@ -473,6 +480,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 					result["h"] = m_h.encode(ignore_default);
 				}
 				
+				break;
 			}
 			case index_for_i:
 			{
@@ -481,6 +489,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 					result["i"] = m_i.encode(ignore_default);
 				}
 				
+				break;
 			}
 			case index_for_j:
 			{
@@ -489,6 +498,7 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 				{
 					result["j"] = spiritsaway::serialize::encode(m_j);
 				}
+				break;
 			}
 			default:
 				break;
@@ -497,6 +507,152 @@ json PropertyMap::encode_fields(const std::vector<std::uint8_t>& offsets, bool i
 	}
 	return result;
 }
+
+json PropertyMap::encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+{
+	json result;
+	for(const auto& one_offset: offsets)
+	{
+		switch(one_offset)
+		{
+			case index_for_a:
+			{
+				if((flag_for_a & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
+				{
+					result["a"] = spiritsaway::serialize::encode(m_a);
+				}
+				break;
+			}
+			case index_for_b:
+			{
+				if((flag_for_b & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
+				{
+					result["b"] = spiritsaway::serialize::encode(m_b);
+				}
+				break;
+			}
+			case index_for_c:
+			{
+				if((flag_for_c & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_c)>()(m_c))
+				{
+					result["c"] = spiritsaway::serialize::encode(m_c);
+				}
+				break;
+			}
+			case index_for_d:
+			{
+				if((flag_for_d & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_d)>()(m_d))
+				{
+					result["d"] = spiritsaway::serialize::encode(m_d);
+				}
+				break;
+			}
+			case index_for_e:
+			{
+				if((flag_for_e & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_e)>()(m_e))
+				{
+					result["e"] = spiritsaway::serialize::encode(m_e);
+				}
+				break;
+			}
+			case index_for_f:
+			{
+				if((flag_for_f & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_f)>()(m_f))
+				{
+					result["f"] = spiritsaway::serialize::encode(m_f);
+				}
+				break;
+			}
+			case index_for_g:
+			{
+				if((flag_for_g & flag.value) != flag.value)
+				{
+					break;
+				}
+				if(!ignore_default || !m_g.has_default_value())
+				{
+					result["g"] = m_g.encode(ignore_default);
+				}
+				
+				break;
+			}
+			case index_for_h:
+			{
+				if((flag_for_h & flag.value) != flag.value)
+				{
+					break;
+				}
+				if(!ignore_default || !m_h.has_default_value())
+				{
+					result["h"] = m_h.encode(ignore_default);
+				}
+				
+				break;
+			}
+			case index_for_i:
+			{
+				if((flag_for_i & flag.value) != flag.value)
+				{
+					break;
+				}
+				if(!ignore_default || !m_i.has_default_value())
+				{
+					result["i"] = m_i.encode(ignore_default);
+				}
+				
+				break;
+			}
+			case index_for_j:
+			{
+				if((flag_for_j & flag.value) != flag.value)
+				{
+					break;
+				}
+				
+				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_j)>()(m_j))
+				{
+					result["j"] = spiritsaway::serialize::encode(m_j);
+				}
+				break;
+			}
+			default:
+				break;
+		}
+		
+	}
+	return result;
+}
+
 
 bool PropertyMap::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
 {
