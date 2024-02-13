@@ -63,6 +63,28 @@ namespace spiritsaway::property
 				return result;
 			}
 		}
+
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+
+
 		bool decode(const json::object_t& data)
 		{
 			if(!property_bag_item<T>::decode(data))
@@ -243,6 +265,31 @@ namespace spiritsaway::property
 			result["sz"] = m_data.size();
 			result["data"] = std::move(data_arr);
 			return result;
+		}
+
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+
+		json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const property_flags& flag, bool ignore_default) const
+		{
+			return {};
 		}
 
 		const Item* get_slot(std::uint32_t slot) const

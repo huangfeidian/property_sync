@@ -35,6 +35,27 @@ namespace spiritsaway::property
 				return result;
 			}
 		}
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+
+
 
 		void update_fields(const property_vec_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
 		{
@@ -148,6 +169,27 @@ namespace spiritsaway::property
 			}
 			return data_arr;
 		}
+
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+
 		const Item* get(std::uint32_t idx) const
 		{
 			if (idx >= m_data.size())

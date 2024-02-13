@@ -197,9 +197,47 @@ json {{{class_name}}}::encode_with_flag(const spiritsaway::property::property_fl
 	}
 }
 
+std::vector<std::uint8_t> {{{class_name}}}::get_fields_with_flag(const spiritsaway::property::property_flags flag) const
+{
+	std::vector<std::uint8_t> result;
+	{{#has_base_class}}
+	result = {{{base_class_name}}}::get_fields_with_flag(flag);
+	{{/has_base_class}}
+
+	{{#property_fields}}
+	if((flag_for_{{field_name}} & flag.value) == flag.value)
+	{
+		result.push_back(index_for_{{field_name}});
+	}
+	{{/property_fields}}
+	return result;
+}
+
+std::vector<std::uint8_t> {{{class_name}}}::get_fields_without_flag(const spiritsaway::property::property_flags flag) const
+{
+	std::vector<std::uint8_t> result;
+	{{#has_base_class}}
+	result = {{{base_class_name}}}::get_fields_without_flag(flag);
+	{{/has_base_class}}
+
+	{{#property_fields}}
+	if((flag_for_{{field_name}} & flag.value) != flag.value)
+	{
+		result.push_back(index_for_{{field_name}});
+	}
+	{{/property_fields}}
+	return result;
+}
+
+
+
 json {{{class_name}}}::encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
 {
 	json result;
+	{{#has_base_class}}
+	result = {{{base_class_name}}}::encode_fields(offsets, ignore_default);
+	{{/has_base_class}}
+
 	for(const auto& one_offset: offsets)
 	{
 		switch(one_offset)
@@ -223,16 +261,23 @@ json {{{class_name}}}::encode_fields(const std::vector<std::uint8_t>& offsets, b
 			}
 			{{/property_fields}}
 			default:
+			{
 				break;
+			}
+				
 		}
 		
 	}
 	return result;
 }
 
-json {{{class_name}}}::encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+json {{{class_name}}}::encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
 {
 	json result;
+	{{#has_base_class}}
+	result = {{{base_class_name}}}::encode_except_fields(offsets, ignore_default);
+	{{/has_base_class}}
+
 	for(const auto& one_offset: offsets)
 	{
 		switch(one_offset)
@@ -240,10 +285,6 @@ json {{{class_name}}}::encode_fields_with_flag(const std::vector<std::uint8_t>& 
 			{{#property_fields}}
 			case index_for_{{field_name}}:
 			{
-				if((flag_for_{{field_name}} & flag.value) != flag.value)
-				{
-					break;
-				}
 				{{#has_property_interface}}
 				if(!ignore_default || !m_{{field_name}}.has_default_value())
 				{
@@ -260,12 +301,15 @@ json {{{class_name}}}::encode_fields_with_flag(const std::vector<std::uint8_t>& 
 			}
 			{{/property_fields}}
 			default:
+			{
 				break;
+			}
 		}
 		
 	}
 	return result;
 }
+
 
 
 bool {{{class_name}}}::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)

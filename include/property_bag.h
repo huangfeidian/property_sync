@@ -57,6 +57,27 @@ namespace spiritsaway::property
 				return result;
 			}
 		}
+
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+
 		bool decode(const json::object_t& data)
 		{
 			auto iter = data.find("id");
@@ -205,6 +226,26 @@ namespace spiritsaway::property
 			}
 			return json_data;
 		}
+		std::vector<std::uint8_t> get_fields_with_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		std::vector<std::uint8_t> get_fields_without_flag(const property_flags& flag) const
+		{
+			return {};
+		}
+
+		json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return {};
+		}
+
+		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
+		{
+			return encode(ignore_default);
+		}
+		
 		bool decode(const json& data)
 		{
 			if (m_data.size())

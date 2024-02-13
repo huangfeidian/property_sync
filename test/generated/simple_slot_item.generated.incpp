@@ -144,9 +144,45 @@ json simple_slot_item::encode_with_flag(const spiritsaway::property::property_fl
 	}
 }
 
+std::vector<std::uint8_t> simple_slot_item::get_fields_with_flag(const spiritsaway::property::property_flags flag) const
+{
+	std::vector<std::uint8_t> result;
+	result = spiritsaway::property::property_slot_item<int>::get_fields_with_flag(flag);
+
+	if((flag_for_a & flag.value) == flag.value)
+	{
+		result.push_back(index_for_a);
+	}
+	if((flag_for_b & flag.value) == flag.value)
+	{
+		result.push_back(index_for_b);
+	}
+	return result;
+}
+
+std::vector<std::uint8_t> simple_slot_item::get_fields_without_flag(const spiritsaway::property::property_flags flag) const
+{
+	std::vector<std::uint8_t> result;
+	result = spiritsaway::property::property_slot_item<int>::get_fields_without_flag(flag);
+
+	if((flag_for_a & flag.value) != flag.value)
+	{
+		result.push_back(index_for_a);
+	}
+	if((flag_for_b & flag.value) != flag.value)
+	{
+		result.push_back(index_for_b);
+	}
+	return result;
+}
+
+
+
 json simple_slot_item::encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
 {
 	json result;
+	result = spiritsaway::property::property_slot_item<int>::encode_fields(offsets, ignore_default);
+
 	for(const auto& one_offset: offsets)
 	{
 		switch(one_offset)
@@ -170,26 +206,27 @@ json simple_slot_item::encode_fields(const std::vector<std::uint8_t>& offsets, b
 				break;
 			}
 			default:
+			{
 				break;
+			}
+				
 		}
 		
 	}
 	return result;
 }
 
-json simple_slot_item::encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+json simple_slot_item::encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
 {
 	json result;
+	result = spiritsaway::property::property_slot_item<int>::encode_except_fields(offsets, ignore_default);
+
 	for(const auto& one_offset: offsets)
 	{
 		switch(one_offset)
 		{
 			case index_for_a:
 			{
-				if((flag_for_a & flag.value) != flag.value)
-				{
-					break;
-				}
 				
 				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_a)>()(m_a))
 				{
@@ -199,10 +236,6 @@ json simple_slot_item::encode_fields_with_flag(const std::vector<std::uint8_t>& 
 			}
 			case index_for_b:
 			{
-				if((flag_for_b & flag.value) != flag.value)
-				{
-					break;
-				}
 				
 				if(!ignore_default ||!spiritsaway::property::has_default_value<decltype(m_b)>()(m_b))
 				{
@@ -211,12 +244,15 @@ json simple_slot_item::encode_fields_with_flag(const std::vector<std::uint8_t>& 
 				break;
 			}
 			default:
+			{
 				break;
+			}
 		}
 		
 	}
 	return result;
 }
+
 
 
 bool simple_slot_item::decode(const std::vector<std::pair<std::uint8_t, json>>& data, std::uint32_t& next_idx)
