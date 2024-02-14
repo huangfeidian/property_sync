@@ -4,7 +4,7 @@
 		"/usr/include",
 		"/usr/local/include",
 		"D:/usr/include",
-		"./generated"
+		"../build/test/generated"
 	],
 	"src_file": "./generate_entry.cpp",
 	"definitions": [
@@ -14,7 +14,7 @@
 		"-fparse-all-comments"
 	],
 	"mustache_folder": "../meta/mustache",
-	"generated_folder": "./generated",
+	"generated_folder": "../build/test/generated",
 	"namespace": "spiritsaway::test",
 	"flag_class": "spiritsaway::property::test_property_flags"
 

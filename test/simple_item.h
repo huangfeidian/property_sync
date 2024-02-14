@@ -14,8 +14,9 @@ namespace spiritsaway::test
 	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
-
+#ifndef __meta_parse__
 #include "simple_bag_item.generated.inch"
+#endif
 	};
 
 	class Meta(property) simple_slot_item : public property_slot_item<int>
@@ -23,8 +24,9 @@ namespace spiritsaway::test
 	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
-
+#ifndef __meta_parse__
 #include "simple_slot_item.generated.inch"
+#endif
 	};
 
 	class Meta(property) simple_vec_item : public property_vec_item
@@ -32,8 +34,9 @@ namespace spiritsaway::test
 	public:
 		Meta(property(sync_clients)) int m_a = 0;
 		Meta(property(save_db)) std::string m_b;
-
+#ifndef __meta_parse__
 #include "simple_vec_item.generated.inch"
+#endif
 	};
 
 	
@@ -46,8 +49,10 @@ namespace spiritsaway::test
 }
 namespace spiritsaway::property
 {
+#ifndef __meta_parse__
 	#include "simple_bag_item.proxy.inch"
 	#include "simple_slot_item.proxy.inch"
 	#include "simple_vec_item.proxy.inch"
+#endif
 
 }
