@@ -39,7 +39,7 @@ json encode_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default
 
 json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default = true) const;
 
-
+json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const;
 
 friend void swap({{{class_name}}}& a, {{{class_name}}}& b)
 {

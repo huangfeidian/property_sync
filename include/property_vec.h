@@ -55,7 +55,10 @@ namespace spiritsaway::property
 			return encode(ignore_default);
 		}
 
-
+		json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+		{
+			return {};
+		}
 
 		void update_fields(const property_vec_item& other, const json& other_json, std::vector<std::uint8_t>& field_indexes)
 		{
@@ -109,7 +112,7 @@ namespace spiritsaway::property
 		}
 	};
 	template <typename Item>
-	class property_vec
+	class property_vec final
 	{
 	public:
 		static_assert(std::is_base_of<property_vec_item, Item>::value,
@@ -188,6 +191,11 @@ namespace spiritsaway::property
 		json encode_except_fields(const std::vector<std::uint8_t>& offsets, bool ignore_default) const
 		{
 			return encode(ignore_default);
+		}
+
+		json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+		{
+			return encode_with_flag(flag, ignore_default, false);
 		}
 
 		const Item* get(std::uint32_t idx) const

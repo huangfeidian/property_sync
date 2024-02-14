@@ -354,7 +354,7 @@ int main(int argc, const char** argv)
 		return 1;
 	}
 	generated_folder = file_folder + generated_folder;
-
+	std::filesystem::create_directories(generated_folder);
 	for (auto& one_include_dir : include_dirs)
 	{
 		if (one_include_dir.empty())

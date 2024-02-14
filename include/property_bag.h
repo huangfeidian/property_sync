@@ -78,6 +78,13 @@ namespace spiritsaway::property
 			return encode(ignore_default);
 		}
 
+		json encode_fields_with_flag(const std::vector<std::uint8_t>& offsets, const spiritsaway::property::property_flags flag, bool ignore_default) const
+		{
+			json::object_t result;
+			encode_with_flag(flag, ignore_default, result);
+			return result;
+		}
+
 		bool decode(const json::object_t& data)
 		{
 			auto iter = data.find("id");
