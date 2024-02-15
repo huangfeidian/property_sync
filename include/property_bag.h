@@ -447,6 +447,20 @@ namespace spiritsaway::property
 			}
 		}
 
+		std::optional<prop_record_proxy<Item>> get_by_idx(msg_queue_base& parent_queue,
+			property_record_offset parent_offset, property_flags parent_flag, std::uint32_t item_idx)
+		{
+
+			if (item_idx >= m_data.size())
+			{
+				return {};
+			}
+			else
+			{
+				return prop_record_proxy<Item>(*m_data[item_idx], parent_queue, parent_offset , parent_flag, item_idx);
+			}
+		}
+
 		bool replay_insert(const json& data)
 		{
 			value_type temp_item;
@@ -680,6 +694,81 @@ namespace spiritsaway::property
 				}
 			}
 
+		}
+
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				std::remove_reference_t<decltype(m_data)>  temp_data;
+
+				if(!serialize::decode(data, temp_data))
+				{
+					return false;
+				}
+				set(temp_data);
+				return true;
+			}
+			case property_cmd::add:
+			{
+				value_type one_item;
+				if (!serialize::decode(data, one_item))
+				{
+					return false;
+				}
+				insert(one_item);
+				return true;
+			}
+			case property_cmd::erase:
+			{
+				if (!data.is_array())
+				{
+					key_type key;
+					if (!serialize::decode(data, key))
+					{
+						return false;
+					}
+					erase(key);
+					return true;
+				}
+				return false;
+			}
+			case property_cmd::item_change:
+			{
+				if(!data.is_array())
+				{
+					return false;
+				}
+				std::uint32_t item_idx;
+				std::uint64_t item_offset;
+				std::uint8_t item_cmd;
+				json item_data;
+				if(!serialize::decode_multi(data, item_idx, item_offset, item_cmd, item_data))
+				{
+					return false;
+				}
+				auto cur_item_proxy = m_data.get_by_idx(m_queue, m_offset, m_flag, item_idx);
+				if(!cur_item_proxy.has_value())
+				{
+					return false;
+				}
+				return cur_item_proxy->replay(property_record_offset(item_offset).to_replay_offset(), property_cmd(item_cmd), item_data);
+				
+			}
+			default:
+				return false;
+			}
 		}
 	};
 

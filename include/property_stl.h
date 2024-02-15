@@ -50,6 +50,27 @@ namespace spiritsaway::property
 			
 		}
 
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				m_data = {};
+				return true;
+			}
+			case property_cmd::set:
+				return serialize::decode(data, m_data);
+			default:
+				return false;
+			}
+		}
+
+
 
 	private:
 		T& m_data;
@@ -158,7 +179,45 @@ namespace spiritsaway::property
 				m_msg_queue.add(m_offset, property_cmd::item_change, m_flag, serialize::encode_multi(idx, new_data));
 			}
 		}
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				std::remove_reference_t<decltype(m_data)> temp_data;
 
+				if(!serialize::decode(data, temp_data))
+				{
+					return false;
+				}
+				set(temp_data);
+				return true;
+			}
+			case property_cmd::item_change:
+			{
+				std::uint32_t idx;
+				T temp;
+				if (!serialize::decode_multi(data, idx, temp))
+				{
+					return false;
+				}
+				item_change(idx, temp);
+				return true;
+			}
+			default:
+				return false;
+			}
+		}
 	private:
 		std::array<T, N>& m_data;
 		msg_queue_base& m_msg_queue;
@@ -360,7 +419,121 @@ namespace spiritsaway::property
 			}
 		}
 
-		
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				std::remove_reference_t<decltype(m_data)>  temp_data;
+
+				if(!serialize::decode(data, temp_data))
+				{
+					return false;
+				}
+				set(temp_data);
+				return true;
+			}
+			case property_cmd::item_change:
+			{
+				std::uint32_t idx;
+				T temp;
+				if (!serialize::decode_multi(data, idx, temp))
+				{
+					return false;
+				}
+				item_change(idx, temp);
+				return true;
+			}
+			case property_cmd::push:
+			{
+				T temp;
+				if (serialize::decode(data, temp))
+				{
+					push_back(std::move(temp));
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			case property_cmd::pop:
+			{
+				if (m_data.empty())
+				{
+					return false;
+				}
+				pop_back();
+				return true;
+			}
+			case property_cmd::pop_erase:
+			{
+				std::uint32_t idx;
+				if (data.is_number_unsigned())
+				{
+					if (!serialize::decode(data, idx))
+					{
+						return false;
+					}
+					pop_erase(idx);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			case property_cmd::add:
+			{
+				T temp;
+				std::uint32_t idx;
+				if (serialize::decode_multi(data, idx, temp))
+				{
+					insert(idx, temp);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			case property_cmd::erase:
+			{
+				std::uint32_t idx,num;
+				if (data.is_number_unsigned())
+				{
+					if (!serialize::decode(data, idx))
+					{
+						return false;
+					}
+					erase(idx);
+					return true;
+				}
+				else if (data.is_array())
+				{
+					if (!serialize::decode_multi(data, idx, num))
+					{
+						return false;
+					}
+					erase_multi(idx, num);
+					return true;
+				}
+				return false;
+			}
+			default:
+				return false;
+			}
+		}
 
 	private:
 		std::vector<T>& m_data;
@@ -612,6 +785,69 @@ namespace spiritsaway::property
 			}
 		}
 
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				std::remove_reference_t<decltype(m_data)>  temp_data;
+
+				if(!serialize::decode(data, temp_data))
+				{
+					return false;
+				}
+				set(temp_data);
+				return true;
+			}
+			case property_cmd::add:
+			{
+				T1 key;
+				T2 value;
+				if (!serialize::decode_multi(data, key, value))
+				{
+					return false;
+				}
+				insert(key, value);
+				return true;
+			}
+			case property_cmd::erase:
+			{
+				if (!data.is_array())
+				{
+					T1 key;
+					if (!serialize::decode(data, key))
+					{
+						return false;
+					}
+					erase(key);
+					return true;
+				}
+				else
+				{
+					std::vector<T1> keys;
+					if (!serialize::decode(data, keys))
+					{
+						return false;
+					}
+					erase_multi(keys);
+					return true;
+				}
+			}
+			default:
+				return false;
+			}
+		}
+
 	private:
 		std::unordered_map<T1, T2>& m_data;
 		msg_queue_base& m_msg_queue;
@@ -772,6 +1008,69 @@ namespace spiritsaway::property
 			}
 		}
 
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				std::remove_reference_t<decltype(m_data)>  temp_data;
+
+				if(!serialize::decode(data, temp_data))
+				{
+					return false;
+				}
+				set(temp_data);
+				return true;
+			}
+			case property_cmd::add:
+			{
+				T1 key;
+				T2 value;
+				if (!serialize::decode_multi(data, key, value))
+				{
+					return false;
+				}
+				insert(key, value);
+				return true;
+			}
+			case property_cmd::erase:
+			{
+				if (!data.is_array())
+				{
+					T1 key;
+					if (!serialize::decode(data, key))
+					{
+						return false;
+					}
+					erase(key);
+					return true;
+				}
+				else
+				{
+					std::vector<T1> keys;
+					if (!serialize::decode(data, keys))
+					{
+						return false;
+					}
+					erase_multi(keys);
+					return true;
+				}
+			}
+			default:
+				return false;
+			}
+		}
+
 
 	private:
 		std::map<T1, T2>& m_data;
@@ -859,6 +1158,4 @@ namespace spiritsaway::property
 			}
 		}
 	};
-
-
 }

@@ -129,6 +129,11 @@ namespace spiritsaway::property
 		{
 			return m_value;
 		}
+
+		bool decode(const json& data)
+		{
+			return serialize::decode(data, m_value);
+		}
 		
 		property_replay_offset to_replay_offset() const
 		{

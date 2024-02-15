@@ -161,5 +161,77 @@ public:
 		}
 	}
 {{/is_property_item}}
+
+	bool replay(spiritsaway::property::property_replay_offset offset, spiritsaway::property::property_cmd cmd, const json& data)
+	{
+		using std::swap;
+		auto split_result = offset.split();
+		auto field_index = split_result.second;
+		auto remain_offset = split_result.first;
+		switch(field_index)
+		{
+	{{#property_fields}}		
+			case {{{class_full_name}}}::index_for_{{field_name}}:
+			{
+				auto temp_proxy = {{field_name}}();
+				return temp_proxy.replay(remain_offset, cmd, data);
+			}
+	{{/property_fields}}
+			{{^is_property_item}}
+			case {{{class_full_name}}}::index_end_for_{{class_name}}:
+			{
+				if(cmd == spiritsaway::property::property_cmd::clear)
+				{
+					clear();
+					return true;
+				}
+				else if(cmd == spiritsaway::property::property_cmd::set)
+				{
+					
+					set(data);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			{{/is_property_item}}
+			{{#is_property_item}}
+			case {{{class_full_name}}}::index_end_for_{{class_name}}:
+			{
+				if(cmd == spiritsaway::property::property_cmd::update_fields)
+				{
+					update_fields(data);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			{{/is_property_item}}
+			default:
+			{{#has_base_class}}
+			    {{#is_property_item}}
+				{{#is_property_item_direct_subclass}}
+				return false;
+				{{/is_property_item_direct_subclass}}
+				{{^is_property_item_direct_subclass}}
+				auto base_proxy = prop_record_proxy<{{{base_class_name}}}>(m_{{{class_name}}}_data, m_queue, m_offset, m_flag);
+				return {{{base_class_name}}}::replay(offset, cmd, data);
+				{{/is_property_item_direct_subclass}}
+				{{/is_property_item}}
+
+				{{^is_property_item}}
+				auto base_proxy = prop_record_proxy<{{{base_class_name}}}>(m_{{{class_name}}}_data, m_queue, m_offset, m_flag);
+				return {{{base_class_name}}}::replay(offset, cmd, data);
+				{{/is_property_item}}
+			{{/has_base_class}}
+			{{^has_base_class}}
+				return false;
+			{{/has_base_class}}
+		}
+	}
 };
 #endif

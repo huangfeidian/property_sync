@@ -632,6 +632,102 @@ namespace spiritsaway::property
 				}
 			}
 		}
+
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				set(data);
+				return true;
+			}
+			case property_cmd::add:
+			{
+				value_type one_item;
+				std::uint32_t item_idx;
+				if (!serialize::decode_multi(data, item_idx, one_item))
+				{
+					return false;
+				}
+				insert(item_idx, one_item);
+				return true;
+			}
+			case property_cmd::erase:
+			{
+				return replay_erase(data);
+			}
+			case property_cmd::push:
+			{
+				push_back(data);
+				return true;
+			}
+			case property_cmd::pop:
+			{
+				pop_back();
+				return true;
+			}
+			case property_cmd::item_change:
+			{
+				if(!data.is_array())
+				{
+					return false;
+				}
+				std::uint32_t item_idx;
+				std::uint64_t item_offset;
+				std::uint8_t item_cmd;
+				json item_data;
+				if(!serialize::decode_multi(data, item_idx, item_offset, item_cmd, item_data))
+				{
+					return false;
+				}
+				auto cur_item_proxy = m_data.get(m_queue, m_offset, m_flag, item_idx);
+				if(!cur_item_proxy.has_value())
+				{
+					return false;
+				}
+				return cur_item_proxy->replay(property_record_offset(item_offset).to_replay_offset(), property_cmd(item_cmd), item_data);
+				
+			}
+			default:
+				return false;
+			}
+		}
+	protected:
+		bool replay_erase(const json& data)
+		{
+			std::uint32_t idx, num;
+			if (data.is_number_unsigned())
+			{
+				if (!serialize::decode(data, idx))
+				{
+					return false;
+				}
+				erase(idx);
+				return true;
+			}
+			else if (data.is_array())
+			{
+				if (!serialize::decode_multi(data, idx, num))
+				{
+					return false;
+				}
+				erase_multi(idx, num);
+				return true;
+			}
+			return false;
+		}
+
+
 	};
 
 }

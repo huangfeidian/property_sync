@@ -916,6 +916,75 @@ namespace spiritsaway::property
 			return m_data.get_slot(m_queue, m_offset, m_flag, cur_slot);
 		}
 
+		bool replay(property_replay_offset offset, property_cmd cmd, const json& data)
+		{
+			if (offset.value() != 0)
+			{
+				return false;
+			}
+			switch (cmd)
+			{
+			case property_cmd::clear:
+			{
+				clear();
+				return true;
+			}
+			case property_cmd::set:
+			{
+				set(data);
+				return true;
+			}
+			case property_cmd::add:
+			{
+				value_type one_item;
+				if (!serialize::decode(data, one_item))
+				{
+					return false;
+				}
+				insert(one_item);
+				return true;
+			}
+			case property_cmd::erase:
+			{
+				if (!data.is_array())
+				{
+					key_type key;
+					if (!serialize::decode(data, key))
+					{
+						return false;
+					}
+					erase_by_slot(key);
+					return true;
+				}
+				return false;
+			}
+			case property_cmd::item_change:
+			{
+				if(!data.is_array())
+				{
+					return false;
+				}
+				std::uint32_t item_idx;
+				std::uint64_t item_offset;
+				std::uint8_t item_cmd;
+				json item_data;
+				if(!serialize::decode_multi(data, item_idx, item_offset, item_cmd, item_data))
+				{
+					return false;
+				}
+				auto cur_item_proxy = m_data.get_slot(m_queue, m_offset, m_flag, item_idx);
+				if(!cur_item_proxy.has_value())
+				{
+					return false;
+				}
+				return cur_item_proxy->replay(property_record_offset(item_offset).to_replay_offset(), property_cmd(item_cmd), item_data);
+				
+			}
+			default:
+				return false;
+			}
+		}
+
 
 	protected:
 		void insert_impl(std::unique_ptr<value_type> value)
