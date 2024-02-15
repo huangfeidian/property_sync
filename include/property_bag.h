@@ -487,6 +487,29 @@ namespace spiritsaway::property
 			}
 			return m_data[mutate_idx]->replay_mutate_msg(field_offset, property_cmd(field_cmd), mutate_content);
 		}
+
+		bool replay_item_mutate(const key_type& key, const json& data)
+		{
+			auto temp_iter = m_index.find(key);
+			if(temp_iter == m_index.end())
+			{
+				return false;
+			}
+			std::uint32_t mutate_idx = temp_iter->second;
+			property_replay_offset field_offset;
+			std::uint8_t field_cmd;
+			json mutate_content;
+			if (!serialize::decode_multi(data, field_offset, field_cmd, mutate_content))
+			{
+				return false;
+			}
+			if (mutate_idx >= m_data.size())
+			{
+				return false;
+			}
+			return m_data[mutate_idx]->replay_mutate_msg(field_offset, property_cmd(field_cmd), mutate_content);
+		}
+
 		bool replay_set(const json& data)
 		{
 			using std::swap;
