@@ -946,17 +946,13 @@ namespace spiritsaway::property
 			}
 			case property_cmd::erase:
 			{
-				if (!data.is_array())
+				std::uint32_t item_idx;
+				if (!serialize::decode(data, item_idx))
 				{
-					key_type key;
-					if (!serialize::decode(data, key))
-					{
-						return false;
-					}
-					erase_by_slot(key);
-					return true;
+					return false;
 				}
-				return false;
+				erase_by_slot(item_idx);
+				return true;
 			}
 			case property_cmd::item_change:
 			{
@@ -979,6 +975,36 @@ namespace spiritsaway::property
 				}
 				return cur_item_proxy->replay(property_record_offset(item_offset).to_replay_offset(), property_cmd(item_cmd), item_data);
 				
+			}
+			case property_cmd::slot_move:
+			{
+				std::uint32_t slot_from, slot_to;
+				if (!serialize::decode_multi(data, slot_from, slot_to))
+				{
+					return false;
+				}
+				move_slot(slot_from, slot_to);
+				return true;
+			}
+			case property_cmd::slot_resize:
+			{
+				std::uint32_t new_size;
+				if (!serialize::decode(data, new_size))
+				{
+					return false;
+				}
+				resize(new_size);
+				return true;
+			}
+			case property_cmd::slot_swap:
+			{
+				std::uint32_t slot_a, slot_b;
+				if (!serialize::decode_multi(data, slot_a, slot_b))
+				{
+					return false;
+				}
+				swap_slot(slot_a, slot_b);
+				return true;
 			}
 			default:
 				return false;
