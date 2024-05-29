@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <any_container/decode.h>
 #include "property_queue.h"
 #include "property_stl.h"
