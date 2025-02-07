@@ -1,3 +1,5 @@
+find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 find_package(meta REQUIRED)
 find_package(Clang REQUIRED)
 include_directories(${LLVM_INCLUDE_DIRS})
