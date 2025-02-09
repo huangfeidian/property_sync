@@ -26,7 +26,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include
 
 target_link_libraries(${PROJECT_NAME} INTERFACE any_container)
 
-target_precompile_headers(${PROJECT_NAME} INTERFACE [["property/property.h"]])
+target_precompile_headers(${PROJECT_NAME} INTERFACE [["property_sync/property.h"]])
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(IS_TOPLEVEL_PROJECT TRUE)
