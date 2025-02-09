@@ -19,6 +19,8 @@ find_package(any_container CONFIG REQUIRED)
 
 INCLUDE_DIRECTORIES(${any_container_include_dirs})
 
+option(WITH_TEST "with test" ON)
+
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE $<INSTALL_INTERFACE:include>)
 
@@ -64,7 +66,10 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/${PRO
 install(EXPORT ${PROJECT_NAME}Targets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
+if(WITH_TEST)
 add_subdirectory(test)
+endif(WITH_TEST)
+
 endif(IS_TOPLEVEL_PROJECT)
 
 add_subdirectory(meta)
