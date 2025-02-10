@@ -17,6 +17,7 @@
 //#include <meta/serialize/decode.h>
 #include <meta/parser/generator.h>
 
+#include <filesystem>
 
 using namespace std;
 using namespace spiritsaway::meta;
@@ -282,13 +283,13 @@ int main(int argc, const char** argv)
 		return 1;
 	}
 
-	auto folder_iter = json_file_path.rfind('/');
-	if (folder_iter == std::string::npos)
-	{
-		std::cout << "file path " << json_file_path << " should has / in it " << std::endl;
-		return 1;
-	}
-	std::string file_folder = json_file_path.substr(0, folder_iter + 1);
+	//auto folder_iter = json_file_path.rfind('/');
+	//if (folder_iter == std::string::npos)
+	//{
+	//	std::cout << "file path " << json_file_path << " should has / in it " << std::endl;
+	//	return 1;
+	//}
+	auto file_folder = std::filesystem::path(json_file_path).parent_path();
 	auto cur_json_content = load_json_file(json_file_path);
 
 	std::vector<std::string> include_dirs;
@@ -330,7 +331,7 @@ int main(int argc, const char** argv)
 		return 1;
 	}
 	flag_class +="::";
-	src_file = file_folder + src_file;
+	src_file = (file_folder / src_file).string();
 	if (mustache_folder.empty())
 	{
 		std::cout << "mustache folder  is empty" << std::endl;
@@ -341,7 +342,7 @@ int main(int argc, const char** argv)
 		std::cout << "mustache folder  " << mustache_folder<<" should begin with ."<<std::endl;
 		return 1;
 	}
-	mustache_folder = file_folder + mustache_folder;
+	mustache_folder = (file_folder / mustache_folder).string();
 
 	if (generated_folder.empty())
 	{
@@ -353,7 +354,7 @@ int main(int argc, const char** argv)
 		std::cout << "generated_folder  " << generated_folder << " should begin with ." << std::endl;
 		return 1;
 	}
-	generated_folder = file_folder + generated_folder;
+	generated_folder = (file_folder / generated_folder).string();
 	std::filesystem::create_directories(generated_folder);
 	for (auto& one_include_dir : include_dirs)
 	{
@@ -363,7 +364,7 @@ int main(int argc, const char** argv)
 		}
 		if (one_include_dir[0] == '.')
 		{
-			one_include_dir = file_folder + one_include_dir;
+			one_include_dir = (file_folder / one_include_dir).string();
 		}
 		
 	}
